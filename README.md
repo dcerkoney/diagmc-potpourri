@@ -61,7 +61,7 @@ Usage: generate_propagators.py [ options ]
 Options:
   -h, --help            show this help message and exit
   --dim=DIM             Spatial dimension of the electron gas (default is 2);
-                        allowed values: {2, 3}.
+                         allowed values: {2, 3}.
   --target_n0=TARGET_N0
                         Target density in units of the lattice constant; since
                         the number of electrons is coarse-grained, the actual
