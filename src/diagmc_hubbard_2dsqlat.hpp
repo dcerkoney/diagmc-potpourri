@@ -826,9 +826,7 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
     }
     return selection;
   }
-  // Blank Metropolis step (does nothing) for testing memory leakage of Cpp2Py wrapped module
-  // FIXME: Identify and prevent issue where repeated calls
-  // to mcmc.step() consume memory \propto n_calls
+  // Blank Metropolis step for debug purposes
   constexpr void blank_step() { ++i_step; }
   // Do a single Metropolis step; we propose a new configuration,
   // then either accept or reject the move probabalistically.

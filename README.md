@@ -43,8 +43,7 @@ For detailed installation instructions, see [here](https://triqs.github.io/tprf/
    ```
 ### 2. Navigate to your local project directory, then build the executable:
    ```sh
-   cd diagmc-hubbard-2dsqlat
-   ./make.sh
+   cd diagmc-hubbard-2dsqlat && ./make.sh
    ```
 
 <!-- USAGE -->
