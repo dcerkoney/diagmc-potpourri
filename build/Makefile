@@ -9,7 +9,7 @@ SRCDIR=../src
 hub_2dsqlat_rt_mcmc : export HDF5_CXX = mpicxx
 hub_2dsqlat_rt_mcmc : export HDF5_CLINKER = mpicxx
 hub_2dsqlat_rt_mcmc : $(SRCDIR)/hub_2dsqlat_rt_mcmc.cpp
-	$(C++) $(CFLAGS) $(SRCDIR)/hub_2dsqlat_rt_mcmc.cpp -o $(BUILDDIR)/hub_2dsqlat_rt_mcmc
+	$(C++) $(CFLAGS) $(SRCDIR)/hub_2dsqlat_rt_mcmc.cpp -o $(BUILDDIR)/hub_2dsqlat_rt_mcmc.exe
 	
 clean:
 	rm -f hub_2dsqlat_rt_mcmc hub_2dsqlat_rt_mcmc.o

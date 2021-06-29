@@ -1,1 +1,1 @@
-make -C build && ln -sfn build/hub_2dsqlat_rt_mcmc hub_2dsqlat_rt_mcmc;
+make -C build && ln -sfn build/hub_2dsqlat_rt_mcmc.exe hub_2dsqlat_rt_mcmc.exe;
