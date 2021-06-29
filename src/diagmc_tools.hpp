@@ -816,16 +816,6 @@ const std::vector<int> first_orthant(const std::vector<int> &nr, int n_site_pd) 
   return nr_first_orthant;
 }
 
-// Overload for a call directly on a lattice space-time coordinate (returns a copy)
-hc_lat_st_coord first_orthant(const hc_lat_st_coord &coord) {
-  hc_lat_st_coord coord_shifted = coord;
-  for (std::size_t i = 0; i < coord.posn.size(); ++i) {
-    coord_shifted.posn[i] =
-        std::min(std::abs(coord.posn[i]), coord.n_site_pd - std::abs(coord.posn[i]));
-  }
-  return coord_shifted;
-}
-
 // Returns the momentum index vector n'_k equivalent to n_k in
 // the first Brillouin zone of the reciprocal lattice
 const std::vector<int> first_brillouin_zone(const std::vector<int> &nk, int n_site_pd) {
@@ -986,6 +976,16 @@ bool nearest_neighbors(hc_lat_st_coord v1, hc_lat_st_coord v2) {
   const std::vector<int> &del_nr = lat_diff(v1, v2);
   // If (del_nr * del_nr) is one, the two sites are nearest neighbors
   return are_close(std::inner_product(del_nr.begin(), del_nr.end(), del_nr.begin(), 0), 1.0);
+}
+
+// Overload for a call directly on a lattice space-time coordinate (returns a copy)
+hc_lat_st_coord first_orthant(const hc_lat_st_coord &coord) {
+  hc_lat_st_coord coord_shifted = coord;
+  for (std::size_t i = 0; i < coord.posn.size(); ++i) {
+    coord_shifted.posn[i] =
+        std::min(std::abs(coord.posn[i]), coord.n_site_pd - std::abs(coord.posn[i]));
+  }
+  return coord_shifted;
 }
 
 // Class representing a hypercubic lattice Matsubara 4-vector;
