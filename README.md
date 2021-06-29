@@ -7,9 +7,7 @@ Low-order diagrammatic Monte-Carlo (DiagMC) for the Hubbard model on the 2D squa
 
 ### 1. HDF5 >= 1.12
 
-Earlier versions of HDF5 (e.g. 1.10) may work as well, but are untested. The code was tested against HDF5 1.12 built from scratch (following the documentation [here](https://portal.hdfgroup.org/display/support/HDF5+1.12.0)). 
-
-Alternatively, one could try installing prebuilt binaries, e.g., on Ubuntu:
+Earlier versions of HDF5 (e.g. 1.10) may work as well, but are untested. The code was tested against HDF5 1.12 built from scratch (following the documentation [here](https://portal.hdfgroup.org/display/support/HDF5+1.12.0)). Alternatively, one could try installing prebuilt binaries, e.g., on Ubuntu:
    ```sh
     sudo apt-get install libhdf5-serial-dev
    ```
@@ -29,12 +27,11 @@ or install Boost in its entirety,
    ```
 ### 3. (Optional) [TRIQS TPRF](https://triqs.github.io/tprf/latest/index.html#)
 
-The TRIQS TPRF package is optionally used for benchmarking purposes in the post-processing script 'plot.py' (if [plot_rpa = True](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/9b82d1568875d67482f1bc3a151dabcaa85454f4/plot.py#L569)). It may be installed (along with [TRIQS](https://triqs.github.io/triqs/latest/) itself) via
+The TRIQS TPRF package is optionally used for benchmarking purposes in the post-processing script 'plot.py' (if [plot_rpa = True](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/f6be749f6154e362187f15f14b11eaa1ded88616/plot.py#L569)). It may be installed (along with [TRIQS](https://triqs.github.io/triqs/latest/) itself) via
    ```sh
     sudo apt-get install triqs_tprf
    ```
 For detailed installation instructions, see [here](https://triqs.github.io/tprf/latest/install.html) and [here](https://triqs.github.io/triqs/latest/install.html).
-
 
 
 ## Installation
@@ -48,7 +45,6 @@ For detailed installation instructions, see [here](https://triqs.github.io/tprf/
    cd diagmc-hubbard-2dsqlat
    ./make.sh
    ```
-
 
 
 ## Usage
