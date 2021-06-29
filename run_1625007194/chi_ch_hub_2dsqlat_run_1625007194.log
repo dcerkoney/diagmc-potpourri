@@ -1,0 +1,2224 @@
+MPI run with 1 thread(s)
+Job started at:	Tue Jun 29 18:53:14 2021
+UNIX timestamp:	1625007194
+
+════════════════════
+ MC step #1000000
+════════════════════
+
+In subspace: [V_0 V_3]
+               ^       
+Diagram pool size: 1
+Diagram pool fermion loop numbers: ( 0 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[111045 788955]
+Subspace saved ratios:	[0.123383 0.876616]
+Subspace average measured signs:	[1 -0.0334328]
+
+Current weight:	0.066964
+Current total acceptance ratio:	0.102893
+Current average ascend ratio:	0.00595222
+Current average descend ratio:	0.00595222
+Current average mutate ratio:	0.0909888
+
+════════════════════
+ MC step #2000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (24, 7)
+ • Rescaled imaginary time (tau / beta): 0.730583
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (21, 10)
+ • Rescaled imaginary time (tau / beta): 0.485442
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (21, 10)
+ • Rescaled imaginary time (tau / beta): 0.485442
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (22, 8)
+ • Rescaled imaginary time (tau / beta): 0.442464
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (22, 8)
+ • Rescaled imaginary time (tau / beta): 0.442464
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[227097 1672903]
+Subspace saved ratios:	[0.119525 0.880475]
+Subspace average measured signs:	[1 -0.0547163]
+
+Current weight:	-3.84118e-10
+Current total acceptance ratio:	0.103312
+Current average ascend ratio:	0.00575158
+Current average descend ratio:	0.00575105
+Current average mutate ratio:	0.0918094
+
+════════════════════
+ MC step #3000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (29, 29)
+ • Rescaled imaginary time (tau / beta): 0.87922
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (29, 28)
+ • Rescaled imaginary time (tau / beta): 0.03292
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (29, 28)
+ • Rescaled imaginary time (tau / beta): 0.03292
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (27, 26)
+ • Rescaled imaginary time (tau / beta): 0.844521
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (27, 26)
+ • Rescaled imaginary time (tau / beta): 0.844521
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[330381 2569619]
+Subspace saved ratios:	[0.113924 0.886075]
+Subspace average measured signs:	[1 -0.0599844]
+
+Current weight:	9.07079e-09
+Current total acceptance ratio:	0.103434
+Current average ascend ratio:	0.00548655
+Current average descend ratio:	0.00548621
+Current average mutate ratio:	0.0924613
+
+════════════════════
+ MC step #4000000
+════════════════════
+
+In subspace: [V_0 V_3]
+               ^       
+Diagram pool size: 1
+Diagram pool fermion loop numbers: ( 0 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[443139 3456861]
+Subspace saved ratios:	[0.113625 0.886374]
+Subspace average measured signs:	[1 -0.0677085]
+
+Current weight:	0.066964
+Current total acceptance ratio:	0.103288
+Current average ascend ratio:	0.00546359
+Current average descend ratio:	0.00546359
+Current average mutate ratio:	0.0923613
+
+════════════════════
+ MC step #5000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (0, 2)
+ • Rescaled imaginary time (tau / beta): 0.674022
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0.998574
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0.998574
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0.996986
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0.996986
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[560169 4339831]
+Subspace saved ratios:	[0.11432 0.88568]
+Subspace average measured signs:	[1 -0.073074]
+
+Current weight:	-1.24316e-05
+Current total acceptance ratio:	0.102962
+Current average ascend ratio:	0.0054949
+Current average descend ratio:	0.00549469
+Current average mutate ratio:	0.0919722
+
+════════════════════
+ MC step #6000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (29, 1)
+ • Rescaled imaginary time (tau / beta): 0.273319
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (28, 1)
+ • Rescaled imaginary time (tau / beta): 0.190467
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (28, 1)
+ • Rescaled imaginary time (tau / beta): 0.190467
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (28, 2)
+ • Rescaled imaginary time (tau / beta): 0.193257
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (28, 2)
+ • Rescaled imaginary time (tau / beta): 0.193257
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[666791 5233209]
+Subspace saved ratios:	[0.113015 0.886984]
+Subspace average measured signs:	[1 -0.0705661]
+
+Current weight:	1.55679e-06
+Current total acceptance ratio:	0.103071
+Current average ascend ratio:	0.00544
+Current average descend ratio:	0.00543983
+Current average mutate ratio:	0.092191
+
+════════════════════
+ MC step #7000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (1, 28)
+ • Rescaled imaginary time (tau / beta): 0.929317
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (29, 29)
+ • Rescaled imaginary time (tau / beta): 0.148152
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (29, 29)
+ • Rescaled imaginary time (tau / beta): 0.148152
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (0, 29)
+ • Rescaled imaginary time (tau / beta): 0.13927
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (0, 29)
+ • Rescaled imaginary time (tau / beta): 0.13927
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[783170 6116830]
+Subspace saved ratios:	[0.113503 0.886497]
+Subspace average measured signs:	[1 -0.0696459]
+
+Current weight:	1.16574e-06
+Current total acceptance ratio:	0.103036
+Current average ascend ratio:	0.00545406
+Current average descend ratio:	0.00545391
+Current average mutate ratio:	0.092128
+
+════════════════════
+ MC step #8000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (1, 29)
+ • Rescaled imaginary time (tau / beta): 0.0604114
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (29, 0)
+ • Rescaled imaginary time (tau / beta): 0.176955
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (29, 0)
+ • Rescaled imaginary time (tau / beta): 0.176955
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0.119458
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0.119458
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[897396 7002604]
+Subspace saved ratios:	[0.113594 0.886405]
+Subspace average measured signs:	[1 -0.0701693]
+
+Current weight:	-1.0222e-07
+Current total acceptance ratio:	0.10285
+Current average ascend ratio:	0.0054743
+Current average descend ratio:	0.00547418
+Current average mutate ratio:	0.0919014
+
+════════════════════
+ MC step #9000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (3, 26)
+ • Rescaled imaginary time (tau / beta): 0.748397
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (1, 27)
+ • Rescaled imaginary time (tau / beta): 0.833632
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (1, 27)
+ • Rescaled imaginary time (tau / beta): 0.833632
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (1, 27)
+ • Rescaled imaginary time (tau / beta): 0.877762
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (1, 27)
+ • Rescaled imaginary time (tau / beta): 0.877762
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[1018969 7881031]
+Subspace saved ratios:	[0.114491 0.885509]
+Subspace average measured signs:	[1 -0.0732834]
+
+Current weight:	-4.29418e-08
+Current total acceptance ratio:	0.102859
+Current average ascend ratio:	0.00553461
+Current average descend ratio:	0.00553449
+Current average mutate ratio:	0.0917894
+
+════════════════════
+ MC step #10000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (1, 29)
+ • Rescaled imaginary time (tau / beta): 0.0581336
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (3, 0)
+ • Rescaled imaginary time (tau / beta): 0.319496
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (3, 0)
+ • Rescaled imaginary time (tau / beta): 0.319496
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (1, 28)
+ • Rescaled imaginary time (tau / beta): 0.0607426
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (1, 28)
+ • Rescaled imaginary time (tau / beta): 0.0607426
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[1142816 8757184]
+Subspace saved ratios:	[0.115436 0.884564]
+Subspace average measured signs:	[1 -0.0709233]
+
+Current weight:	2.99382e-09
+Current total acceptance ratio:	0.102927
+Current average ascend ratio:	0.00556454
+Current average descend ratio:	0.00556444
+Current average mutate ratio:	0.0917977
+
+════════════════════
+ MC step #11000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (3, 3)
+ • Rescaled imaginary time (tau / beta): 0.501165
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0.710831
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0.710831
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0.631962
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0.631962
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[1263188 9636812]
+Subspace saved ratios:	[0.115889 0.884111]
+Subspace average measured signs:	[1 -0.0717522]
+
+Current weight:	-3.54625e-07
+Current total acceptance ratio:	0.103046
+Current average ascend ratio:	0.00559138
+Current average descend ratio:	0.00559128
+Current average mutate ratio:	0.0918636
+
+════════════════════
+ MC step #12000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (1, 2)
+ • Rescaled imaginary time (tau / beta): 0.0553874
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (0, 1)
+ • Rescaled imaginary time (tau / beta): 0.488776
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (0, 1)
+ • Rescaled imaginary time (tau / beta): 0.488776
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (1, 1)
+ • Rescaled imaginary time (tau / beta): 0.487172
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (1, 1)
+ • Rescaled imaginary time (tau / beta): 0.487172
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[1380205 10519795]
+Subspace saved ratios:	[0.115984 0.884016]
+Subspace average measured signs:	[1 -0.0720177]
+
+Current weight:	1.27906e-06
+Current total acceptance ratio:	0.103096
+Current average ascend ratio:	0.00560008
+Current average descend ratio:	0.0056
+Current average mutate ratio:	0.0918962
+
+════════════════════
+ MC step #13000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (29, 28)
+ • Rescaled imaginary time (tau / beta): 0.0492529
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (1, 0)
+ • Rescaled imaginary time (tau / beta): 0.0115901
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (1, 0)
+ • Rescaled imaginary time (tau / beta): 0.0115901
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (1, 0)
+ • Rescaled imaginary time (tau / beta): 0.959919
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (1, 0)
+ • Rescaled imaginary time (tau / beta): 0.959919
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[1492418 11407582]
+Subspace saved ratios:	[0.115691 0.884309]
+Subspace average measured signs:	[1 -0.072556]
+
+Current weight:	-4.60568e-06
+Current total acceptance ratio:	0.103039
+Current average ascend ratio:	0.0055886
+Current average descend ratio:	0.00558853
+Current average mutate ratio:	0.0918615
+
+════════════════════
+ MC step #14000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (23, 24)
+ • Rescaled imaginary time (tau / beta): 0.828207
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (2, 1)
+ • Rescaled imaginary time (tau / beta): 0.152936
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (2, 1)
+ • Rescaled imaginary time (tau / beta): 0.152936
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (2, 2)
+ • Rescaled imaginary time (tau / beta): 0.158446
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (2, 2)
+ • Rescaled imaginary time (tau / beta): 0.158446
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[1598031 12301969]
+Subspace saved ratios:	[0.114966 0.885034]
+Subspace average measured signs:	[1 -0.0732823]
+
+Current weight:	-1.60662e-08
+Current total acceptance ratio:	0.103139
+Current average ascend ratio:	0.00556424
+Current average descend ratio:	0.00556417
+Current average mutate ratio:	0.0920104
+
+════════════════════
+ MC step #15000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (5, 14)
+ • Rescaled imaginary time (tau / beta): 0.323322
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (25, 4)
+ • Rescaled imaginary time (tau / beta): 0.0863228
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (25, 4)
+ • Rescaled imaginary time (tau / beta): 0.0863228
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (25, 4)
+ • Rescaled imaginary time (tau / beta): 0.993103
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (25, 4)
+ • Rescaled imaginary time (tau / beta): 0.993103
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[1708936 13191064]
+Subspace saved ratios:	[0.114694 0.885306]
+Subspace average measured signs:	[1 -0.0742607]
+
+Current weight:	6.43341e-10
+Current total acceptance ratio:	0.10308
+Current average ascend ratio:	0.00555141
+Current average descend ratio:	0.00555134
+Current average mutate ratio:	0.0919776
+
+════════════════════
+ MC step #16000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (0, 2)
+ • Rescaled imaginary time (tau / beta): 0.427628
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (1, 1)
+ • Rescaled imaginary time (tau / beta): 0.39191
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (1, 1)
+ • Rescaled imaginary time (tau / beta): 0.39191
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (29, 2)
+ • Rescaled imaginary time (tau / beta): 0.387841
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (29, 2)
+ • Rescaled imaginary time (tau / beta): 0.387841
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[1819976 14080024]
+Subspace saved ratios:	[0.114464 0.885536]
+Subspace average measured signs:	[1 -0.0740619]
+
+Current weight:	-2.71406e-08
+Current total acceptance ratio:	0.103155
+Current average ascend ratio:	0.00554472
+Current average descend ratio:	0.00554465
+Current average mutate ratio:	0.0920655
+
+════════════════════
+ MC step #17000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0.536806
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0.538983
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0.538983
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0.562582
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0.562582
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[1947134 14952866]
+Subspace saved ratios:	[0.115215 0.884785]
+Subspace average measured signs:	[1 -0.0740412]
+
+Current weight:	-0.000171058
+Current total acceptance ratio:	0.103109
+Current average ascend ratio:	0.00558278
+Current average descend ratio:	0.00558272
+Current average mutate ratio:	0.0919432
+
+════════════════════
+ MC step #18000000
+════════════════════
+
+In subspace: [V_0 V_3]
+               ^       
+Diagram pool size: 1
+Diagram pool fermion loop numbers: ( 0 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[2054381 15845619]
+Subspace saved ratios:	[0.11477 0.88523]
+Subspace average measured signs:	[1 -0.0754923]
+
+Current weight:	0.066964
+Current total acceptance ratio:	0.103008
+Current average ascend ratio:	0.00556212
+Current average descend ratio:	0.00556212
+Current average mutate ratio:	0.0918833
+
+════════════════════
+ MC step #19000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (22, 22)
+ • Rescaled imaginary time (tau / beta): 0.530338
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (24, 24)
+ • Rescaled imaginary time (tau / beta): 0.0862236
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (24, 24)
+ • Rescaled imaginary time (tau / beta): 0.0862236
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (24, 24)
+ • Rescaled imaginary time (tau / beta): 0.0243527
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (24, 24)
+ • Rescaled imaginary time (tau / beta): 0.0243527
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[2181333 16718667]
+Subspace saved ratios:	[0.115414 0.884586]
+Subspace average measured signs:	[1 -0.0745271]
+
+Current weight:	-3.08938e-08
+Current total acceptance ratio:	0.102993
+Current average ascend ratio:	0.00559418
+Current average descend ratio:	0.00559413
+Current average mutate ratio:	0.0918051
+
+════════════════════
+ MC step #20000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (1, 28)
+ • Rescaled imaginary time (tau / beta): 0.0117041
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (2, 28)
+ • Rescaled imaginary time (tau / beta): 0.246593
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (2, 28)
+ • Rescaled imaginary time (tau / beta): 0.246593
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (1, 28)
+ • Rescaled imaginary time (tau / beta): 0.25716
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (1, 28)
+ • Rescaled imaginary time (tau / beta): 0.25716
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[2286519 17613481]
+Subspace saved ratios:	[0.1149 0.8851]
+Subspace average measured signs:	[1 -0.0756528]
+
+Current weight:	1.68667e-06
+Current total acceptance ratio:	0.102999
+Current average ascend ratio:	0.00556502
+Current average descend ratio:	0.00556497
+Current average mutate ratio:	0.0918693
+
+════════════════════
+ MC step #21000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (6, 5)
+ • Rescaled imaginary time (tau / beta): 0.829928
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (20, 18)
+ • Rescaled imaginary time (tau / beta): 0.868181
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (20, 18)
+ • Rescaled imaginary time (tau / beta): 0.868181
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (22, 20)
+ • Rescaled imaginary time (tau / beta): 0.24339
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (22, 20)
+ • Rescaled imaginary time (tau / beta): 0.24339
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[2394390 18505610]
+Subspace saved ratios:	[0.114564 0.885436]
+Subspace average measured signs:	[1 -0.0747385]
+
+Current weight:	-1.91996e-12
+Current total acceptance ratio:	0.103011
+Current average ascend ratio:	0.0055411
+Current average descend ratio:	0.00554105
+Current average mutate ratio:	0.0919288
+
+════════════════════
+ MC step #22000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (6, 2)
+ • Rescaled imaginary time (tau / beta): 0.00805984
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (4, 3)
+ • Rescaled imaginary time (tau / beta): 0.126801
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (4, 3)
+ • Rescaled imaginary time (tau / beta): 0.126801
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (4, 3)
+ • Rescaled imaginary time (tau / beta): 0.0687209
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (4, 3)
+ • Rescaled imaginary time (tau / beta): 0.0687209
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[2502141 19397859]
+Subspace saved ratios:	[0.114253 0.885747]
+Subspace average measured signs:	[1 -0.074998]
+
+Current weight:	-5.56924e-08
+Current total acceptance ratio:	0.103031
+Current average ascend ratio:	0.00552776
+Current average descend ratio:	0.00552772
+Current average mutate ratio:	0.0919755
+
+════════════════════
+ MC step #23000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (27, 3)
+ • Rescaled imaginary time (tau / beta): 0.526675
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (0, 1)
+ • Rescaled imaginary time (tau / beta): 0.500192
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (0, 1)
+ • Rescaled imaginary time (tau / beta): 0.500192
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (29, 1)
+ • Rescaled imaginary time (tau / beta): 0.47493
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (29, 1)
+ • Rescaled imaginary time (tau / beta): 0.47493
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[2612197 20287803]
+Subspace saved ratios:	[0.11407 0.88593]
+Subspace average measured signs:	[1 -0.0759412]
+
+Current weight:	-1.1004e-07
+Current total acceptance ratio:	0.103023
+Current average ascend ratio:	0.00552218
+Current average descend ratio:	0.00552214
+Current average mutate ratio:	0.0919785
+
+════════════════════
+ MC step #24000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (5, 4)
+ • Rescaled imaginary time (tau / beta): 0.869929
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (29, 0)
+ • Rescaled imaginary time (tau / beta): 0.353724
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (29, 0)
+ • Rescaled imaginary time (tau / beta): 0.353724
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (29, 1)
+ • Rescaled imaginary time (tau / beta): 0.33271
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (29, 1)
+ • Rescaled imaginary time (tau / beta): 0.33271
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[2738449 21161551]
+Subspace saved ratios:	[0.114579 0.885421]
+Subspace average measured signs:	[1 -0.0756179]
+
+Current weight:	-8.44697e-09
+Current total acceptance ratio:	0.103064
+Current average ascend ratio:	0.00554611
+Current average descend ratio:	0.00554607
+Current average mutate ratio:	0.0919716
+
+════════════════════
+ MC step #25000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (28, 0)
+ • Rescaled imaginary time (tau / beta): 0.246596
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (1, 28)
+ • Rescaled imaginary time (tau / beta): 0.0632595
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (1, 28)
+ • Rescaled imaginary time (tau / beta): 0.0632595
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (1, 28)
+ • Rescaled imaginary time (tau / beta): 0.0680407
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (1, 28)
+ • Rescaled imaginary time (tau / beta): 0.0680407
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[2866983 22033017]
+Subspace saved ratios:	[0.11514 0.88486]
+Subspace average measured signs:	[1 -0.0755263]
+
+Current weight:	-2.60201e-07
+Current total acceptance ratio:	0.10302
+Current average ascend ratio:	0.00556932
+Current average descend ratio:	0.00556928
+Current average mutate ratio:	0.0918819
+
+════════════════════
+ MC step #26000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (2, 29)
+ • Rescaled imaginary time (tau / beta): 0.865355
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (4, 26)
+ • Rescaled imaginary time (tau / beta): 0.524859
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (4, 26)
+ • Rescaled imaginary time (tau / beta): 0.524859
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (4, 26)
+ • Rescaled imaginary time (tau / beta): 0.032
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (4, 26)
+ • Rescaled imaginary time (tau / beta): 0.032
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[2999459 22900541]
+Subspace saved ratios:	[0.115809 0.884191]
+Subspace average measured signs:	[1 -0.0761422]
+
+Current weight:	-7.41751e-09
+Current total acceptance ratio:	0.103004
+Current average ascend ratio:	0.00559973
+Current average descend ratio:	0.00559969
+Current average mutate ratio:	0.0918048
+
+════════════════════
+ MC step #27000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (3, 27)
+ • Rescaled imaginary time (tau / beta): 0.0984244
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (1, 0)
+ • Rescaled imaginary time (tau / beta): 0.090768
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (1, 0)
+ • Rescaled imaginary time (tau / beta): 0.090768
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (1, 0)
+ • Rescaled imaginary time (tau / beta): 0.0754417
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (1, 0)
+ • Rescaled imaginary time (tau / beta): 0.0754417
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[3123419 23776581]
+Subspace saved ratios:	[0.116112 0.883888]
+Subspace average measured signs:	[1 -0.0756233]
+
+Current weight:	-1.49648e-06
+Current total acceptance ratio:	0.103037
+Current average ascend ratio:	0.00561848
+Current average descend ratio:	0.00561844
+Current average mutate ratio:	0.0918005
+
+════════════════════
+ MC step #28000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (29, 29)
+ • Rescaled imaginary time (tau / beta): 0.242803
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (3, 26)
+ • Rescaled imaginary time (tau / beta): 0.721412
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (3, 26)
+ • Rescaled imaginary time (tau / beta): 0.721412
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (3, 26)
+ • Rescaled imaginary time (tau / beta): 0.784136
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (3, 26)
+ • Rescaled imaginary time (tau / beta): 0.784136
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[3231812 24668188]
+Subspace saved ratios:	[0.115836 0.884164]
+Subspace average measured signs:	[1 -0.0747736]
+
+Current weight:	-2.103e-08
+Current total acceptance ratio:	0.103042
+Current average ascend ratio:	0.00560498
+Current average descend ratio:	0.00560495
+Current average mutate ratio:	0.091832
+
+════════════════════
+ MC step #29000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (2, 2)
+ • Rescaled imaginary time (tau / beta): 0.713713
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (5, 5)
+ • Rescaled imaginary time (tau / beta): 0.802089
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (5, 5)
+ • Rescaled imaginary time (tau / beta): 0.802089
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (4, 5)
+ • Rescaled imaginary time (tau / beta): 0.794508
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (4, 5)
+ • Rescaled imaginary time (tau / beta): 0.794508
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[3348152 25551848]
+Subspace saved ratios:	[0.115853 0.884147]
+Subspace average measured signs:	[1 -0.0748434]
+
+Current weight:	1.84653e-07
+Current total acceptance ratio:	0.103055
+Current average ascend ratio:	0.00560592
+Current average descend ratio:	0.00560588
+Current average mutate ratio:	0.0918435
+
+════════════════════
+ MC step #30000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (1, 29)
+ • Rescaled imaginary time (tau / beta): 0.0993045
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (1, 2)
+ • Rescaled imaginary time (tau / beta): 0.704816
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (1, 2)
+ • Rescaled imaginary time (tau / beta): 0.704816
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (1, 2)
+ • Rescaled imaginary time (tau / beta): 0.0220271
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (1, 2)
+ • Rescaled imaginary time (tau / beta): 0.0220271
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[3484442 26415558]
+Subspace saved ratios:	[0.116537 0.883463]
+Subspace average measured signs:	[1 -0.074837]
+
+Current weight:	-6.23052e-09
+Current total acceptance ratio:	0.103088
+Current average ascend ratio:	0.00563726
+Current average descend ratio:	0.00563722
+Current average mutate ratio:	0.0918135
+
+════════════════════
+ MC step #31000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (3, 2)
+ • Rescaled imaginary time (tau / beta): 0.137086
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (2, 3)
+ • Rescaled imaginary time (tau / beta): 0.060565
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (2, 3)
+ • Rescaled imaginary time (tau / beta): 0.060565
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (3, 2)
+ • Rescaled imaginary time (tau / beta): 0.989535
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (3, 2)
+ • Rescaled imaginary time (tau / beta): 0.989535
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[3610081 27289919]
+Subspace saved ratios:	[0.116831 0.883169]
+Subspace average measured signs:	[1 -0.0742634]
+
+Current weight:	-1.61637e-07
+Current total acceptance ratio:	0.103085
+Current average ascend ratio:	0.00565065
+Current average descend ratio:	0.00565061
+Current average mutate ratio:	0.0917838
+
+════════════════════
+ MC step #32000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (28, 28)
+ • Rescaled imaginary time (tau / beta): 0.53957
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (29, 1)
+ • Rescaled imaginary time (tau / beta): 0.313636
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (29, 1)
+ • Rescaled imaginary time (tau / beta): 0.313636
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (1, 4)
+ • Rescaled imaginary time (tau / beta): 0.340246
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (1, 4)
+ • Rescaled imaginary time (tau / beta): 0.340246
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[3716454 28183546]
+Subspace saved ratios:	[0.116503 0.883497]
+Subspace average measured signs:	[1 -0.0743333]
+
+Current weight:	-4.67522e-10
+Current total acceptance ratio:	0.103062
+Current average ascend ratio:	0.00563201
+Current average descend ratio:	0.00563197
+Current average mutate ratio:	0.0917983
+
+════════════════════
+ MC step #33000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (0, 27)
+ • Rescaled imaginary time (tau / beta): 0.160624
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (9, 22)
+ • Rescaled imaginary time (tau / beta): 0.415575
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (9, 22)
+ • Rescaled imaginary time (tau / beta): 0.415575
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (8, 22)
+ • Rescaled imaginary time (tau / beta): 0.403751
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (8, 22)
+ • Rescaled imaginary time (tau / beta): 0.403751
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[3831130 29068870]
+Subspace saved ratios:	[0.116448 0.883552]
+Subspace average measured signs:	[1 -0.0747829]
+
+Current weight:	-1.30529e-09
+Current total acceptance ratio:	0.103021
+Current average ascend ratio:	0.0056255
+Current average descend ratio:	0.00562547
+Current average mutate ratio:	0.0917696
+
+════════════════════
+ MC step #34000000
+════════════════════
+
+In subspace: [V_0 V_3]
+               ^       
+Diagram pool size: 1
+Diagram pool fermion loop numbers: ( 0 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[3948383 29951617]
+Subspace saved ratios:	[0.116471 0.883528]
+Subspace average measured signs:	[1 -0.0747566]
+
+Current weight:	0.066964
+Current total acceptance ratio:	0.103057
+Current average ascend ratio:	0.00562832
+Current average descend ratio:	0.00562832
+Current average mutate ratio:	0.0918006
+
+════════════════════
+ MC step #35000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (29, 29)
+ • Rescaled imaginary time (tau / beta): 0.701452
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (29, 28)
+ • Rescaled imaginary time (tau / beta): 0.683844
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (29, 28)
+ • Rescaled imaginary time (tau / beta): 0.683844
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (29, 29)
+ • Rescaled imaginary time (tau / beta): 0.6883
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (29, 29)
+ • Rescaled imaginary time (tau / beta): 0.6883
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[4055895 30844105]
+Subspace saved ratios:	[0.116215 0.883785]
+Subspace average measured signs:	[1 -0.0743785]
+
+Current weight:	-3.17178e-06
+Current total acceptance ratio:	0.103074
+Current average ascend ratio:	0.00561696
+Current average descend ratio:	0.00561693
+Current average mutate ratio:	0.0918397
+
+════════════════════
+ MC step #36000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (29, 0)
+ • Rescaled imaginary time (tau / beta): 0.968957
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (1, 29)
+ • Rescaled imaginary time (tau / beta): 0.813496
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (1, 29)
+ • Rescaled imaginary time (tau / beta): 0.813496
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (1, 29)
+ • Rescaled imaginary time (tau / beta): 0.881768
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (1, 29)
+ • Rescaled imaginary time (tau / beta): 0.881768
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[4168130 31731870]
+Subspace saved ratios:	[0.116104 0.883896]
+Subspace average measured signs:	[1 -0.0742777]
+
+Current weight:	1.82339e-06
+Current total acceptance ratio:	0.103068
+Current average ascend ratio:	0.00561379
+Current average descend ratio:	0.00561376
+Current average mutate ratio:	0.0918405
+
+════════════════════
+ MC step #37000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (8, 25)
+ • Rescaled imaginary time (tau / beta): 0.14803
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (5, 28)
+ • Rescaled imaginary time (tau / beta): 0.138378
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (5, 28)
+ • Rescaled imaginary time (tau / beta): 0.138378
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (6, 27)
+ • Rescaled imaginary time (tau / beta): 0.252947
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (6, 27)
+ • Rescaled imaginary time (tau / beta): 0.252947
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[4274025 32625975]
+Subspace saved ratios:	[0.115827 0.884173]
+Subspace average measured signs:	[1 -0.0743138]
+
+Current weight:	8.81189e-11
+Current total acceptance ratio:	0.10306
+Current average ascend ratio:	0.00559726
+Current average descend ratio:	0.00559724
+Current average mutate ratio:	0.0918654
+
+════════════════════
+ MC step #38000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (3, 25)
+ • Rescaled imaginary time (tau / beta): 0.604224
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (5, 26)
+ • Rescaled imaginary time (tau / beta): 0.385008
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (5, 26)
+ • Rescaled imaginary time (tau / beta): 0.385008
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (5, 25)
+ • Rescaled imaginary time (tau / beta): 0.394446
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (5, 25)
+ • Rescaled imaginary time (tau / beta): 0.394446
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[4404170 33495830]
+Subspace saved ratios:	[0.116205 0.883795]
+Subspace average measured signs:	[1 -0.0745204]
+
+Current weight:	-4.70313e-09
+Current total acceptance ratio:	0.103085
+Current average ascend ratio:	0.00561158
+Current average descend ratio:	0.00561156
+Current average mutate ratio:	0.0918617
+
+════════════════════
+ MC step #39000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (2, 29)
+ • Rescaled imaginary time (tau / beta): 0.0239931
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (5, 27)
+ • Rescaled imaginary time (tau / beta): 0.0413557
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (5, 27)
+ • Rescaled imaginary time (tau / beta): 0.0413557
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (5, 27)
+ • Rescaled imaginary time (tau / beta): 0.0627028
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (5, 27)
+ • Rescaled imaginary time (tau / beta): 0.0627028
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[4532835 34367165]
+Subspace saved ratios:	[0.116525 0.883475]
+Subspace average measured signs:	[1 -0.0744365]
+
+Current weight:	-1.90333e-07
+Current total acceptance ratio:	0.103064
+Current average ascend ratio:	0.00562985
+Current average descend ratio:	0.00562982
+Current average mutate ratio:	0.0918047
+
+════════════════════
+ MC step #40000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (28, 22)
+ • Rescaled imaginary time (tau / beta): 0.256342
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (28, 22)
+ • Rescaled imaginary time (tau / beta): 0.19878
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (28, 22)
+ • Rescaled imaginary time (tau / beta): 0.19878
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (28, 22)
+ • Rescaled imaginary time (tau / beta): 0.234213
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (28, 22)
+ • Rescaled imaginary time (tau / beta): 0.234213
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[4650085 35249915]
+Subspace saved ratios:	[0.116543 0.883456]
+Subspace average measured signs:	[1 -0.0747392]
+
+Current weight:	-9.88347e-09
+Current total acceptance ratio:	0.103071
+Current average ascend ratio:	0.00563226
+Current average descend ratio:	0.00563223
+Current average mutate ratio:	0.0918064
+
+════════════════════
+ MC step #41000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (6, 25)
+ • Rescaled imaginary time (tau / beta): 0.0453317
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (5, 26)
+ • Rescaled imaginary time (tau / beta): 0.0606672
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (5, 26)
+ • Rescaled imaginary time (tau / beta): 0.0606672
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (5, 26)
+ • Rescaled imaginary time (tau / beta): 0.0211789
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (5, 26)
+ • Rescaled imaginary time (tau / beta): 0.0211789
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[4763491 36136509]
+Subspace saved ratios:	[0.116467 0.883533]
+Subspace average measured signs:	[1 -0.0743154]
+
+Current weight:	8.40918e-07
+Current total acceptance ratio:	0.103055
+Current average ascend ratio:	0.00562866
+Current average descend ratio:	0.00562863
+Current average mutate ratio:	0.091798
+
+════════════════════
+ MC step #42000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (1, 4)
+ • Rescaled imaginary time (tau / beta): 0.903138
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (3, 28)
+ • Rescaled imaginary time (tau / beta): 0.313993
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (3, 28)
+ • Rescaled imaginary time (tau / beta): 0.313993
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (2, 28)
+ • Rescaled imaginary time (tau / beta): 0.32991
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (2, 28)
+ • Rescaled imaginary time (tau / beta): 0.32991
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[4879031 37020969]
+Subspace saved ratios:	[0.116445 0.883555]
+Subspace average measured signs:	[1 -0.073634]
+
+Current weight:	-5.88997e-09
+Current total acceptance ratio:	0.103077
+Current average ascend ratio:	0.00562709
+Current average descend ratio:	0.00562706
+Current average mutate ratio:	0.0918233
+
+════════════════════
+ MC step #43000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (27, 26)
+ • Rescaled imaginary time (tau / beta): 0.0662574
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (29, 29)
+ • Rescaled imaginary time (tau / beta): 0.115374
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (29, 29)
+ • Rescaled imaginary time (tau / beta): 0.115374
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (29, 29)
+ • Rescaled imaginary time (tau / beta): 0.0972763
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (29, 29)
+ • Rescaled imaginary time (tau / beta): 0.0972763
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[4982084 37917916]
+Subspace saved ratios:	[0.116132 0.883867]
+Subspace average measured signs:	[1 -0.0741678]
+
+Current weight:	1.72238e-06
+Current total acceptance ratio:	0.103071
+Current average ascend ratio:	0.00561231
+Current average descend ratio:	0.00561228
+Current average mutate ratio:	0.091846
+
+════════════════════
+ MC step #44000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (27, 4)
+ • Rescaled imaginary time (tau / beta): 0.940388
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (0, 1)
+ • Rescaled imaginary time (tau / beta): 0.785158
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (0, 1)
+ • Rescaled imaginary time (tau / beta): 0.785158
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (0, 1)
+ • Rescaled imaginary time (tau / beta): 0.736865
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (0, 1)
+ • Rescaled imaginary time (tau / beta): 0.736865
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[5084229 38815771]
+Subspace saved ratios:	[0.115814 0.884186]
+Subspace average measured signs:	[1 -0.0746742]
+
+Current weight:	6.74548e-08
+Current total acceptance ratio:	0.103082
+Current average ascend ratio:	0.00559886
+Current average descend ratio:	0.00559884
+Current average mutate ratio:	0.091884
+
+════════════════════
+ MC step #45000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (10, 18)
+ • Rescaled imaginary time (tau / beta): 0.6615
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (5, 23)
+ • Rescaled imaginary time (tau / beta): 0.249229
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (5, 23)
+ • Rescaled imaginary time (tau / beta): 0.249229
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (4, 23)
+ • Rescaled imaginary time (tau / beta): 0.307118
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (4, 23)
+ • Rescaled imaginary time (tau / beta): 0.307118
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[5208550 39691450]
+Subspace saved ratios:	[0.116003 0.883997]
+Subspace average measured signs:	[1 -0.0746366]
+
+Current weight:	-3.59391e-11
+Current total acceptance ratio:	0.103084
+Current average ascend ratio:	0.00560862
+Current average descend ratio:	0.0056086
+Current average mutate ratio:	0.091867
+
+════════════════════
+ MC step #46000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (3, 27)
+ • Rescaled imaginary time (tau / beta): 0.691977
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0.100984
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0.100984
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0.166007
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0.166007
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[5323274 40576726]
+Subspace saved ratios:	[0.115975 0.884025]
+Subspace average measured signs:	[1 -0.0745938]
+
+Current weight:	-7.06534e-07
+Current total acceptance ratio:	0.103126
+Current average ascend ratio:	0.00561052
+Current average descend ratio:	0.0056105
+Current average mutate ratio:	0.0919052
+
+════════════════════
+ MC step #47000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (28, 27)
+ • Rescaled imaginary time (tau / beta): 0.0826044
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (27, 27)
+ • Rescaled imaginary time (tau / beta): 0.693432
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (27, 27)
+ • Rescaled imaginary time (tau / beta): 0.693432
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (27, 28)
+ • Rescaled imaginary time (tau / beta): 0.758112
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (27, 28)
+ • Rescaled imaginary time (tau / beta): 0.758112
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[5430657 41469343]
+Subspace saved ratios:	[0.115792 0.884208]
+Subspace average measured signs:	[1 -0.0749193]
+
+Current weight:	-8.44919e-09
+Current total acceptance ratio:	0.103121
+Current average ascend ratio:	0.00560203
+Current average descend ratio:	0.005602
+Current average mutate ratio:	0.0919166
+
+════════════════════
+ MC step #48000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (1, 1)
+ • Rescaled imaginary time (tau / beta): 0.148633
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (29, 1)
+ • Rescaled imaginary time (tau / beta): 0.909157
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (29, 1)
+ • Rescaled imaginary time (tau / beta): 0.909157
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0.950899
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0.950899
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[5553940 42346060]
+Subspace saved ratios:	[0.115949 0.884051]
+Subspace average measured signs:	[1 -0.0746888]
+
+Current weight:	-8.13987e-08
+Current total acceptance ratio:	0.103119
+Current average ascend ratio:	0.00560887
+Current average descend ratio:	0.00560885
+Current average mutate ratio:	0.0919011
+
+════════════════════
+ MC step #49000000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (3, 26)
+ • Rescaled imaginary time (tau / beta): 0.887956
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (2, 27)
+ • Rescaled imaginary time (tau / beta): 0.756241
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (2, 27)
+ • Rescaled imaginary time (tau / beta): 0.756241
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (2, 27)
+ • Rescaled imaginary time (tau / beta): 0.77041
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (2, 27)
+ • Rescaled imaginary time (tau / beta): 0.77041
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[5673011 43226989]
+Subspace saved ratios:	[0.116012 0.883987]
+Subspace average measured signs:	[1 -0.0743536]
+
+Current weight:	2.56042e-07
+Current total acceptance ratio:	0.103117
+Current average ascend ratio:	0.0056101
+Current average descend ratio:	0.00561008
+Current average mutate ratio:	0.0918963
+
+════════════════════
+ MC step #50000000
+════════════════════
+
+In subspace: [V_0 V_3]
+               ^       
+Diagram pool size: 1
+Diagram pool fermion loop numbers: ( 0 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[5781931 44118069]
+Subspace saved ratios:	[0.11587 0.88413]
+Subspace average measured signs:	[1 -0.0743799]
+
+Current weight:	0.066964
+Current total acceptance ratio:	0.103145
+Current average ascend ratio:	0.00560513
+Current average descend ratio:	0.00560513
+Current average mutate ratio:	0.0919349
+Final results:
+════════════════════
+ MC step #50100000
+════════════════════
+
+In subspace: [V_0 V_3]
+                   ^   
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #0)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #1)
+ • Position indices: (0, 0)
+ • Rescaled imaginary time (tau / beta): 0.964724
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #2)
+ • Position indices: (29, 29)
+ • Rescaled imaginary time (tau / beta): 0.0593183
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #3)
+ • Position indices: (29, 29)
+ • Rescaled imaginary time (tau / beta): 0.0593183
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #4)
+ • Position indices: (29, 29)
+ • Rescaled imaginary time (tau / beta): 0.164602
+───────────────────────────────────────────────────
+ Lattice spacetime coordinate (ID #5)
+ • Position indices: (29, 29)
+ • Rescaled imaginary time (tau / beta): 0.164602
+───────────────────────────────────────────────────
+
+Diagram pool size: 5
+Diagram pool fermion loop numbers: ( 2 2 2 2 2 )
+Constraints on spacetime coordinates: [x x x 2 x 4]
+
+Subspace saved counts:	[5795613 44204387]
+Subspace saved ratios:	[0.115912 0.884088]
+Subspace average measured signs:	[1 -0.0743621]
+
+Current weight:	-1.69731e-06
+Current total acceptance ratio:	0.103146
+Current average ascend ratio:	0.0056072
+Current average descend ratio:	0.00560718
+Current average mutate ratio:	0.0919313
+
+Normalization constant: C / N_{s,0} =1.15543e-08
+
+Job ended at:	Tue Jun 29 18:56:13 2021
+Elapsed time:	179 seconds
