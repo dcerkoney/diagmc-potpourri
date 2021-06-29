@@ -1,7 +1,7 @@
 # diagmc-hubbard-2dsqlat
 Low-order diagrammatic Monte-Carlo (DiagMC) for the Hubbard model on the 2D square lattice.
 
-### Dependencies
+## Dependencies
 
 1. HDF5 >= 1.12
 
@@ -33,7 +33,7 @@ The TRIQS TPRF package is optionally used for benchmarking purposes in the post-
    ```
 For detailed installation instructions, see [here](https://triqs.github.io/tprf/latest/install.html) and [here](https://triqs.github.io/triqs/latest/install.html).
 
-### Installation
+## Installation
 
 1. Clone the repo:
    ```sh
