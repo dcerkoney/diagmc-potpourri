@@ -79,7 +79,7 @@ Options:
                          variable density; otherwise, we use a fixed density
                          and variable chemical potential.
   --t_hop=T_HOP         The tight-binding hopping parameter t.
-  --U_loc=U_LOC         Onsite Hubbard interaction in units of 1/t.
+  --U_loc=U_LOC         Onsite Hubbard interaction in units of t.
   --beta=BETA           Inverse temperature in units of 1/t.
   --n_site_pd=N_SITE_PD
                          Number of sites per direction.
