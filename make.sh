@@ -1,0 +1,1 @@
+make -C build && ln -sfn build/hub_2dsqlat_rt_mcmc hub_2dsqlat_rt_mcmc;

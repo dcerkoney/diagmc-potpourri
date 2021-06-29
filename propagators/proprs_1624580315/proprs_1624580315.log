@@ -1,0 +1,38 @@
+-----------------------------
+Lattice G_0(r, tau) from FFT
+-----------------------------
+Job ID# (POSIX integer timestamp): 1624580315
+Spatial dimension: d = 2
+t (hopping parameter): 1.0
+beta / t (inverse temperature): 100.0
+U / t (onsite (Hubbard) interaction): 1.0
+Magnetization ((n_up - n_down) / n_tot): 0.0
+Lattice coordination number: z = 4
+Bandwidth: w = 2zt = 8.0
+
+Number of sites per direction: N = 64
+Total number of electrons: N_e = 4096
+Lattice constant: a = 1.0
+Lattice length: L = 64.0
+Lattice UV cutoff: Lambda_{lat} = 9.869604401089358
+Imaginary-time infinitesimal (for G_0 hard cutoff and limits): 1e-10
+
+mu_tilde_H: 5.672737592188337e-05
+mu_H: 0.5000567273759219
+n_0 = n = 1.0
+r_s: 0.5641895835477563
+e_F: 0.0
+{k_F} in the first quadrant: 
+[k[ 0 32],	k[ 1 31],	k[ 2 30],	k[ 3 29],	
+ k[ 4 28],	k[ 5 27],	k[ 6 26],	k[ 7 25],	
+ k[ 8 24],	k[ 9 23],	k[10 22],	k[11 21],	
+ k[12 20],	k[13 19],	k[14 18],	k[15 17],	
+ k[16 16],	k[17 15],	k[18 14],	k[19 13],	
+ k[20 12],	k[21 11],	k[22 10],	k[23  9],	
+ k[24  8],	k[25  7],	k[26  6],	k[27  5],	
+ k[28  4],	k[29  3],	k[30  2],	k[31  1],	
+ k[32  0]]
+
+Number of nonuniform tau mesh points: 2048
+Number of frequency mesh points: 2048
+
