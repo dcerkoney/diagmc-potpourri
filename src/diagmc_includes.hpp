@@ -35,12 +35,7 @@
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
 #include <boost/random/uniform_real_distribution.hpp>
-// NOTE: we use the stdlib random_device instead,
-//       as the boost random library must be linked
-//       explicitly for this functionality to work,
-//       and it is not yet clear to me how to achieve
-//       this using the cpp2py/cmake wrapping framework.
-// TODO:
-//       This will not generate true random seeds on all
-//       systems, so should be changed in the future!
+// NOTE: We have used the stdlib random_device for simplicity.
+//       This will not generate true random seeds on all systems,
+//       so should be changed to the following in the future!
 // #include <boost/random/random_device.hpp>
