@@ -251,14 +251,6 @@ def main():
           ': '+str(path_k_coords[len(i_path) // 3]))
     assert len(np.unique(path_k_coords, axis=0)) == len(path_k_coords)
 
-    # # Logspaced taulist; smallest time mesh point in G_0 calculation is \beta * \delta_\tau = 1e-10
-    # delta_tau = 1e-10 / beta
-    # tau_loglist_left = (np.logspace(np.log10(delta_tau), np.log10(0.5),
-    #                                 num=optdict['n_tau'] // 2))
-    # tau_loglist_right = (1.0 - tau_loglist_left[::-1])
-    # tau_loglist = beta * np.concatenate(
-    #         ([0.0, delta_tau], tau_loglist_left[1:-1], [0.5], tau_loglist_right[1:-1], [1.0 - delta_tau, 1.0]))
-
     # Cubic taulist; smallest time mesh point in G_0 calculation is \beta * \delta_\tau = 1e-10
     delta_tau = 1e-10 / beta
     tau_powlist_left = (np.linspace(delta_tau ** (1.0 / 3.0), 0.5 ** (1.0 / 3.0),
@@ -267,14 +259,6 @@ def main():
     # tau_powlist = beta * \
     tau_list = beta * np.concatenate(
             ([0.0, delta_tau], tau_powlist_left[1:-1], [0.5], tau_powlist_right[1:-1], [1.0 - delta_tau, 1.0]))
-
-    # Log the input parameters
-    # if lat_const == 1:
-    #     log_name = 'lat_g0_'+str(dim)+'d_N='+str(n_site_pd)+'_beta='+str(
-    #         '%g' % optdict['beta'])
-    # else:
-    #     log_name = 'lat_g0_'+str(dim)+'d_N='+str(n_site_pd)+'_a='+str(
-    #         '%g' % lat_const)+'_beta='+str('%g' % optdict['beta'])
 
     if optdict['save']:
         log_savename = safe_filename(
