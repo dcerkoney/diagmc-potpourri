@@ -54,7 +54,7 @@ For detailed installation instructions, see [here](https://triqs.github.io/tprf/
 ## Usage
 
 To use the code, first edit the test input parameters in 'hub_2dsqlat_rt_mcmc.cpp' as desired. In principle, the MCMC integrator is compatible with free energy, self energy, and polarization measurements, but only the latter have been tested. The provided example calculates the charge polarization up to 2nd order in U, and optionally compares with the RPA result (obtained via the TRIQS TPRF package). Several example sets of propagators/results are provided, but in order to run the code for a different set of test parameters, one may need to generate new propagators (i.e., if the code complains that a compatible lattice Green's function was not found). To this end, use the script [generate_propagators.py](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/9b82d1568875d67482f1bc3a151dabcaa85454f4/generate_propagators.py). The usage details are accessible as follows:
-   ```sh
+   ```
 python3 generate_propagators.py -h
 Usage: generate_propagators.py [ options ]
 
