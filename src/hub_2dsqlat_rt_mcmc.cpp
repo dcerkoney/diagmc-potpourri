@@ -20,9 +20,9 @@ bool normalize = true;    // Should the integration results be normalized?
 bool save_serial = true;  // Should the thread results be individually saved?
 bool batch_U = false;     // Should we perform a batch calculation for multiple U values?
 int n_warm = 100000;      // Number of steps in the burn-in / warmup phase
-int n_meas = 5000000;     // Total number of steps in the measurement phase (including skips)
+int n_meas = 50000000;     // Total number of steps in the measurement phase (including skips)
 int n_skip = 1;           // Number of steps to skip in ancy points to measure at
-int n_nu_meas = 5;        // Number of external frequency points to measure at
+int n_nu_meas = 1;        // Number of external frequency points to measure at
 int max_posn_shift = 3;   // Variable maximum step size in local position component shifts
 
 /* Lattice parameters */
