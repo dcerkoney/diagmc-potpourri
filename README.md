@@ -63,28 +63,28 @@ Options:
   --dim=DIM             Spatial dimension of the electron gas (default is 2);
                          allowed values: {2, 3}.
   --target_n0=TARGET_N0
-                        Target density in units of the lattice constant; since
-                        the number of electrons is coarse-grained, the actual
-                        density may differ slightly. Default (n0 = 1)
-                        corresponds to half-filling (mu = 0).
+                         Target density in units of the lattice constant; since
+                         the number of electrons is coarse-grained, the actual
+                         density may differ slightly. Default (n0 = 1)
+                         corresponds to half-filling (mu = 0).
   --target_mu0=TARGET_MU0
-                        Target (noninteracting) chemical potential. If
-                        supplied, we work at fixed chemical potential and
-                        variable density; otherwise, we use a fixed density
-                        and variable chemical potential.
+                         Target (noninteracting) chemical potential. If
+                         supplied, we work at fixed chemical potential and
+                         variable density; otherwise, we use a fixed density
+                         and variable chemical potential.
   --t_hop=T_HOP         The tight-binding hopping parameter t.
   --U_loc=U_LOC         Onsite Hubbard interaction in units of 1/t.
   --beta=BETA           Inverse temperature in units of 1/t.
   --n_site_pd=N_SITE_PD
-                        Number of sites per direction.
+                         Number of sites per direction.
   --lat_const=LAT_CONST
-                        Lattice constant, in Bohr radii (for working at fixed
-                        'N' and 'a'; we will calculate 'V' on-the-fly).
+                         Lattice constant, in Bohr radii (for working at fixed
+                         'N' and 'a'; we will calculate 'V' on-the-fly).
   --lat_length=LAT_LENGTH
-                        Lattice length, in Bohr radii (for working at fixed V;
-                        we will calculate 'a' on-the-fly).
+                         Lattice length, in Bohr radii (for working at fixed V;
+                         we will calculate 'a' on-the-fly).
   --n_tau=N_TAU         Number of tau points in the nonuniform mesh used for
-                        downsampling (an even number).
+                         downsampling (an even number).
   --n_nu=N_NU           Number of bosonic frequency points (an even number).
   --save_dir=SAVE_DIR   Subdirectory to save results to, if applicable
   --save                Save propagator data to h5?
