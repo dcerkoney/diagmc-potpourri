@@ -36,7 +36,7 @@ For serial usage, remove the [`D_MPI`](https://github.com/dcerkoney/diagmc-hubba
 
 ### 4. (Optional) [TRIQS TPRF](https://triqs.github.io/tprf/latest/index.html#)
 
-The TRIQS TPRF package is optionally used for benchmarking purposes in the post-processing script 'plot.py' (if [`plot_rpa = True`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/f6be749f6154e362187f15f14b11eaa1ded88616/plot.py#L569)). It may be installed (along with [TRIQS](https://triqs.github.io/triqs/latest/) itself) via
+The TRIQS TPRF package is optionally used for benchmarking purposes in the post-processing script 'plot.py' if [`plot_rpa = True`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/f6be749f6154e362187f15f14b11eaa1ded88616/plot.py#L569). It may be installed (along with [TRIQS](https://triqs.github.io/triqs/latest/) itself) via
    ```sh
     sudo apt-get install triqs_tprf
    ```
