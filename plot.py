@@ -565,14 +565,16 @@ def main():
     """
     Generate charge susceptibility plots for the Hubbard model on a finite square lattice.
     """
+    # Should the RPA result from TRIQS TPRF be added to the static plots for comparison?
+    plot_rpa = True
+
     # Use TeX / TeX font in plots
     plt.rcParams.update({
         "text.usetex": True,
         "font.family": "serif",
         "font.serif": ["Computer Modern Roman"],
-    })
-    # Should the RPA result from TRIQS TPRF be added to the static plots for comparison?
-    plot_rpa = True
+    })    
+
     # Parse command line argument(s)
     if len(sys.argv[1:]) == 0:
         logfiles = glob.glob('*/*run*.log')

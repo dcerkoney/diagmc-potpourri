@@ -51,18 +51,15 @@ def main():
     parser.add_option("--dim", type="int",    default=2,
                       help="Spatial dimension of the electron gas (default is 2); allowed values: {2, 3}.")
     parser.add_option("--target_n0", type="float",  default=None,
-                      help='''Target density in units of the lattice constant; since the number of electrons
-                              is coarse-grained, the actual density may differ slightly. Default (n0 = 1)
-                              corresponds to half-filling (mu = 0).''')
+                      help="Target density in units of the lattice constant; since the number of electrons "
+                      + "is coarse-grained, the actual density may differ slightly. Default (n0 = 1) "
+                      + "corresponds to half-filling (mu = 0).")
     parser.add_option("--target_mu0", type="float",  default=None,
-                      help='''Target (noninteracting) chemical potential. If supplied, we work at
-                              fixed chemical potential and variable density; otherwise, we use a
-                              fixed density and variable chemical potential.''')
-    parser.add_option("--magnetization",  default=0.0,
-                      help='''Determines the difference between the total number of up and down
-                              spin electron; default corresponds to half-filling (m = 0).''')
+                      help="Target (noninteracting) chemical potential. If supplied, we work at "
+                      + "fixed chemical potential and variable density; otherwise, we use a "
+                      + "fixed density and variable chemical potential.")
     parser.add_option("--t_hop", type="float", default=1.0,
-                      help='''The tight-binding hopping parameter t.''')
+                      help="The tight-binding hopping parameter t.")
     parser.add_option("--U_loc", type="float",  default=1.0,
                       help="Onsite Hubbard interaction in units of 1/t.")
     parser.add_option("--beta", type="float",  default=1.0,
@@ -70,26 +67,26 @@ def main():
     parser.add_option("--n_site_pd", type="int",    default=30,
                       help="Number of sites per direction.")
     parser.add_option("--lat_const", type="float",    default=1.0,
-                      help='''Lattice constant, in Bohr radii (for working at fixed 
-                              'N' and 'a'; we will calculate 'V' on-the-fly).''')
+                      help="Lattice constant, in Bohr radii (for working at fixed "
+                              +"'N' and 'a'; we will calculate 'V' on-the-fly).")
     parser.add_option("--lat_length", type="float",    default=None,
-                      help='''Lattice length, in Bohr radii (for working at 
-                              fixed V; we will calculate 'a' on-the-fly).''')
+                      help="Lattice length, in Bohr radii (for working at "
+                              +"fixed V; we will calculate 'a' on-the-fly).")
     parser.add_option("--n_tau",  type="int",   default=2**9,
-                      help='''Number of tau points in the nonuniform mesh 
-                              used for downsampling (an even number).''')
+                      help="Number of tau points in the nonuniform mesh "
+                              "used for downsampling (an even number).")
     parser.add_option("--n_nu",  type="int",   default=2**9,
                       help="Number of bosonic frequency points (an even number).")
-    parser.add_option("--plot_g0",   default=False,  action="store_true",
-                      help="Option for plotting the lattice Green's functions.")
-    parser.add_option("--plot_pi0",   default=False,  action="store_true",
-                      help="Option for plotting the polarization bubble P_0.")
+    parser.add_option("--save_dir",   type="string", default="propagators",
+                      help="Subdirectory to save results to, if applicable")
     parser.add_option("--save",   default=False,  action="store_true",
                       help="Save propagator data to h5?")
     parser.add_option("--overwrite",   default=False,  action="store_true",
                       help="Overwrite existing propagator data?")
-    parser.add_option("--save_dir",   type="string", default="propagators",
-                      help="Subdirectory to save results to, if applicable")
+    parser.add_option("--plot_g0",   default=False,  action="store_true",
+                      help="Option for plotting the lattice Green's functions.")
+    parser.add_option("--plot_pi0",   default=False,  action="store_true",
+                      help="Option for plotting the polarization bubble P_0.")
 
     # Next, parse  the arguments and collect all options into a dictionary
     (options, _) = parser.parse_args()
@@ -115,9 +112,6 @@ def main():
             'd = '+str(optdict['dim'])+' is not a currently supported spatial dimension; d must be 2 or 3!')
     # The coordination number for hypercubic lattices is 2 * d (two nearest neighbors per Cartesian axis)
     z_coord = 2 * dim
-
-    if optdict['magnetization'] != 0:
-        raise ValueError('Spin-polarized calculations not yet implemented!')
 
     # Determine the lattice constant and length
     if (optdict['lat_const'] is None) and (optdict['lat_length'] is None):
@@ -278,7 +272,7 @@ def main():
             f"t (hopping parameter): {optdict['t_hop']}\n"
             f"beta / t (inverse temperature): {optdict['beta']}\n"
             f"U / t (onsite (Hubbard) interaction): {optdict['U_loc']}\n"
-            f"Magnetization ((n_up - n_down) / n_tot): {optdict['magnetization']}\n" +
+            f"Magnetization ((n_up - n_down) / n_tot): 0.0\n" +
             f'Lattice coordination number: z = {z_coord}\n'
             f"Bandwidth: w = 2zt = {2 * z_coord * optdict['t_hop']}\n"
             '\n'
