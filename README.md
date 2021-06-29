@@ -102,7 +102,7 @@ or for a parallel run, e.g. with 8 threads,
    ```
    
 Reproducing all the figures provided (by setting [n_nu_meas = 5]() and [batch_U = true](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/9b82d1568875d67482f1bc3a151dabcaa85454f4/src/hub_2dsqlat_rt_mcmc.cpp#L21)) will take a while (around half an hour).
-For faster runs, try reducing n_meas by a factor of 10 (i.e., set [n_meas = 5000000](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/9b82d1568875d67482f1bc3a151dabcaa85454f4/src/hub_2dsqlat_rt_mcmc.cpp#L23)), or calculate only static susceptibilities by leaving [n_nu_meas = 1](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/9b82d1568875d67482f1bc3a151dabcaa85454f4/src/hub_2dsqlat_rt_mcmc.cpp#L25).
+For faster runs, try reducing n_meas by a factor of 10 (i.e., set [n_meas = 5000000](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/9b82d1568875d67482f1bc3a151dabcaa85454f4/src/hub_2dsqlat_rt_mcmc.cpp#L23)) and/or calculate only static susceptibilities by leaving [n_nu_meas = 1](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/9b82d1568875d67482f1bc3a151dabcaa85454f4/src/hub_2dsqlat_rt_mcmc.cpp#L25).
 
 Finally, use [plot.py](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/9b82d1568875d67482f1bc3a151dabcaa85454f4/plot.py) for postprocessing:
 * To generate plots for all run subdirectories,
