@@ -25,7 +25,7 @@ or install Boost in its entirety,
    ```sh
     sudo apt-get install libboost-all-dev
    ```
-### 3. (Optional) Open MPI (or equivalent)
+### 3. (Optional) Open MPI or equivalent
 Open MPI is packaged with most Linux distros nowadays; you can check that it is installed via, e.g., the following:
    ```sh
     sudo apt-get install openmpi-bin openmpi-common libopenmpi-dev
