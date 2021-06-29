@@ -52,7 +52,7 @@ For detailed installation instructions, see [here](https://triqs.github.io/tprf/
    ```sh
    cd diagmc-hubbard-2dsqlat && ./make.sh
    ```
-For serial usage, remove the ```D_MPI``` preprocessor macro from the [Makefile](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/e00ea5a7d17f2076fe5889a23ca7152f3c5846d3/build/Makefile#L2).
+For serial usage, remove the [`D_MPI`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/e00ea5a7d17f2076fe5889a23ca7152f3c5846d3/build/Makefile#L2) preprocessor macro from the Makefile.
 
 <!-- USAGE -->
 ## Usage
