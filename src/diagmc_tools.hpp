@@ -258,8 +258,6 @@ class interp_1d {
   mesh_1d f_mesh;
   // Constructor
   interp_1d(const mesh_1d &f_mesh_) : f_mesh(f_mesh_) {}
-  // TODO: Figure out what this did...why was a new error thrown by cmake?
-  //       Is the new cpp2py wrapper to blame?
   // An explicit default constructor
   interp_1d() : f_mesh({}, {}) {}
   // Use bilinear interpolation to evaluate the interpoland at any point
@@ -993,15 +991,11 @@ std::vector<int> lat_diff(hc_lat_st_coord v1, hc_lat_st_coord v2) {
 }
 
 
-// TODO: refactor this to avoid unnecessary calculation 
-//       of time difference and std tie/ignore!
-//
 // Calculate the spatial distance |r1 - r2| using the appropriate lattice metric,
 // in units of the lattice constant (rescale by v1.lat_const for absolute distance)
 double lat_dist(hc_lat_st_coord v1, hc_lat_st_coord v2) {
   // First, get the spacetime difference vector (v1 - v2) in the first orthant
   const std::vector<int> &del_nr = lat_diff(v1, v2);
-  // std::tie(del_nr, std::ignore) = (v1 - v2);
   // Now, calculate the distance, sqrt(r12 * r12)
   double del_r_mag = 0;
   for (const int &del_nr_i : del_nr) {
