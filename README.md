@@ -7,7 +7,7 @@ Low-order diagrammatic Monte-Carlo (DiagMC) for the Hubbard model on the 2D squa
 
 ### 1. HDF5 >= 1.12
 
-Earlier versions of HDF5 (e.g. 1.10) may work as well, but are untested. The code was tested against HDF5 1.12 built from scratch (following the documentation [here](https://portal.hdfgroup.org/display/support/HDF5+1.12.0)). Alternatively, one could try installing prebuilt binaries, e.g.:
+Earlier versions of HDF5 (e.g. 1.10) may work as well, but are untested. The code was tested against HDF5 1.12 built from scratch (following the documentation [here](https://portal.hdfgroup.org/display/support/HDF5+1.12.0)). Alternatively, one could try installing prebuilt binaries, e.g.,
    ```sh
     sudo apt-get install libhdf5-serial-dev
    ```
