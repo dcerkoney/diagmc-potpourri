@@ -25,7 +25,14 @@ or install Boost in its entirety,
    ```sh
     sudo apt-get install libboost-all-dev
    ```
-### 3. (Optional) [TRIQS TPRF](https://triqs.github.io/tprf/latest/index.html#)
+### 3. (Optional) Open MPI (or equivalent)
+Open MPI is packaged with most Linux distros nowadays; you can check that it is installed via, e.g., the following:
+   ```sh
+    sudo apt-get install openmpi-bin openmpi-common libopenmpi-dev
+   ```
+To link `h5c++` against an alternative MPI compiler (e.g., Intel or MPICH2), you will need to modify the [CXX](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/e00ea5a7d17f2076fe5889a23ca7152f3c5846d3/build/Makefile#L9) and [linker](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/e00ea5a7d17f2076fe5889a23ca7152f3c5846d3/build/Makefile#L10) flags in the Makefile accordingly.
+
+### 4. (Optional) [TRIQS TPRF](https://triqs.github.io/tprf/latest/index.html#)
 
 The TRIQS TPRF package is optionally used for benchmarking purposes in the post-processing script 'plot.py' (if [plot_rpa = True](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/f6be749f6154e362187f15f14b11eaa1ded88616/plot.py#L569)). It may be installed (along with [TRIQS](https://triqs.github.io/triqs/latest/) itself) via
    ```sh
@@ -45,6 +52,7 @@ For detailed installation instructions, see [here](https://triqs.github.io/tprf/
    ```sh
    cd diagmc-hubbard-2dsqlat && ./make.sh
    ```
+For serial usage, remove the ```D_MPI``` preprocessor macro from the [Makefile](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/e00ea5a7d17f2076fe5889a23ca7152f3c5846d3/build/Makefile#L2).
 
 <!-- USAGE -->
 ## Usage
