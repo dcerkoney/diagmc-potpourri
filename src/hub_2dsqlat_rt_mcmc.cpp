@@ -148,7 +148,7 @@ bool params_consistent(std::string filename, bool main_thread) {
 }
 
 // Loads the bare (Hartree) lattice Green's function data from HDF5
-f_interp_mtx_2d load_g0_h5(std::string filename, bool debug = false) {
+lattice_2d_f_interp load_g0_h5(std::string filename, bool debug = false) {
   // Use test input parameters
   using namespace test_input;
 
@@ -233,8 +233,8 @@ f_interp_mtx_2d load_g0_h5(std::string filename, bool debug = false) {
   shape_attr.read(shape_type, shape.data());
 
   // G_0(r, tau) mesh is (d + 1)-dimensional
-  const int dim = shape.size() - 1;
-  const int n_site_irred = static_cast<int>(std::floor(n_site_pd / 2) + 1);
+  int dim = shape.size() - 1;
+  int n_site_irred = static_cast<int>(std::floor(n_site_pd / 2) + 1);
   assert(shape == std::vector<long>({n_site_irred, n_site_irred, n_tau}));
 
   if (debug) {
@@ -249,19 +249,18 @@ f_interp_mtx_2d load_g0_h5(std::string filename, bool debug = false) {
   // Build G_0 interpolant matrix //
   //////////////////////////////////
 
-  // Reshape lattice G_0 data into a 2D matrix of linear 1D interpolants
-  f_interp_mtx_2d lat_g0_r_tau;
+  // Build a vector of linear 1D interpolants from flattened lattice G_0 data
+  std::vector<f_interp_1d> lat_g0_vec_interp;
   for (int i = 0; i < n_site_irred; ++i) {
-    std::vector<f_interp_1d> g0_row;
     for (int j = 0; j < n_site_irred; ++j) {
-      std::vector<double> rowdata;
+      std::vector<double> g0_tau_data;
       for (int k = 0; k < n_tau; ++k) {
-        rowdata.push_back(lat_g0_vec[k + n_tau * (j + n_site_irred * i)]);
+        g0_tau_data.push_back(lat_g0_vec[k + n_tau * (j + n_site_irred * i)]);
       }
-      g0_row.push_back(f_interp_1d(mesh_1d(rowdata, tau_mesh), beta));
+      lat_g0_vec_interp.push_back(f_interp_1d(fmesh_1d(g0_tau_data, tau_mesh), beta));
     }
-    lat_g0_r_tau.push_back(g0_row);
   }
+  lattice_2d_f_interp lat_g0_r_tau(n_site_irred, n_site_irred, lat_g0_vec_interp);
   return lat_g0_r_tau;
 }
 
@@ -515,7 +514,7 @@ int main(int argc, char* argv[]) {
     try {
       // Find and load Green's function data consistent with the current test parameters;
       // we look recursively for any h5 files in the "propagators" parent directory.
-      f_interp_mtx_2d lat_g0_r_tau;
+      lattice_2d_f_interp lat_g0_r_tau;
       std::string propr_dirname = "propagators";
       for (const auto& rdir_entry : std::filesystem::recursive_directory_iterator(propr_dirname)) {
         // If this is a subdirectory, continue iterating
@@ -543,7 +542,7 @@ int main(int argc, char* argv[]) {
           break;
         }
       }
-      if (lat_g0_r_tau.empty()) {
+      if (lat_g0_r_tau.data.empty()) {
         throw std::logic_error("No applicable Green's function data found!");
       }
 
