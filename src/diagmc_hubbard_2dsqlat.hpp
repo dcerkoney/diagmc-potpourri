@@ -2,7 +2,6 @@
 #include "diagmc_includes.hpp"
 #include "diagmc_tools.hpp"
 
-
 // Configuration object for real-space MCMC for the Hubbard model on the 2d
 // square lattice; it is assumed the measurement is a scalar, or a one-particle
 // correlation function that is a function of an external Matsubara 4-vector.
@@ -30,8 +29,8 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
   int idx_ss_curr = 0;
   int idx_ss_prop = 0;
   int max_order;  // Maximum diagram order in the run
-  int n_ext;  // Number of externally-constrained vertices (includies internal
-              // vertices tethered to external ones)
+  int n_ext;      // Number of externally-constrained vertices (includies internal
+                  // vertices tethered to external ones)
   int diag_type;
   int n_subspaces;
   // The proposal probability ratio is P(nu | nu') / P(nu' | nu), where
@@ -77,7 +76,8 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
                              const std::string &diag_typestring_, const diagram_pools_el &ss_diags_,
                              const std::vector<int> &subspaces_,
                              const hc_lat_mf_coords &mf_meas_coords_, const meas_t &meas_sums_,
-                             const bool verbose_ = false, const bool debug_ = false, const std::time_t & timestamp_ = 0)
+                             const bool verbose_ = false, const bool debug_ = false,
+                             const std::time_t &timestamp_ = 0)
       // Parent constructor
       : params(params_),
         lat_g0_r_tau(lat_g0_r_tau_),
@@ -86,7 +86,7 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
         ss_diags(ss_diags_),
         subspaces(subspaces_),
         mf_meas_coords(mf_meas_coords_),
-        meas_sums(meas_sums_) ,
+        meas_sums(meas_sums_),
         verbose(verbose_),
         debug(debug_),
         timestamp(timestamp_) {
@@ -156,7 +156,7 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
     // Also save constrained mates for quick access and diagram-type generality;
     // the constrained mate vertices are: v_mate = argwhere(constraints == v_modif).
     // Analagous to the constraint vector, a -1 represents a mate vertex itself.
-    mates.assign(constraints.size(), -1); 
+    mates.assign(constraints.size(), -1);
     for (size_t i = 0; i < constraints.size(); i++) {
       std::vector<int>::iterator it = std::find(constraints.begin(), constraints.end(), i);
       // Record the mate of each unconstrained vertex we find
@@ -166,7 +166,7 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
     }
     // Vector holding indices (ID#s) of all modifiable (unconstrained, non-COM)
     // spacetime coordinates, for use with mutate updates
-    std::vector<int>::iterator it = constraints.begin() + 1; // +1 to ignore COM coord
+    std::vector<int>::iterator it = constraints.begin() + 1;  // +1 to ignore COM coord
     while ((it = std::find(it, constraints.end(), -1)) != constraints.end()) {
       modifiables.push_back(std::distance(constraints.begin(), it));
       ++it;
@@ -204,12 +204,10 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
       }
       // Calculate the normalization constant for the MCMC integration
       if (ss_n_saved[0] == 0) {
-        std::cout
-            << "Warning: the normalization subspace was unvisited; keeping "
-               "default normalization constant (1) for debugging purposes!"
-            << std::endl;
-      }
-      else {
+        std::cout << "Warning: the normalization subspace was unvisited; keeping "
+                     "default normalization constant (1) for debugging purposes!"
+                  << std::endl;
+      } else {
         norm_const = d0_weight / static_cast<double>(ss_n_saved[0]);
       }
       // Get the reweighted (normalized) mean values in all measurement subspaces
@@ -274,7 +272,6 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
     if (!name.empty()) {
       add_attribute_h5<std::string>(name, "integrator_name", h5file);
     }
-    
 
     // Build an HDF5 compound datatype for complex numbers out of complex_t structs
     typedef struct complex_t {
@@ -323,8 +320,7 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
     std::string full_fpath = filename + ".log";
     if (filename.empty()) {
       buffer = std::cout.rdbuf();
-    }
-    else {
+    } else {
       if (!job_id.empty()) {
         full_fpath = job_id + "/" + filename + "_" + job_id + ".log";
       }
@@ -469,9 +465,7 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
   // Instantiates the Markov chain at some user-supplied phase space coordinate,
   // and determines the associated initial configuration weight. Also seeds the
   // random number generator(s) to be used in the Metropolis step and updates.
-  constexpr void setup(const int idx_ss_init, 
-                       const hc_lat_st_coords &initial_coords) {
-
+  constexpr void setup(const int idx_ss_init, const hc_lat_st_coords &initial_coords) {
     // If the initial subspace is the trivial one, call the appropriate setup
     // method
     if (idx_ss_init == 0) {
@@ -514,7 +508,9 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
     for (int i = v_start; i < v_stop; ++i) {
       // Seed spacetime variables for new unconstrained vertices
       if (constraints[i] == -1) {
-        if (debug) { std::cout << "Seeding vertex v_" << i << "..." << std::endl; }
+        if (debug) {
+          std::cout << "Seeding vertex v_" << i << "..." << std::endl;
+        }
         v_seed_id = i;
         v_seed_itime = params.beta * std_uniform(rand_gen);
         for (int j = 0; j < params.dim; ++j) {
@@ -611,9 +607,8 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
           this_lat_posn -= params.n_site_pd;
         }
         if (debug && !(((this_lat_posn - lat_offset) >= 0) &&
-              ((this_lat_posn - lat_offset) < params.n_site_pd))) {
-          std::cout << "Current lattice position: "
-                    << (this_lat_posn - lat_offset) << std::endl;
+                       ((this_lat_posn - lat_offset) < params.n_site_pd))) {
+          std::cout << "Current lattice position: " << (this_lat_posn - lat_offset) << std::endl;
           throw std::out_of_range("Bad lattice position (not in [0, N))!");
         }
         proposal_ratio *= boost::math::pdf(lat_binomial_dist, this_lat_posn - lat_offset);
@@ -680,7 +675,7 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
       // Now, update the selected vertex's position allowing for
       // local position shifts up to 3 nn away (improves ergodicity)
       int posn_offset = static_cast<int>(std::floor((posn_shift_gen.max() + 1) / 2));
-      int posn_shift = posn_shift_gen(rand_gen) - posn_offset; 
+      int posn_shift = posn_shift_gen(rand_gen) - posn_offset;
       if (debug) {
         std::cout << "Trying position shift = " << posn_shift << std::endl;
       }
@@ -745,7 +740,7 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
         const hc_lat_mf_coord &v_out_mf_j = mf_meas_coords[j];
         // The FT factor is: e^{-i (p * r - nu * tau)}
         p_dot_r = 0.0;
-        nu_tau = v_out_mf_j.freq * v_out_rt.itime;
+        nu_tau = v_out_mf_j.imfreq * v_out_rt.itime;
         // for (std::size_t k = 0; k < params.dim; ++k) {
         //   p_dot_r += v_out_mf_j.mom[k] * v_out_rt.posn[k];
         // }
@@ -864,8 +859,7 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
           ++n_mutate;
         }
       }
-    } 
-    else if (debug) {
+    } else if (debug) {
       std::cout << "Move rejected (p_accept = " << acceptance_ratio << ")" << std::endl;
     }
     // After the warm-up period, perform a measurement every n_skip steps

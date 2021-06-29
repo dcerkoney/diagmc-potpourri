@@ -33,18 +33,15 @@ Binom_gen lat_binomial;
 Binom_dist lat_binomial_dist;
 Arcsin_dist arcsin_dist(0.0, 1.0);
 
-
 class not_implemeted_error : public virtual std::logic_error {
  public:
   using std::logic_error::logic_error;
 };
 
-
 // Arcsine distribution for imaginary time generation
 double arcsin_gen(Rand_engine rand_gen) {
   return boost::math::quantile(arcsin_dist, std_uniform(rand_gen));
 }
-
 
 // Computes (a modulo b) for integral or floating types
 // following the standard mathematical (Pythonic) convention
@@ -59,7 +56,6 @@ constexpr T pymod(const T &a, const T &b) {
   }
 }
 
-
 // Type-safe signum function template; see:
 // https://stackoverflow.com/questions/1903954/is-there-a-standard-sign-function-signum-sgn-in-c-c
 // NOTE: returns a double for valid multiplication with complex numbers (for
@@ -68,7 +64,6 @@ template <typename T>
 constexpr double sgn(T val) {
   return (T(0) < val) - (val < T(0));
 }
-
 
 // Computes nCk without unnecessary factorial computations; see:
 // https://stackoverflow.com/questions/9330915/number-of-combinations-n-choose-r-in-c
@@ -93,20 +88,17 @@ constexpr T n_choose_k(int n, int k) {
   return result;
 }
 
-
 // Returns the radius of a d-dimensional ball as a function of its volume and dimension
 constexpr double rad_d_ball(double vol, int dim) {
   return std::pow(vol * std::tgamma(1.0 + (dim / 2.0)), 1.0 / static_cast<double>(dim)) /
          std::sqrt(M_PI);
 }
 
-
 // Emulates np.allclose from python, applied to singleton arrays (two floating point numbers);
 // see: https://numpy.org/doc/stable/reference/generated/numpy.allclose.html
 constexpr bool are_close(double a, double b, double rtol = 1e-5, double atol = 1e-8) {
   return std::fabs(a - b) <= (atol + rtol * std::fabs(b));
 }
-
 
 // | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | ...
 // i_first_bos = {2, if poln; 0, o/w}
@@ -141,7 +133,6 @@ constexpr bool is_pinned(int i_constr, int i_vert, int n_legs, int i_first_bos, 
   }
 }
 
-
 // Perform some simple checks on H5 data/pred types (to avoid unexpected casting)
 template <typename Tstd, typename Th5 = H5::PredType>
 void check_h5type(std::string name, H5::DataType datatype, Th5 predtype) {
@@ -153,7 +144,6 @@ void check_h5type(std::string name, H5::DataType datatype, Th5 predtype) {
   }
   return;
 }
-
 
 // Load an attribute from an HDF5 location and return data of corresponding predtype
 // NOTE: may throw an exception, which should be caught!
@@ -192,7 +182,6 @@ Tattr load_attribute_h5(std::string attr_name, Tloc h5loc) {
   return attr_buffer;
 }
 
-
 // Add a parameter to an HDF5 location as an attribute
 // NOTE: may throw an exception, which should be caught!
 template <typename Tattr, typename Tloc = H5::Group>
@@ -223,7 +212,6 @@ void add_attribute_h5(Tattr param, std::string param_name, Tloc h5loc) {
   return;
 }
 
-
 // 1D mesh class (contains the 1D grid and function data)
 struct mesh_1d {
   // Fields
@@ -234,7 +222,6 @@ struct mesh_1d {
       : data(data_), x_grid(x_grid_) {}
 };
 
-
 // 2D mesh class (contains the function data
 // on the mesh, and the grids for each variable)
 struct mesh_2d {
@@ -243,12 +230,10 @@ struct mesh_2d {
   std::vector<double> x_grid;
   std::vector<double> y_grid;
   // Constructor
-  mesh_2d(const std::vector<std::vector<double>> &data_,
-          const std::vector<double> &x_grid_,
+  mesh_2d(const std::vector<std::vector<double>> &data_, const std::vector<double> &x_grid_,
           const std::vector<double> &y_grid_)
       : data(data_), x_grid(x_grid_), y_grid(y_grid_) {}
 };
-
 
 // 1D interpolant class (used, e.g. to define
 // continuous-time objects from tau grid data)
@@ -313,7 +298,6 @@ class interp_1d {
     return (f_1 * (x_2 - x) + f_2 * (x - x_1)) / (x_2 - x_1);
   }
 };
-
 
 // For a fermionic Green's function interpolant (antiperiodic), the period is beta
 class f_interp_1d : public interp_1d {
@@ -380,7 +364,6 @@ class f_interp_1d : public interp_1d {
 typedef std::vector<std::vector<f_interp_1d>> f_interp_mtx_2d;
 typedef std::vector<std::vector<std::vector<f_interp_1d>>> f_interp_mtx_3d;
 
-
 // For a bosonic Green's function interpolant (periodic), the period is beta
 class b_interp_1d : public interp_1d {
  public:
@@ -436,9 +419,8 @@ class b_interp_1d : public interp_1d {
 typedef std::vector<std::vector<b_interp_1d>> b_interp_mtx_2d;
 typedef std::vector<std::vector<std::vector<b_interp_1d>>> b_interp_mtx_3d;
 
-
-// 2D interpolant class (used, e.g. to define continuous-spacetime objects from
-// r-tau grid data)
+// 2D interpolant class (used, e.g., to define
+// spatially continuous objects from r-grid data)
 class interp_2d {
  public:
   // Fields
@@ -446,14 +428,11 @@ class interp_2d {
   // Constructor
   interp_2d(const mesh_2d &f_mesh_) : f_mesh(f_mesh_) {}
   // Use bilinear interpolation to evaluate the interpoland at any point
-  double eval(const std::vector<double> &point) const {
-    return bilinear_interp(f_mesh, point);
-  }
+  double eval(const std::vector<double> &point) const { return bilinear_interp(f_mesh, point); }
   // Evaluates the antiperiodic extension of the interp_2d object in
   // a single periodic variable using information on the principle interval.
   // The periodic variable in the evaluation point is specified by ap_idx.
-  double ap_eval(const std::vector<double> &point, double period,
-                 int ap_idx = 1) const {
+  double ap_eval(const std::vector<double> &point, double period, int ap_idx = 1) const {
     int sign = 1;
     std::vector<double> point_shifted = point;
     while (point_shifted[ap_idx] < 0) {
@@ -469,8 +448,7 @@ class interp_2d {
 
  private:
   // Bilinear interpolation function
-  double bilinear_interp(const mesh_2d &f_mesh,
-                         const std::vector<double> &point) const {
+  double bilinear_interp(const mesh_2d &f_mesh, const std::vector<double> &point) const {
     // Define the x and y values at which to evaluate the function
     double x = point[0], y = point[1];
     // If the values are outside the range of the x and y grids,
@@ -525,13 +503,11 @@ class interp_2d {
   }
 };
 
-
-// Defines the (split bosonic/fermionic) edge list representation of a set of graphs; since 
+// Defines the (split bosonic/fermionic) edge list representation of a set of graphs; since
 // (wlog) the bosonic edges are assumed equal for all graphs, we only define the list once
 typedef std::array<int, 2> edge_t;
 typedef std::vector<edge_t> edge_list;
 typedef std::vector<edge_list> edge_lists;
-
 
 // A pool of graphs in the edge list representation
 // (assumed to share a common bosonic edge basis)
@@ -544,7 +520,6 @@ struct graphs_el {
   graphs_el(const edge_list &b_edge_list_, const edge_lists &f_edge_lists_)
       : b_edge_list(b_edge_list_), f_edge_lists(f_edge_lists_) {}
 };
-
 
 // A pool of 3-point vertices each consisting of one boson
 // and two fermion edges (directed in/out of the base vertex)
@@ -643,6 +618,7 @@ struct diagram_pool_el {
         n_spins_max(*max_element(std::begin(n_loops_), std::end(n_loops_))) {}
 };
 typedef std::vector<diagram_pool_el> diagram_pools_el;
+
 // An explicit default constructor (a 0-dimensional diagram pool)
 diagram_pool_el::diagram_pool_el()
     : s_ferm(0.5),
@@ -659,7 +635,6 @@ diagram_pool_el::diagram_pool_el()
       symm_factors({1}),
       n_loops({0}),
       loops({}) {}
-
 
 // MCMC parameter class for the extended Hubbard model on a lattice
 struct mcmc_lattice_params {
@@ -720,7 +695,6 @@ struct mcmc_lattice_params {
   }
 };
 
-
 // MCMC parameter class for the lattice homogeneous electron gas (LHEG) model
 struct mcmc_lheg_params : public mcmc_lattice_params {
   // Fields
@@ -747,7 +721,6 @@ struct mcmc_lheg_params : public mcmc_lattice_params {
     return;
   }
 };
-
 
 // MCMC parameter class for the (extended) Hubbard model on a lattice
 struct mcmc_lat_ext_hub_params : public mcmc_lattice_params {
@@ -791,6 +764,7 @@ struct mcmc_lat_ext_hub_params : public mcmc_lattice_params {
   template <typename Tloc = H5::Group>
   void save_to_h5(Tloc h5loc) const {
     mcmc_lattice_params::save_to_h5<Tloc>(h5loc);
+    add_attribute_h5<int>(max_posn_shift, "max_posn_shift", h5loc);
     add_attribute_h5<double, Tloc>(mu_tilde, "mu_tilde", h5loc);
     add_attribute_h5<double, Tloc>(U_loc, "U_loc", h5loc);
     add_attribute_h5<double, Tloc>(V_nn, "V_nn", h5loc);
@@ -804,10 +778,9 @@ struct mcmc_lat_ext_hub_params : public mcmc_lattice_params {
   }
 };
 
-
 // Class representing a space - (imaginary) time coordinate
 class st_coord {
-public:
+ public:
   // Fields
   int id;
   double itime;
@@ -821,10 +794,10 @@ public:
     std::vector<double> st_dist;
     // Spatial distance
     std::vector<double> del_posn;
-    std::transform(posn.begin(), posn.end(), start.posn.begin(),
-                   std::back_inserter(del_posn), std::minus<double>());
-    st_dist[0] = std::sqrt(std::inner_product(del_posn.begin(), del_posn.end(),
-                                              del_posn.begin(), 0));
+    std::transform(posn.begin(), posn.end(), start.posn.begin(), std::back_inserter(del_posn),
+                   std::minus<double>());
+    st_dist[0] =
+        std::sqrt(std::inner_product(del_posn.begin(), del_posn.end(), del_posn.begin(), 0));
     // Temporal distance, modulo beta
     st_dist[1] = itime - start.itime;
     return st_dist;
@@ -832,25 +805,30 @@ public:
 };
 typedef std::vector<st_coord> st_coords;
 
-
 // Returns the position index vector n'_r equivalent to n_r in the first orthant
 // of the lattice (relative to the center), so that sqrt(n'_r * n'_r) defines
 // the proper distance
-const std::vector<int> first_orthant(const std::vector<int> &nr,
-                                     int n_site_pd) {
+const std::vector<int> first_orthant(const std::vector<int> &nr, int n_site_pd) {
   std::vector<int> nr_first_orthant = nr;
   for (std::size_t i = 0; i < nr.size(); ++i) {
-    nr_first_orthant[i] =
-        std::min(std::abs(nr[i]), n_site_pd - std::abs(nr[i]));
+    nr_first_orthant[i] = std::min(std::abs(nr[i]), n_site_pd - std::abs(nr[i]));
   }
   return nr_first_orthant;
 }
 
+// Overload for a call directly on a lattice space-time coordinate (returns a copy)
+hc_lat_st_coord first_orthant(const hc_lat_st_coord &coord) {
+  hc_lat_st_coord coord_shifted = coord;
+  for (std::size_t i = 0; i < coord.posn.size(); ++i) {
+    coord_shifted.posn[i] =
+        std::min(std::abs(coord.posn[i]), coord.n_site_pd - std::abs(coord.posn[i]));
+  }
+  return coord_shifted;
+}
 
 // Returns the momentum index vector n'_k equivalent to n_k in
 // the first Brillouin zone of the reciprocal lattice
-const std::vector<int> first_brillouin_zone(const std::vector<int> &nk,
-                                            int n_site_pd) {
+const std::vector<int> first_brillouin_zone(const std::vector<int> &nk, int n_site_pd) {
   std::vector<int> nk_1BZ = nk;
   // Move each component back into the 1BZ;
   // k_i \in [-\pi / a, \pi / a) => nk_i \in [floor(-N / 2), floor(N / 2) - 1)
@@ -867,12 +845,11 @@ const std::vector<int> first_brillouin_zone(const std::vector<int> &nk,
   return nk_1BZ;
 }
 
-
 // Class representing a hypercubic lattice space - (imaginary) time coordinate;
 // position vectors are given in units of the lattice constant, i.e., they index
 // the lattice, and the d-toroidal lattice metric is used for spatial distances
 class hc_lat_st_coord {
-public:
+ public:
   // Fields
   bool debug;
   int id;
@@ -901,17 +878,16 @@ public:
         beta(beta_),
         delta_tau(delta_tau_),
         lat_const(lat_const_),
-        debug(debug_) ,
+        debug(debug_),
         dim(posn_.size()) {}
-  // Overload - operator for calculation of lattice spacetime differences (v_end
-  // - v_start)
+  // Overload - operator for calculation of lattice spacetime differences (v_end - v_start)
   std::tuple<std::vector<int>, double> operator-(const hc_lat_st_coord &v_start) const {
     // Spatial distance in units of the lattice constant (nvec = rvec / a)
     std::vector<int> del_nr;
     // First fill del_nr with (v_end - v_start), then apply the lattice metric
     // component-wise
-    std::transform(posn.begin(), posn.end(), v_start.posn.begin(),
-                   std::back_inserter(del_nr), std::minus<int>());
+    std::transform(posn.begin(), posn.end(), v_start.posn.begin(), std::back_inserter(del_nr),
+                   std::minus<int>());
     double del_tau;
     // Enforce normal ordering if this is a density-type loop
     if (id == v_start.id) {
@@ -958,8 +934,10 @@ public:
   }
 };
 typedef std::vector<hc_lat_st_coord> hc_lat_st_coords;
+
 // Custom default constructor definition (so that we can resize a vector of coordinates)
 hc_lat_st_coord::hc_lat_st_coord() : id(0), itime(0), lat_const(0.0) {}
+
 // COM constructor definition (coordinates at the origin and user-supplied
 // lattice parameters)
 hc_lat_st_coord::hc_lat_st_coord(int dim_, int n_site_pd_, double beta_, double delta_tau_,
@@ -977,19 +955,17 @@ std::tuple<std::vector<int>, double> test_lat_st_diff(hc_lat_st_coord v1, hc_lat
   return v1 - v2;
 }
 
-
 // Calculate the lattice spacetime difference v1.posn - v2.posn (modulo lattice BC)
 std::vector<int> lat_diff(hc_lat_st_coord v1, hc_lat_st_coord v2) {
   // Spatial distance in units of the lattice constant (nvec = rvec / a)
   std::vector<int> del_nr;
   // First, fill del_nr with (posn_2 - posn_1)
-  std::transform(v2.posn.begin(), v2.posn.end(), v1.posn.begin(),
-                 std::back_inserter(del_nr), std::minus<int>());
+  std::transform(v2.posn.begin(), v2.posn.end(), v1.posn.begin(), std::back_inserter(del_nr),
+                 std::minus<int>());
   // Now return the vector for (posn_final - posn_init), after
   // enforcing the appropriate lattice boundary conditions
   return first_orthant(del_nr, v1.n_site_pd);
 }
-
 
 // Calculate the spatial distance |r1 - r2| using the appropriate lattice metric,
 // in units of the lattice constant (rescale by v1.lat_const for absolute distance)
@@ -1004,87 +980,80 @@ double lat_dist(hc_lat_st_coord v1, hc_lat_st_coord v2) {
   return std::sqrt(del_r_mag);
 }
 
-
 // Checks whether two sites are nearest neighbors
 bool nearest_neighbors(hc_lat_st_coord v1, hc_lat_st_coord v2) {
   // First, get the spacetime difference vector (v1 - v2) in the first orthant
   const std::vector<int> &del_nr = lat_diff(v1, v2);
   // If (del_nr * del_nr) is one, the two sites are nearest neighbors
-  return (std::inner_product(del_nr.begin(), del_nr.end(), del_nr.begin(), 0) == 1);
+  return are_close(std::inner_product(del_nr.begin(), del_nr.end(), del_nr.begin(), 0), 1.0);
 }
-
-
-// Overload for a call directly on a lattice
-// space-time coordinate (returns a copy)
-hc_lat_st_coord first_orthant(const hc_lat_st_coord &coord) {
-  hc_lat_st_coord coord_shifted = coord;
-  for (std::size_t i = 0; i < coord.posn.size(); ++i) {
-    coord_shifted.posn[i] = std::min(std::abs(coord.posn[i]),
-                                     coord.n_site_pd - std::abs(coord.posn[i]));
-  }
-  return coord_shifted;
-}
-
 
 // Class representing a hypercubic lattice Matsubara 4-vector;
 // momentum 3-vectors are given in units of the reciprocal
 // lattice spacing, i.e., they index the 1BZ.
 class hc_lat_mf_coord {
-public:
+ public:
   // Fields
   int id;
-  double freq; // The imaginary part of the Matsubara frequency (i freq)
+  double imfreq;  // The imaginary part of the Matsubara frequency (i imfreq)
   std::vector<int> mom;
   // Lattice variables
   int n_site_pd;
   double lat_const;
   // Constructor
-  hc_lat_mf_coord(int id_, double freq_, std::vector<int> mom_, int n_site_pd_,
+  hc_lat_mf_coord(int id_, double imfreq_, std::vector<int> mom_, int n_site_pd_,
                   double lat_const_ = 1.0)
-      : id(id_), freq(freq_), mom(mom_), n_site_pd(n_site_pd_),
-        lat_const(lat_const_) {}
+      : id(id_), imfreq(imfreq_), mom(mom_), n_site_pd(n_site_pd_), lat_const(lat_const_) {}
   // Default constructor
-  hc_lat_mf_coord() : id(0), freq(0), lat_const(1.0) {}
+  hc_lat_mf_coord() : id(0), imfreq(0), lat_const(1.0) {}
   // Overload - operator for calculation of lattice Matsubara 4-vector
   // differences (v_end - v_start)
-  std::tuple<std::vector<int>, double>
-  operator-(const hc_lat_mf_coord &v_start) const {
+  std::tuple<std::vector<int>, double> operator-(const hc_lat_mf_coord &v_start) const {
     // Spatial distance in units of the lattice constant (nvec = rvec / a)
     std::vector<int> del_nk;
     // First fill del_nk with (v_end - v_start), then apply the reciprocal
     // lattice metric component-wise
-    std::transform(mom.begin(), mom.end(), v_start.mom.begin(),
-                   std::back_inserter(del_nk), std::minus<int>());
+    std::transform(mom.begin(), mom.end(), v_start.mom.begin(), std::back_inserter(del_nk),
+                   std::minus<int>());
     // Now we can return a tuple (r_end - r_start, ifreq_end - ifreq_start)
-    return std::make_tuple(first_brillouin_zone(del_nk, n_site_pd),
-                           freq - v_start.freq);
+    return std::make_tuple(first_brillouin_zone(del_nk, n_site_pd), imfreq - v_start.imfreq);
   }
-  void print() const {
-    std::cout << "\nLattice momentum-time coordinate:" << std::endl;
-    std::cout << "-----------------------------" << std::endl;
-    std::cout << "ID#: " << id << std::endl;
-    std::cout << "Momentum indices: (";
+  void print(std::streambuf *buffer = std::cout.rdbuf(), bool toprule = true,
+             bool botrule = true) const {
+    std::ostream out(buffer);
+    if (toprule) {
+      out << "\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
+             "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
+             "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
+             "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
+          << std::endl;
+    }
+    out << " Lattice momentum-time coordinate (ID #" << id << ")" << std::endl;
+    out << " \u2022 Momentum indices: (";
     for (int i = 0; i < mom.size(); ++i) {
       if (i == mom.size() - 1) {
-        std::cout << mom[i] << ")" << std::endl;
+        out << mom[i] << ")" << std::endl;
       } else {
-        std::cout << mom[i] << ", ";
+        out << mom[i] << ", ";
       }
     }
-    std::cout << "Matsubara frequency Im(inu): " << freq << "\n" << std::endl;
+    out << " \u2022 Matsubara frequency Im(inu): " << imfreq << std::endl;
+    if (botrule) {
+      out << "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
+             "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
+             "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
+             "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
+          << std::endl;
+    }
   }
 };
 typedef std::vector<hc_lat_mf_coord> hc_lat_mf_coords;
 
-
-std::tuple<std::vector<int>, double> test_lat_mf_diff(hc_lat_mf_coord v1,
-                                                      hc_lat_mf_coord v2) {
+std::tuple<std::vector<int>, double> test_lat_mf_diff(hc_lat_mf_coord v1, hc_lat_mf_coord v2) {
   return v1 - v2;
 }
 
-
-// Calculate the lattice momentum-frequency 'distance' dist(v1, v2) \equiv
-// (k_12, ik_12)
+// Calculate the lattice momentum-frequency 'distance' dist(v1, v2) \equiv (k_12, ik_12)
 std::tuple<double, double> lat_mf_dist(hc_lat_mf_coord v1, hc_lat_mf_coord v2) {
   // First, get the momentum-time difference (v1 - v2)
   std::vector<int> del_nk;
@@ -1100,8 +1069,7 @@ std::tuple<double, double> lat_mf_dist(hc_lat_mf_coord v1, hc_lat_mf_coord v2) {
   return std::make_tuple(del_k_mag, del_freq);
 }
 
-
-// Overload for a call directly on a lattice momentum-time coordinate 
+// Overload for a call directly on a lattice momentum-time coordinate
 // (returns a copy)
 hc_lat_mf_coord first_brillouin_zone(const hc_lat_mf_coord &coord) {
   hc_lat_mf_coord coord_shifted = coord;
@@ -1120,12 +1088,13 @@ hc_lat_mf_coord first_brillouin_zone(const hc_lat_mf_coord &coord) {
   return coord_shifted;
 }
 
+namespace develop {
 
 // Class representing a hypercubic lattice space - (imaginary) time coordinate;
 // position vectors are given in units of the lattice constant, i.e., they index
 // the lattice, and the d-toroidal lattice metric is used for spatial distances
 class fcc_lat_st_coord {
-public:
+ public:
   // Fields
   int id;
   double itime;
@@ -1137,31 +1106,27 @@ public:
   double two_pi_a = 2.0 * M_PI / lat_const;
   // Contains the list of normalized direct lattice basis vectors
   // (in units of the lattice constant)
-  std::vector<std::vector<double>> r_basis = {{+0.5, +0.5, +0.0},
-                                              {+0.5, +0.0, +0.5},
-                                              {+0.0, +0.5, +0.5}};
+  std::vector<std::vector<double>> r_basis = {
+      {+0.5, +0.5, +0.0}, {+0.5, +0.0, +0.5}, {+0.0, +0.5, +0.5}};
   // Contains the list of reciprocal lattice basis vectors
   // (in units of (2 pi / a))
-  std::vector<std::vector<double>> k_basis = {{+0.5, +0.5, -0.5},
-                                              {+0.5, -0.5, +0.5},
-                                              {-0.5, +0.5, +0.5}};
+  std::vector<std::vector<double>> k_basis = {
+      {+0.5, +0.5, -0.5}, {+0.5, -0.5, +0.5}, {-0.5, +0.5, +0.5}};
   // Use a custom default constructor
   fcc_lat_st_coord();
   // Constructor
-  fcc_lat_st_coord(int id_, double itime_, std::vector<int> posn_,
-                   int n_site_pd_, double lat_const_ = 1.0)
-      : id(id_), itime(itime_), posn(posn_), n_site_pd(n_site_pd_),
-        lat_const(lat_const_) {}
+  fcc_lat_st_coord(int id_, double itime_, std::vector<int> posn_, int n_site_pd_,
+                   double lat_const_ = 1.0)
+      : id(id_), itime(itime_), posn(posn_), n_site_pd(n_site_pd_), lat_const(lat_const_) {}
   // Overload - operator for calculation of lattice spacetime differences (v_end
   // - v_start)
-  std::tuple<std::vector<int>, double>
-  operator-(const fcc_lat_st_coord &v_start) const {
+  std::tuple<std::vector<int>, double> operator-(const fcc_lat_st_coord &v_start) const {
     // Spatial distance in units of the lattice constant (nvec = rvec / a)
     std::vector<int> del_nr;
     // First fill del_nr with (v_end - v_start),
     // then apply the lattice metric component-wise
-    std::transform(posn.begin(), posn.end(), v_start.posn.begin(),
-                   std::back_inserter(del_nr), std::minus<int>());
+    std::transform(posn.begin(), posn.end(), v_start.posn.begin(), std::back_inserter(del_nr),
+                   std::minus<int>());
     // Now we can return a tuple (r_end - r_start, tau_end - tau_start)
     return std::make_tuple(lat_bc(del_nr), itime - v_start.itime);
   }
@@ -1177,18 +1142,14 @@ public:
 };
 typedef std::vector<fcc_lat_st_coord> fcc_lat_st_coords;
 
-
 // Custom default constructor (so that we can resize a vector of coordinates)
 fcc_lat_st_coord::fcc_lat_st_coord() : id(0), itime(0), n_site_pd(0), lat_const(0) {}
 
-
-std::tuple<std::vector<int>, double> test_lat_st_diff(fcc_lat_st_coord v1,
-                                                      fcc_lat_st_coord v2) {
+std::tuple<std::vector<int>, double> test_lat_st_diff(fcc_lat_st_coord v1, fcc_lat_st_coord v2) {
   return v1 - v2;
 }
 
-
-// TODO: refactor this to avoid unnecessary calculation 
+// TODO: refactor this to avoid unnecessary calculation
 //       of time difference and std tie/ignore!
 //
 // Calculate the spatial distance |r1 - r2| using the appropriate
@@ -1212,15 +1173,14 @@ double lat_dist(fcc_lat_st_coord v1, fcc_lat_st_coord v2) {
   return del_r_mag;
 }
 
+}  // namespace develop
 
 namespace deprecated {
-
 
 // Defines the permutation group representation of a graph, consisting
 // of one fermionic (psi) and one bosonic (phi) connection row vector
 typedef std::vector<std::vector<int>> graph_pg;
 typedef std::vector<graph_pg> graphs_pg;
-
 
 // Diagram pool class (set of graphs at fixed order, associated
 // diagram info and current/proposal spacetime coordinates)
@@ -1296,6 +1256,5 @@ diagram_pool_pg::diagram_pool_pg()
       n_loops(),
       loops(),
       neighbors() {}
-
 
 }  // namespace deprecated

@@ -18,7 +18,7 @@ if version.parse(matplotlib.__version__) < version.parse("3.4"):
     # Ignore findfont warnings (buggy for matplotlib<3.4)
     import logging
     logging.getLogger('matplotlib.font_manager').disabled = True
-    
+
 # Local script imports
 from lattice_tools import fill_band
 
@@ -30,8 +30,10 @@ def complex_h5view(dataset):
 
 def load_params_h5(run_subdir, job_name, logfile):
     ### Extra parameters ###
-    order = 3           # Order n in perturbation theory, measurement space V_n
-    n_intn = order - 1  # Number of interaction lines in all V_n graphs (order in U)
+    # Order n in perturbation theory, measurement space V_n
+    order = 3
+    # Number of interaction lines in all V_n graphs (order in U)
+    n_intn = order - 1
     save_name = 'chi_ch_hub_2dsqlat'
 
     # Prefix for saved files
@@ -76,7 +78,8 @@ def get_triqs_stat_chi_ch_RPA(params, path_k_coords):
         orbital_names=['up', 'down'],
     )
 
-    e_k = H.on_mesh_brillouin_zone(n_k=(params['n_site_pd'], params['n_site_pd'], 1))
+    e_k = H.on_mesh_brillouin_zone(
+        n_k=(params['n_site_pd'], params['n_site_pd'], 1))
 
     G = np.array([0.0, 0.0, 0.0]) * 2.*np.pi
     X = np.array([0.5, 0.0, 0.0]) * 2.*np.pi
@@ -230,17 +233,20 @@ def plot_chi_n_ch(params, run_subdir, job_name, logfile):
     # If we missed the Fermi surface along the M-\Gamma path
     # due to coarse-graining, set the locations manually
     if (len(i_path_kf_locs) == 1):
-        i_path_kf_locs = [params['n_k_meas'] / 3.0, params['n_k_meas'] * 5 / 6.0]
+        i_path_kf_locs = [params['n_k_meas'] /
+                          3.0, params['n_k_meas'] * 5 / 6.0]
 
     # The missing k-point is the duplicate \Gamma point
     assert n_k_plot == params['n_k_meas'] + 1
     assert len(chi_n_ch_means) == params['n_k_meas'] * n_nu_meas
 
     # Reshape the calculated susceptibility data into
-    chi_n_ch_calc_means = chi_n_ch_means.reshape((n_nu_meas, params['n_k_meas']))
+    chi_n_ch_calc_means = chi_n_ch_means.reshape(
+        (n_nu_meas, params['n_k_meas']))
     chi_n_ch_calc_errs = None
     if n_threads > 1:
-        chi_n_ch_calc_errs = chi_n_ch_errs.reshape((n_nu_meas, params['n_k_meas']))
+        chi_n_ch_calc_errs = chi_n_ch_errs.reshape(
+            (n_nu_meas, params['n_k_meas']))
 
     ##########################################################################
     # Plot the charge susceptibility for the first few Matsubara frequencies #
@@ -248,7 +254,8 @@ def plot_chi_n_ch(params, run_subdir, job_name, logfile):
 
     print('\nPlotting charge susceptibility corrections...', end='', flush=True)
 
-    colorlist = ['orchid', 'cornflowerblue', 'turquoise', 'chartreuse', 'greenyellow']
+    colorlist = ['orchid', 'cornflowerblue',
+                 'turquoise', 'chartreuse', 'greenyellow']
 
     # Plot the static susceptibility if n_nu_meas = 1
     if n_nu_meas == 1:
@@ -445,17 +452,20 @@ def plot_static_chi_ch_together(params, run_subdir, job_name, logfile, plot_rpa=
     # due to coarse-graining, set the locations manually
     if len(i_path_kf_locs) == 1:
         # print(i_path_kf_locs)
-        i_path_kf_locs = [params['n_k_meas'] / 3.0, params['n_k_meas'] * 5 / 6.0]
+        i_path_kf_locs = [params['n_k_meas'] /
+                          3.0, params['n_k_meas'] * 5 / 6.0]
 
     # The missing k-point is the duplicate \Gamma point
     assert n_k_plot == params['n_k_meas'] + 1
     assert len(chi_n_ch_means) == params['n_k_meas'] * n_nu_meas
 
     # Reshape the calculated susceptibility data into a 2D array
-    chi_n_ch_calc_means = chi_n_ch_means.reshape((n_nu_meas, params['n_k_meas']))
+    chi_n_ch_calc_means = chi_n_ch_means.reshape(
+        (n_nu_meas, params['n_k_meas']))
     chi_n_ch_calc_errs = None
     if n_threads > 1:
-        chi_n_ch_calc_errs = chi_n_ch_errs.reshape((n_nu_meas, params['n_k_meas']))
+        chi_n_ch_calc_errs = chi_n_ch_errs.reshape(
+            (n_nu_meas, params['n_k_meas']))
 
     # Get the exact noninteracting static susceptibility along the k-path
     chi_0_ch_exact = np.zeros((n_nu_meas, params['n_k_meas']))
@@ -476,7 +486,8 @@ def plot_static_chi_ch_together(params, run_subdir, job_name, logfile, plot_rpa=
     if plot_rpa:
         # Surpress TRIQS stdout/stderr
         with open(os.devnull, "w") as f, contextlib.redirect_stdout(f), contextlib.redirect_stderr(f):
-            triqs_chi_0_ch_RPA = get_triqs_stat_chi_ch_RPA(params, path_k_coords)
+            triqs_chi_0_ch_RPA = get_triqs_stat_chi_ch_RPA(
+                params, path_k_coords)
 
     print('Plotting static charge susceptibility...', end='', flush=True)
 
@@ -496,7 +507,7 @@ def plot_static_chi_ch_together(params, run_subdir, job_name, logfile, plot_rpa=
 
     ax.plot(i_path, chi_n_ch_tot_means[0, :][i_path % params['n_k_meas']], 'o-',
             markersize=2.5, color=colorlist[1], label=rf"$n={params['n_intn']}$")
-    
+
     if plot_rpa:
         ax.plot(i_path, triqs_chi_0_ch_RPA[i_path % params['n_k_meas']], 'o-',
                 markersize=2.5, color=colorlist[2], label='RPA')
@@ -573,7 +584,7 @@ def main():
         "text.usetex": True,
         "font.family": "serif",
         "font.serif": ["Computer Modern Roman"],
-    })    
+    })
 
     # Parse command line argument(s)
     if len(sys.argv[1:]) == 0:
@@ -588,7 +599,8 @@ def main():
         run_subdirs = [os.path.dirname(lf) for lf in logfiles]
         for i in range(len(logfiles)):
             # Get parameters
-            print(f"\nGenerating plots for run subdirectory '{run_subdirs[i]}':\n")
+            print(
+                f"\nGenerating plots for run subdirectory '{run_subdirs[i]}':\n")
             # Ignore this subdir if there is no complete run data in it
             if len(glob.glob(f'{run_subdirs[i]}/*run*.h5')) == 0:
                 print('\nNo run data found in this working directory, skipping it!\n')
@@ -646,7 +658,8 @@ def main():
             filename = os.path.splitext(logfile)[0]
             job_id = int(filename.rsplit('run_')[-1])
             job_name = f'run_{job_id}'
-            print(f"Manually selected the following run subdirectory:\n'{run_subdir}'")
+            print(
+                f"Manually selected the following run subdirectory:\n'{run_subdir}'")
             print(f"\nUsing logfile:\n'{logfile}'")
             # Get parameters
             params = load_params_h5(run_subdir, job_name, logfile)

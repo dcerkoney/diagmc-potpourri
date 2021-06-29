@@ -4,11 +4,9 @@
 #include <mpi.h>
 #endif
 
-
 // Defines the measurement type: a Matsubara (4-momentum) correlation function
 //                               for the Hubbard model on a 2D square lattice
 using meas_t = mcmc_cfg_2d_sq_hub_mf_meas::meas_t;
-
 
 // Hard-coded parameters for a test calculation
 namespace test_input {
@@ -20,7 +18,7 @@ bool normalize = true;    // Should the integration results be normalized?
 bool save_serial = true;  // Should the thread results be individually saved?
 bool batch_U = false;     // Should we perform a batch calculation for multiple U values?
 int n_warm = 100000;      // Number of steps in the burn-in / warmup phase
-int n_meas = 50000000;     // Total number of steps in the measurement phase (including skips)
+int n_meas = 50000000;    // Total number of steps in the measurement phase (including skips)
 int n_skip = 1;           // Number of steps to skip in ancy points to measure at
 int n_nu_meas = 1;        // Number of external frequency points to measure at
 int max_posn_shift = 3;   // Variable maximum step size in local position component shifts
@@ -74,7 +72,6 @@ double mu_tilde;  // The HF renormalized, aka reduced chemical potential,
 double mu;        // Physical chemical potential corresponding to mu_tilde
 
 }  // namespace test_input
-
 
 // Check if the params used for G_0 data match the current test parameters
 bool params_consistent(std::string filename, bool main_thread) {
@@ -150,12 +147,11 @@ bool params_consistent(std::string filename, bool main_thread) {
   return true;
 }
 
-
 // Loads the bare (Hartree) lattice Green's function data from HDF5
 f_interp_mtx_2d load_g0_h5(std::string filename, bool debug = false) {
   // Use test input parameters
   using namespace test_input;
-  
+
   int ibuffer;
   double dbuffer;
 
@@ -269,7 +265,6 @@ f_interp_mtx_2d load_g0_h5(std::string filename, bool debug = false) {
   return lat_g0_r_tau;
 }
 
-
 #ifdef _MPI
 // Aggregate MPI results, compute the standard error over threads, and save the results to HDF5
 void aggregate_and_save(int mpi_size, int mpi_rank, int mpi_main,
@@ -280,7 +275,7 @@ void aggregate_and_save(int mpi_size, int mpi_rank, int mpi_main,
 
   bool main_thread = (mpi_rank == mpi_main);
 
-  const mcmc_lat_ext_hub_params & params = integrator.params;
+  const mcmc_lat_ext_hub_params& params = integrator.params;
   bool normalized = integrator.normalized;
   meas_t thread_data;
   if (normalized) {
@@ -320,8 +315,8 @@ void aggregate_and_save(int mpi_size, int mpi_rank, int mpi_main,
     if (main_thread) {
       MPI_Reduce(MPI_IN_PLACE, thread_data[i].data(), thread_data[i].size(), MPI_DOUBLE_COMPLEX,
                  MPI_SUM, mpi_main, MPI_COMM_WORLD);
-      MPI_Reduce(MPI_IN_PLACE, thread_normsqdata[i].data(), thread_normsqdata[i].size(),
-                 MPI_DOUBLE, MPI_SUM, mpi_main, MPI_COMM_WORLD);
+      MPI_Reduce(MPI_IN_PLACE, thread_normsqdata[i].data(), thread_normsqdata[i].size(), MPI_DOUBLE,
+                 MPI_SUM, mpi_main, MPI_COMM_WORLD);
     } else {
       MPI_Reduce(thread_data[i].data(), thread_data[i].data(), thread_data[i].size(),
                  MPI_DOUBLE_COMPLEX, MPI_SUM, mpi_main, MPI_COMM_WORLD);
@@ -337,11 +332,12 @@ void aggregate_and_save(int mpi_size, int mpi_rank, int mpi_main,
         ss_meas_data.push_back(thread_data[i][j] / static_cast<double>(mpi_size));
         if (subspaces[i] != 0) {
           // Naive sample variance is s^2_N = <(x - <x>)^2> = <x^2> - <x>^2
-          double naive_sample_variance =
-              (thread_normsqdata[i][j] / static_cast<double>(mpi_size)) - std::norm(ss_meas_data[j]);
+          double naive_sample_variance = (thread_normsqdata[i][j] / static_cast<double>(mpi_size)) -
+                                         std::norm(ss_meas_data[j]);
           // Unbiased (Bessel-corrected) sample variance is s^2_{N-1} = s^2_N * (N / (N - 1)),
           // giving a standard error estimate s_{N-1} = s_N * sqrt(N / (N - 1))
-          ss_meas_err.push_back(std::sqrt(naive_sample_variance * mpi_size / static_cast<double>(mpi_size - 1)));
+          ss_meas_err.push_back(
+              std::sqrt(naive_sample_variance * mpi_size / static_cast<double>(mpi_size - 1)));
         }
       }
       meas_data.push_back(ss_meas_data);
@@ -383,7 +379,6 @@ void aggregate_and_save(int mpi_size, int mpi_rank, int mpi_main,
     // Save MCMC parameters as HDF5 attributes
     params.save_to_h5<H5::H5File>(h5file);
     add_attribute_h5<bool>(normalized, "normalized", h5file);
-    add_attribute_h5<int>(max_posn_shift, "max_posn_shift", h5file);
     add_attribute_h5<int>(integrator.n_ascend, "n_ascend", h5file);
     add_attribute_h5<int>(integrator.n_descend, "n_descend", h5file);
     add_attribute_h5<int>(integrator.n_mutate, "n_mutate", h5file);
@@ -456,7 +451,6 @@ void aggregate_and_save(int mpi_size, int mpi_rank, int mpi_main,
   }
 }
 #endif
-
 
 int main(int argc, char* argv[]) {
   // Use test input parameters
@@ -637,7 +631,7 @@ int main(int argc, char* argv[]) {
           coord.print();
         }
       }
-      
+
       // Initialize the MCMC observables {Tr[sgn(D_0)], Tr[sgn(D_n) exp(-iq * r + iq_m * tau)]}
       meas_t meas_sums = {{0}, std::vector<std::complex<double>>(n_meas_coords, 0)};
       assert(meas_sums.size() == subspaces.size());

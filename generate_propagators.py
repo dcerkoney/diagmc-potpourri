@@ -68,13 +68,13 @@ def main():
                       help="Number of sites per direction.")
     parser.add_option("--lat_const", type="float",    default=1.0,
                       help="Lattice constant, in Bohr radii (for working at fixed "
-                              +"'N' and 'a'; we will calculate 'V' on-the-fly).")
+                      + "'N' and 'a'; we will calculate 'V' on-the-fly).")
     parser.add_option("--lat_length", type="float",    default=None,
                       help="Lattice length, in Bohr radii (for working at "
-                              +"fixed V; we will calculate 'a' on-the-fly).")
+                      + "fixed V; we will calculate 'a' on-the-fly).")
     parser.add_option("--n_tau",  type="int",   default=2**9,
                       help="Number of tau points in the nonuniform mesh "
-                              "used for downsampling (an even number).")
+                      + "used for downsampling (an even number).")
     parser.add_option("--n_nu",  type="int",   default=2**9,
                       help="Number of bosonic frequency points (an even number).")
     parser.add_option("--save_dir",   type="string", default="propagators",
@@ -131,7 +131,7 @@ def main():
     # Make sure there is no roundoff error in the nearest-neighbor distance calculations
     test_distance_roundoff(n_site_pd=optdict['n_site_pd'], lat_const=lat_const)
 
-     # Convert to Hartrees from energy units of t
+    # Convert to Hartrees from energy units of t
     U_loc = optdict['U_loc'] / optdict['t_hop']
     beta = optdict['beta'] * optdict['t_hop']
     n_site_pd = optdict['n_site_pd']
@@ -143,13 +143,13 @@ def main():
 
     # Determine the density and reduced chemical potential
     lat_dens_getter = LatticeDensity(dim=dim,
-                                 beta=beta, 
-                                 t_hop=optdict['t_hop'], 
-                                 n_site_pd=n_site_pd, 
-                                 lat_const=lat_const, 
-                                 target_mu=optdict['target_mu0'], 
-                                 target_rho=optdict['target_n0'],
-                                 sigma=sigma_hartree)
+                                     beta=beta,
+                                     t_hop=optdict['t_hop'],
+                                     n_site_pd=n_site_pd,
+                                     lat_const=lat_const,
+                                     target_mu=optdict['target_mu0'],
+                                     target_rho=optdict['target_n0'],
+                                     sigma=sigma_hartree)
     mu = lat_dens_getter.mu
     n0 = lat_dens_getter.rho
     num_elec = lat_dens_getter.num_elec
@@ -157,7 +157,8 @@ def main():
     # (Hartree) reduced chemical potential with which we parametrize G_H
     mu_tilde = mu - sigma_hartree(_, n0)
 
-    print('N_e: ', num_elec, '\nn_H: ', n0, '\nmu_H: ', mu, '\nmu_tilde_H: ', mu_tilde)
+    print('N_e: ', num_elec, '\nn_H: ', n0,
+          '\nmu_H: ', mu, '\nmu_tilde_H: ', mu_tilde)
 
     # Volume of a 'dim'-dimensional ball
     def rad_d_ball(vol): return (vol * gamma(1.0 + dim / 2.0)
@@ -252,7 +253,7 @@ def main():
     tau_powlist_right = (1.0 - tau_powlist_left[::-1])
     # tau_powlist = beta * \
     tau_list = beta * np.concatenate(
-            ([0.0, delta_tau], tau_powlist_left[1:-1], [0.5], tau_powlist_right[1:-1], [1.0 - delta_tau, 1.0]))
+        ([0.0, delta_tau], tau_powlist_left[1:-1], [0.5], tau_powlist_right[1:-1], [1.0 - delta_tau, 1.0]))
 
     if optdict['save']:
         log_savename = safe_filename(
@@ -368,13 +369,13 @@ def main():
         h5file.attrs['t_hop'] = optdict['t_hop']
         h5file.attrs['U_loc'] = optdict['U_loc']
         h5file.attrs['n_tau'] = optdict['n_tau']
-        
+
         g0_r_tau_irred_mesh = g0_r_tau_ifft_mesh[r_red_slice]
         g0_irred_1d = g0_r_tau_irred_mesh.flatten(order='C')
 
         dataset_g0 = h5file.create_dataset('lat_g0_rt_data', data=g0_irred_1d)
         dataset_g0.attrs['shape'] = g0_r_tau_ifft_mesh[r_red_slice].shape
-        
+
         # Save tau on [0, beta)
         assert(len(tau_list[:-1]) == optdict['n_tau'])
         dataset_tau = h5file.create_dataset('tau_mesh', data=tau_list[:-1])
@@ -481,7 +482,8 @@ def main():
             # Add some evenly-spaced minor ticks to the axis
             n_minor_ticks = 9
             # assert (len(i_path)) % 9 == 0
-            minor_ticks = np.arange(0, len(i_path), len(i_path) / n_minor_ticks)
+            minor_ticks = np.arange(
+                0, len(i_path), len(i_path) / n_minor_ticks)
             # print(minor_ticks)
             ax.set_xticks(minor_ticks, minor=True)
             # Label the high-symmetry points
@@ -535,13 +537,16 @@ def main():
         pi0_q4_irred_mesh = pi0_q4_dense[k_red_slice]
         pi0_irred_1d = pi0_q4_irred_mesh.flatten(order='C')
 
-        dataset_pi0 = h5file.create_dataset('lat_pi0_q4_data', data=pi0_irred_1d)
+        dataset_pi0 = h5file.create_dataset(
+            'lat_pi0_q4_data', data=pi0_irred_1d)
         dataset_pi0.attrs['shape'] = pi0_q4_dense[k_red_slice].shape
 
-        dataset_tau = h5file.create_dataset('tau_unif_mesh', data=tau_dense_unif[:-1])
+        dataset_tau = h5file.create_dataset(
+            'tau_unif_mesh', data=tau_dense_unif[:-1])
         # dataset_tau.attrs['n_tau_unif'] = n_tau_unif
 
-        dataset_nu = h5file.create_dataset('nu_unif_mesh', data=list(range(optdict['n_nu'])))
+        dataset_nu = h5file.create_dataset(
+            'nu_unif_mesh', data=list(range(optdict['n_nu'])))
         # dataset_nu.attrs['n_nu'] = optdict['n_nu']
 
         # Write to disk

@@ -252,7 +252,8 @@ def get_all_k_sigma_states(dim, n_site_pd, lat_const, k_scale, t_hop, shift=Fals
     indices = unshifted_indices
     if shift:
         shift = n_site_pd // 2
-        indices = np.concatenate((unshifted_indices[shift:], unshifted_indices[:shift]))
+        indices = np.concatenate(
+            (unshifted_indices[shift:], unshifted_indices[:shift]))
     # print(indices)
     # Get the list of distances and coordinates
     if dim == 2:
@@ -335,6 +336,7 @@ def ext_hub_scHF_num_elec_from_mu0(dim, mu0, n_site_pd, lat_const, z_coord,
         qp_rescale=qp_rescale,
         meshgrid=True,
     )
+
     def mu0_implicit(num_elec):
         # Solve the implicit equation in terms of the Extended
         # Hubbard Hartree-reduced chemical potential, which is
@@ -357,7 +359,8 @@ def lat_mu_tilde_from_num_elec(dim, num_elec, n_site_pd, lat_const, z_coord,
     n0 = num_elec / vol_lat
     # Solve the implicit equation in N_e in terms of the Hartree-reduced
     # chemical potential, mu_tilde := mu - ((U / 2) + z V) n
-    mu_tilde = lat_mu0_from_num_elec(dim, num_elec, n_site_pd, lat_const, t_hop, beta, qp_rescale)
+    mu_tilde = lat_mu0_from_num_elec(
+        dim, num_elec, n_site_pd, lat_const, t_hop, beta, qp_rescale)
     # Recover mu = mu_tilde + ((U / 2) + z V) n
     mu = mu_tilde + ((U_loc / 2.0) + (z_coord * V_nn)) * n0
     return mu, mu_tilde
@@ -378,6 +381,7 @@ def lat_mu0_from_num_elec(dim, num_elec, n_site_pd, lat_const, t_hop, beta, qp_r
         qp_rescale=qp_rescale,
         meshgrid=True,
     )
+
     def num_elec_implicit(mu0):
         ferm_meshgrid = ferm(beta*(epsilon_k_meshgrid - mu0))
         num_elec_trial = int(round(2 * np.sum(ferm_meshgrid)))
@@ -576,7 +580,7 @@ def g0_k4(k4, mu, lat_const, t_hop, qp_rescale=1.0, meshgrid=False):
 
 
 def g0_k_tau(k, tau, beta, dim, mu, lat_const, t_hop, qp_rescale=1.0):
-    # NOTE: Zero-tau limits other than the choice ztl = 1, which enforces a continuous 
+    # NOTE: Zero-tau limits other than the choice ztl = 1, which enforces a continuous
     #       principle interval (\tau \in [0 = 0^{+}, \beta = \beta^{-}]) were deprecated
     '''Get G_0(k, tau) on the lattice for various deduced batch shapes of k and tau.'''
     def g0_kvec_tau(kvec, tau, beta, mu, lat_const, t_hop, qp_rescale=1.0, batch=False, zero_tau_limit=1):
@@ -664,6 +668,7 @@ def g0_k_tau(k, tau, beta, dim, mu, lat_const, t_hop, qp_rescale=1.0):
             if zero_tau_limit == -1:
                 result[idx_zt] *= -np.exp(-2*x[idx_zt])
             return result
+
     def g0_kvec_meshgrid_tau(k_meshgrid, tau, beta, mu, lat_const, t_hop, qp_rescale=1.0, zero_tau_limit=1):
         '''Meshgrid imaginary time electron Green's function; the zero_tau_limit parameter 
            controls the discontinuity at \tau = 0; the value -1 corresponds to normal-ordering
@@ -764,14 +769,15 @@ def get_lat_g0_r_tau(lat_const, n_site_pd, t_hop, taulist, dim, beta,
     # Shift endpoints (tau = 0, beta) to delta and beta - delta, if present
     taulist_cont = np.copy(taulist)
     taulist_cont[taulist_cont == 0] = min(beta * delta_tau, taulist_cont[1])
-    taulist_cont[taulist_cont == beta] = max(beta * (1 - delta_tau), taulist_cont[-2])
+    taulist_cont[taulist_cont == beta] = max(
+        beta * (1 - delta_tau), taulist_cont[-2])
     # First, get G_0(k, \tau) for each 3D k vector and tau point
     mesh_shape = dim * [len(ki_GX_list)] + [len(taulist)]
     g0_k_tau_mesh = np.zeros(mesh_shape)
     for itau in range(len(taulist)):
         g0_k_tau_mesh[..., itau] = g0_k_tau(
             k=k_meshgrid,
-            # The small shift when \tau = \beta ensures that we 
+            # The small shift when \tau = \beta ensures that we
             # numerically define [0, \beta] := [0^{+}, \beta^{-}]
             # tau=taulist[itau] - beta * delta_tau * (taulist[itau] == beta),
             tau=taulist_cont[itau],
@@ -802,7 +808,7 @@ def get_lat_g0_r_tau(lat_const, n_site_pd, t_hop, taulist, dim, beta,
     g0_r_tau_interp = interpolate.RegularGridInterpolator(
         r_tau_mesh, g0_ifft_red_mesh, bounds_error=False, fill_value=0.0)
 
-    # Build an (N x ... x N) (d times) matrix of imaginary-time 
+    # Build an (N x ... x N) (d times) matrix of imaginary-time
     # interpolants (interpolation in r is unnecessary on the lattice)
     g0_r_tau_interp_mtx = np.empty(dim * (n_site_pd,), dtype=object)
     for idx_ri in np.ndindex(dim * (n_site_pd,)):
@@ -1006,9 +1012,10 @@ def get_lat_g0_k_tau_from_g0_r_tau(g0_r_tau_ifft_mesh, lat_const, num_elec, n_si
     k_meshgrid = np.asarray(np.meshgrid(*ki_meshes))
     # Do the FFT (the factor of a^3 assures that this is a proper inverse of the IFFT)
     g0_k_tau_fft_mesh = np.real(np.fft.fftn(g0_r_tau_ifft_mesh,
-                                      axes=np.arange(dim))) * lat_const**dim
+                                            axes=np.arange(dim))) * lat_const**dim
     # Interpolate in r_i's and tau
-    ki_bz_for_fftshift = kscale * np.arange(- n_site_pd // 2, n_site_pd // 2, dtype=int)
+    ki_bz_for_fftshift = kscale * \
+        np.arange(- n_site_pd // 2, n_site_pd // 2, dtype=int)
     k_tau_mesh_sign_ordered = dim * (ki_bz_for_fftshift,) + (taulist,)
     g0_k_tau_interp = interpolate.RegularGridInterpolator(
         k_tau_mesh_sign_ordered, np.fft.fftshift(g0_k_tau_fft_mesh, axes=np.arange(dim)), bounds_error=False, fill_value=0.0)
@@ -1016,7 +1023,8 @@ def get_lat_g0_k_tau_from_g0_r_tau(g0_r_tau_ifft_mesh, lat_const, num_elec, n_si
     # Shift endpoints to delta and beta - delta, if present
     taulist_cont = np.copy(taulist)
     taulist_cont[taulist_cont == 0] = min(beta * delta_tau, taulist_cont[1])
-    taulist_cont[taulist_cont == beta] = max(beta * (1 - delta_tau), taulist_cont[-2])
+    taulist_cont[taulist_cont == beta] = max(
+        beta * (1 - delta_tau), taulist_cont[-2])
 
     # Compare to exact G_0(k, \tau) (should be equal up to a small floating-point error)
     for itau in range(len(taulist)):
@@ -1062,7 +1070,8 @@ def get_lat_g0_k_tau_from_g0_r_tau(g0_r_tau_ifft_mesh, lat_const, num_elec, n_si
         # Build the full ordered high-symmetry path
         path_nk_coords = np.concatenate(
             (nk_coords_Gamma_X, nk_coords_X_M, nk_coords_M_Gamma))
-        path_nk_coords_shifted = path_nk_coords - n_site_pd * (path_nk_coords == N_edge)
+        path_nk_coords_shifted = path_nk_coords - \
+            n_site_pd * (path_nk_coords == N_edge)
         path_k_coords = kscale * path_nk_coords
         path_k_coords_shifted = kscale * path_nk_coords_shifted
 
@@ -1077,7 +1086,7 @@ def get_lat_g0_k_tau_from_g0_r_tau(g0_r_tau_ifft_mesh, lat_const, num_elec, n_si
         i_path_kf_locs = np.asarray(i_path_kf_locs)
 
         # Lists for plots
-        small_kx_list = ki_bz[len(ki_bz) / 2:: len(ki_bz) / 10]        
+        small_kx_list = ki_bz[len(ki_bz) / 2:: len(ki_bz) / 10]
         little_taulist = np.linspace(taulist.min(), taulist.max(), num=5)
         big_taulist = np.linspace(taulist.min(), taulist.max(), num=1001)
         big_klist = path_k_coords
@@ -1144,7 +1153,7 @@ def get_lat_g0_k_tau_from_g0_r_tau(g0_r_tau_ifft_mesh, lat_const, num_elec, n_si
 
 
 def get_pi0_q4_path_from_g0_r_tau_quad(g0_r_tau_ifft_red_mesh, path_q_coords, inu_list,
-                                       tau_list, beta, delta_tau, dim, n_site_pd, lat_const, 
+                                       tau_list, beta, delta_tau, dim, n_site_pd, lat_const,
                                        verbose=False):
     '''Calculates the electron-hole ('polarization') bubble $\Pi_0(q, i\nu)$ numerically
        exactly via Gaussian quadrature, given $G_0(r, \tau)$ on the lattice. Also returns a
@@ -1171,7 +1180,8 @@ def get_pi0_q4_path_from_g0_r_tau_quad(g0_r_tau_ifft_red_mesh, path_q_coords, in
                 this_nr_coord = (this_r_coord / lat_const).astype(int)
                 this_del_nr = difference_n_torus(
                     n1=this_nr_coord, n2=np.zeros(dim, dtype=int), N=n_site_pd)
-                g0_tau_p_this_r_coord = g0_r_tau_ifft_red_mesh[this_del_nr[0], this_del_nr[1]]
+                g0_tau_p_this_r_coord = g0_r_tau_ifft_red_mesh[this_del_nr[0],
+                                                               this_del_nr[1]]
                 g0_tau_m_this_r_coord = g0_r_tau_ifft_red_mesh[this_del_nr[0],
                                                                this_del_nr[1]][::-1]
                 # Now multiply by the FT factor; if \tau = \beta is present in the list,
@@ -1180,7 +1190,7 @@ def get_pi0_q4_path_from_g0_r_tau_quad(g0_r_tau_ifft_red_mesh, path_q_coords, in
                 f_tau += -g0_tau_p_this_r_coord * g0_tau_m_this_r_coord * \
                     np.cos(np.dot(this_q_coord, this_r_coord)) * \
                     np.cos(this_nu * tau_list)
-                    # np.cos(this_nu * tau_list_cont)
+                # np.cos(this_nu * tau_list_cont)
             f_tau_interp = interpolate.interp1d(
                 tau_list, f_tau, kind='cubic', bounds_error=None, fill_value=0.0)
             # mean, err = quad(lambda tau: f_tau_interp(tau), 0.0, beta - delta_tau,
@@ -1230,8 +1240,10 @@ def get_pi0_q4_from_g0_r_tau_fft(g0_r_tau, n_nu, dim, beta, delta_tau, n_site_pd
         tau_unif_mesh = beta * np.arange(n_nu + 1) / float(n_nu)
 
         tau_unif_cont = np.copy(tau_unif_mesh)
-        tau_unif_cont[tau_unif_cont == 0] = min(beta * delta_tau, tau_unif_cont[1])
-        tau_unif_cont[tau_unif_cont == beta] = max(beta * (1 - delta_tau), tau_unif_cont[-2])
+        tau_unif_cont[tau_unif_cont == 0] = min(
+            beta * delta_tau, tau_unif_cont[1])
+        tau_unif_cont[tau_unif_cont == beta] = max(
+            beta * (1 - delta_tau), tau_unif_cont[-2])
 
         # Get G_0 on the uniform mesh via linear interpolation (lossy upsampling)
         g0_r_tau_fft = np.empty(dim * (n_site_pd,) + (n_nu + 1,))
@@ -1243,13 +1255,13 @@ def get_pi0_q4_from_g0_r_tau_fft(g0_r_tau, n_nu, dim, beta, delta_tau, n_site_pd
             assert np.unique(
                 np.sign(g0_r_tau_fft[idx_ri_tj][g0_r_tau_fft[idx_ri_tj] != 0])).size < 2
 
-    # If G_0(r, \tau) is a (dim + 1) array of mesh data, we can work with it 
+    # If G_0(r, \tau) is a (dim + 1) array of mesh data, we can work with it
     # directly; it is assumed that the spacing in \tau is uniform in this case
     # TODO: Find a nice way to check it without adding tau_list input if possible!
     else:
         g0_r_tau_fft = g0_r_tau
 
-    # Make sure that the employed tau mesh is odd, 
+    # Make sure that the employed tau mesh is odd,
     # i.e., symmetric about \tau = \beta / 2
     assert g0_r_tau_fft.shape[-1] % 2 == 1
 
@@ -1282,7 +1294,6 @@ def get_pi0_q4_from_g0_r_tau_fft(g0_r_tau, n_nu, dim, beta, delta_tau, n_site_pd
     # from the list for purposes of the IFFT to Matsubara frequency
     pi0_q4 = beta * fftpack.ifft(pi0_q_tau[..., :-1], axis=-1).real
     assert pi0_q4.shape == dim * (n_site_pd,) + (n_nu,)
-    
     return pi0_q4, pi0_q_tau
 
 
@@ -1319,14 +1330,15 @@ def get_lat_wstar_q(pi0_q_inu, lat_const, n_site_pd, n_nu, dim, beta):
     for idx_qi in iter_idx_q:
         # V(q) = 4\pi / |q|^2
         vstar_q[idx_qi] = 4 * np.pi / kscale**2 / np.dot(idx_qi, idx_qi)
-        # Reduced interaction for FFT: \widetilde{W}_0(q, i\nu) / V(q) 
+        # Reduced interaction for FFT: \widetilde{W}_0(q, i\nu) / V(q)
         # = V(q) \Pi_0(q, i\nu) / (1 - V(q) \Pi_0(q, i\nu))
         wtilde_over_v_star_q_inu = vstar_q[idx_qi] * \
             pi0_q_inu[idx_qi] / (1.0 - vstar_q[idx_qi] * pi0_q_inu[idx_qi])
         # \widetilde{W}_0(q, i\nu) = V(q)^2 \Pi_0(q, i\nu) / (1 - V(q) \Pi_0(q, i\nu))
         wstar_tilde_q_inu[idx_qi] = wtilde_over_v_star_q_inu * vstar_q[idx_qi]
         # Get the values via FFT for \tau < \beta
-        wstar_tilde_q_tau[idx_qi][:-1] = np.real(2 * fftpack.fft(wtilde_over_v_star_q_inu) - wtilde_over_v_star_q_inu[0]) / beta
+        wstar_tilde_q_tau[idx_qi][:-1] = np.real(2 * fftpack.fft(
+            wtilde_over_v_star_q_inu) - wtilde_over_v_star_q_inu[0]) / beta
 
     # wstar_tilde_q_tau[..., :-1] = np.real(
     #     2 * fftpack.fft(wstar_tilde_q_inu, axis=-1) - wstar_tilde_q_inu[..., 0, np.newaxis]) / beta
@@ -1366,7 +1378,7 @@ def get_lat_wstar_r(vstar_q, wstar_tilde_q4, wstar_tilde_q_tau, lat_const, dim):
 
     wstar_tilde_r_tau = np.real(np.fft.ifftn(
         wstar_tilde_q_tau, axes=np.arange(dim))) / lat_const**dim
-    
+
     print('Verifying bosonic symmetry in Wstar(r, tau)...', end='')
     assert np.all(wstar_tilde_r_tau[..., :] == wstar_tilde_r_tau[..., ::-1])
     print('OK')
