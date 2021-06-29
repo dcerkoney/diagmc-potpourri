@@ -5,7 +5,7 @@ Low-order diagrammatic Monte-Carlo (DiagMC) for the Hubbard model on the 2D squa
 
 ## Dependencies
 
-1. HDF5 >= 1.12
+### 1. HDF5 >= 1.12
 
 Earlier versions of HDF5 (e.g. 1.10) may work as well, but are untested. The code was tested against HDF5 1.12 built from scratch (following the documentation [here](https://portal.hdfgroup.org/display/support/HDF5+1.12.0)). 
 
@@ -17,7 +17,7 @@ To use the pre- and post-processing scripts, the [Python HDF5 library](https://d
    ```sh
     pip install h5py
    ```
-2. Boost [Math](https://www.boost.org/doc/libs/1_76_0/libs/math/doc/html/index.html) and [Random](https://www.boost.org/doc/libs/1_76_0/doc/html/boost_random.html) Libraries
+### 2. Boost [Math](https://www.boost.org/doc/libs/1_76_0/libs/math/doc/html/index.html) and [Random](https://www.boost.org/doc/libs/1_76_0/doc/html/boost_random.html) Libraries
 
 Either install the libraries individually via
    ```sh
@@ -27,7 +27,7 @@ or install Boost in its entirety,
    ```sh
     sudo apt-get install libboost-all-dev
    ```
-3. (Optional) [TRIQS TPRF](https://triqs.github.io/tprf/latest/index.html#)
+### 3. (Optional) [TRIQS TPRF](https://triqs.github.io/tprf/latest/index.html#)
 
 The TRIQS TPRF package is optionally used for benchmarking purposes in the post-processing script 'plot.py' (if [plot_rpa = True](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/9b82d1568875d67482f1bc3a151dabcaa85454f4/plot.py#L569)). It may be installed (along with [TRIQS](https://triqs.github.io/triqs/latest/) itself) via
    ```sh
