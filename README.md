@@ -106,15 +106,15 @@ Reproducing all the figures provided (by setting [n_nu_meas = 5]() and [batch_U 
 For faster runs, try reducing n_meas by a factor of 10 (i.e., set [n_meas = 5000000](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/9b82d1568875d67482f1bc3a151dabcaa85454f4/src/hub_2dsqlat_rt_mcmc.cpp#L23)), or calculate only static susceptibilities by leaving [n_nu_meas = 1](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/9b82d1568875d67482f1bc3a151dabcaa85454f4/src/hub_2dsqlat_rt_mcmc.cpp#L25).
 
 Finally, use [plot.py](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/9b82d1568875d67482f1bc3a151dabcaa85454f4/plot.py) for postprocessing. 
-### * To generate plots for all run subdirectories:
+* To generate plots for all run subdirectories:
    ```sh
     python3 plot.py
    ```
-### * To generate plots for a specific run subdirectory:
+* To generate plots for a specific run subdirectory:
    ```sh
     python3 plot.py RUN_SUBDIR
    ```
-### * To generate plots for the most recent run:
+* To generate plots for the most recent run:
    ```sh
     python3 plot.py latest
    ```
