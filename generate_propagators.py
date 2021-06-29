@@ -61,7 +61,7 @@ def main():
     parser.add_option("--t_hop", type="float", default=1.0,
                       help="The tight-binding hopping parameter t.")
     parser.add_option("--U_loc", type="float",  default=1.0,
-                      help="Onsite Hubbard interaction in units of 1/t.")
+                      help="Onsite Hubbard interaction in units of t.")
     parser.add_option("--beta", type="float",  default=1.0,
                       help="Inverse temperature in units of 1/t.")
     parser.add_option("--n_site_pd", type="int",    default=30,
@@ -133,7 +133,7 @@ def main():
 
      # Convert to Hartrees from energy units of t
     U_loc = optdict['U_loc'] / optdict['t_hop']
-    beta = optdict['beta'] / optdict['t_hop']
+    beta = optdict['beta'] * optdict['t_hop']
     n_site_pd = optdict['n_site_pd']
 
     # Sigma[k, rho] = Sigma_H[rho] |_{U_loc}
