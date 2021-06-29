@@ -1,5 +1,5 @@
 C++ = h5c++
-CFLAGS =  -D_MPI -O3 -std=c++17 -fopenmp #-fPIC
+CFLAGS = -D_MPI -O3 -std=c++17 -fopenmp #-fPIC
 BOOST = -lboost_system -lboost_filesystem
 
 BUILDDIR=.
