@@ -881,8 +881,8 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
     while (i_step < params.n_warm + params.n_meas) {
       // Do a Metropolis-Hastings step
       step();
-      // Print MCMC state information for every half-millionth measurement if the verbosity is high
-      // if (verbose && (idx_ss_curr > 0) && (i_step >= params.n_warm) && (i_step % 500000 == 0)) {
+      // Save MCMC state information for every millionth measurement to logfile,
+      // and print it to stdout if the verbosity is high
       if (main_thread && (i_step >= params.n_warm) && (i_step % 1000000 == 0)) {
         summarize(job_id, outfile);  // print to logfile
         if (verbose) {
