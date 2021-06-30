@@ -21,7 +21,7 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
   int i_step = 0;
   int n_saved = 0;
   int n_accepted = 0;
-  // For checking d0 value / detailed balance
+  // For checking detailed balance and ergodicity
   int n_ascend = 0;
   int n_descend = 0;
   int n_mutate = 0;
@@ -63,7 +63,7 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
   std::vector<int> modifiables;
   hc_lat_st_coords coords_curr;
   hc_lat_st_coords coords_prop;
-  f_interp_mtx_2d lat_g0_r_tau;
+  lattice_2d_f_interp lat_g0_r_tau;
   // Measurement coordinates in the Matsubara representation
   hc_lat_mf_coords mf_meas_coords;
   // Measurement results for each subspace;
@@ -72,7 +72,7 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
   meas_t meas_means;  // normalized mean data
   // Constructor
   mcmc_cfg_2d_sq_hub_mf_meas(const mcmc_lat_ext_hub_params &params_,
-                             const f_interp_mtx_2d &lat_g0_r_tau_, const double d0_weight_,
+                             const lattice_2d_f_interp &lat_g0_r_tau_, const double d0_weight_,
                              const std::string &diag_typestring_, const diagram_pools_el &ss_diags_,
                              const std::vector<int> &subspaces_,
                              const hc_lat_mf_coords &mf_meas_coords_, const meas_t &meas_sums_,
@@ -195,7 +195,7 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
     rand_gen.seed(rd());
   }
   // Returns the results of the MCMC run; the default behaviour
-  // normalizes the integration by C / N_{s,0} =  D_0 / E_0
+  // normalizes the integration by C / N =  D_0 / E_0 = D_0 / N_{s,0}
   meas_t results(bool normalize = true) {
     if (normalize) {
       // Normalized results already calculated
@@ -943,7 +943,7 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
         double del_tau;
         std::vector<int> del_nr(params.dim);
         std::tie(del_nr, del_tau) = coords_prop[edge[1]] - coords_prop[edge[0]];
-        this_weight *= lat_g0_r_tau[del_nr[0]][del_nr[1]].ap_eval(del_tau);
+        this_weight *= lat_g0_r_tau(del_nr[0], del_nr[1]).ap_eval(del_tau);
       }
       if (using_local_wf) {
         // Record the full weight of this diagram, with prefactors
@@ -988,7 +988,7 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
           std::tie(del_nr, del_tau) = coords[i][f_edge[1]] - coords[i][f_edge[0]];
           // Evaluate the Green's function interpolant over
           // the spacetime distance associated with this line
-          ferm_io_weight *= lat_g0_r_tau[del_nr[0]][del_nr[1]].ap_eval(del_tau);
+          ferm_io_weight *= lat_g0_r_tau(del_nr[0], del_nr[1]).ap_eval(del_tau);
         }
         // Fermionic part of the 3-vertex weight
         vert_weights[i] = ferm_io_weight;

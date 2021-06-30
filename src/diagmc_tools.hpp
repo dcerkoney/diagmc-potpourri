@@ -212,25 +212,58 @@ void add_attribute_h5(Tattr param, std::string param_name, Tloc h5loc) {
   return;
 }
 
+// Represent a 2D lattice of arbitrary objects using
+// a variable-size contiguous (1D) std::vector
+template <typename T>
+class lattice_2d {
+ public:
+  // int N_i;
+  int N_j;
+  std::vector<T> data;
+  // Constructors
+  lattice_2d() = default;
+  lattice_2d(int N_i_, int N_j_, const std::vector<T> &data_)
+      : /* N_i(N_i_), */ N_j(N_j_), data(data_) {}
+  // Index the 2D lattice
+  constexpr const T &operator()(int i, int j) const { return data[j + N_j * i]; }
+};
+
+// Represent a 3D lattice of arbitrary objects using
+// a variable-size contiguous (1D) std::vector
+template <typename T>
+class lattice_3d {
+ public:
+  // int N_i;
+  int N_j;
+  int N_k;
+  std::vector<T> data;
+  // Constructors
+  lattice_3d() = default;
+  lattice_3d(int N_i_, int N_j_, int N_k_, const std::vector<T> &data_)
+      : /* N_i(N_i_), */ N_j(N_j_), N_k(N_k_), data(data_) {}
+  // Index the 3D lattice
+  constexpr const T &operator()(int i, int j, int k) const { return data[k + N_k * (j + N_j * i)]; }
+};
+
 // 1D mesh class (contains the 1D grid and function data)
-struct mesh_1d {
+struct fmesh_1d {
   // Fields
   std::vector<double> data;
   std::vector<double> x_grid;
   // Constructor
-  mesh_1d(const std::vector<double> &data_, const std::vector<double> &x_grid_)
+  fmesh_1d(const std::vector<double> &data_, const std::vector<double> &x_grid_)
       : data(data_), x_grid(x_grid_) {}
 };
 
 // 2D mesh class (contains the function data
 // on the mesh, and the grids for each variable)
-struct mesh_2d {
+struct fmesh_2d {
   // Fields
   std::vector<std::vector<double>> data;
   std::vector<double> x_grid;
   std::vector<double> y_grid;
   // Constructor
-  mesh_2d(const std::vector<std::vector<double>> &data_, const std::vector<double> &x_grid_,
+  fmesh_2d(const std::vector<std::vector<double>> &data_, const std::vector<double> &x_grid_,
           const std::vector<double> &y_grid_)
       : data(data_), x_grid(x_grid_), y_grid(y_grid_) {}
 };
@@ -240,9 +273,9 @@ struct mesh_2d {
 class interp_1d {
  public:
   // Fields
-  mesh_1d f_mesh;
+  fmesh_1d f_mesh;
   // Constructor
-  interp_1d(const mesh_1d &f_mesh_) : f_mesh(f_mesh_) {}
+  interp_1d(const fmesh_1d &f_mesh_) : f_mesh(f_mesh_) {}
   // An explicit default constructor
   interp_1d() : f_mesh({}, {}) {}
   // Use bilinear interpolation to evaluate the interpoland at any point
@@ -266,7 +299,7 @@ class interp_1d {
  private:
   // Linear interpolation function; approximates f(x) from mesh data.
   // NOTE: This algorithm applies regardless of mesh uniformity!
-  double linear_interp(const mesh_1d &f_mesh, const double &x) const {
+  double linear_interp(const fmesh_1d &f_mesh, const double &x) const {
     // If the values are outside the range of the x and y grids,
     // return 0 (i.e., use extrapolation with a fill value of zero)
     if ((x < f_mesh.x_grid.front()) || (x > f_mesh.x_grid.back())) {
@@ -305,7 +338,7 @@ class f_interp_1d : public interp_1d {
   // Fields
   double beta;
   // Constructor
-  f_interp_1d(const mesh_1d &f_mesh_, const double beta_) : interp_1d(f_mesh_), beta(beta_) {}
+  f_interp_1d(const fmesh_1d &f_mesh_, const double beta_) : interp_1d(f_mesh_), beta(beta_) {}
   // Use bilinear interpolation to evaluate the interpoland at any point
   double eval(const double &point) const { return linear_interp(f_mesh, point); }
   // Evaluates the antiperiodic extension of the fermionic Green's function
@@ -327,7 +360,7 @@ class f_interp_1d : public interp_1d {
  private:
   // Linear interpolation function; approximates f(x) from mesh data.
   // NOTE: This algorithm applies regardless of mesh uniformity!
-  double linear_interp(const mesh_1d &f_mesh, const double &x) const {
+  double linear_interp(const fmesh_1d &f_mesh, const double &x) const {
     // If the values are outside the range of the x and y grids,
     // return 0 (i.e., use extrapolation with a fill value of zero)
     if ((x < f_mesh.x_grid.front()) || (x > f_mesh.x_grid.back())) {
@@ -359,10 +392,11 @@ class f_interp_1d : public interp_1d {
     return (f_1 * (x_2 - x) + f_2 * (x - x_1)) / (x_2 - x_1);
   }
 };
-// Define types for continuous-time fermionic Green's functions
-// on a hypercubic lattice with d = 2, 3 (antiperiodic in beta)
-typedef std::vector<std::vector<f_interp_1d>> f_interp_mtx_2d;
-typedef std::vector<std::vector<std::vector<f_interp_1d>>> f_interp_mtx_3d;
+
+// Continuous-time fermionic Green's functions on a hypercubic lattice,
+// represented as a contiguous std::vector of linear interpolants
+typedef lattice_2d<f_interp_1d> lattice_2d_f_interp;
+typedef lattice_3d<f_interp_1d> lattice_3d_f_interp;
 
 // For a bosonic Green's function interpolant (periodic), the period is beta
 class b_interp_1d : public interp_1d {
@@ -370,7 +404,7 @@ class b_interp_1d : public interp_1d {
   // Fields
   const double beta;
   // Constructor
-  b_interp_1d(const mesh_1d &f_mesh_, const double beta_) : interp_1d(f_mesh_), beta(beta_) {}
+  b_interp_1d(const fmesh_1d &f_mesh_, const double beta_) : interp_1d(f_mesh_), beta(beta_) {}
   // Use bilinear interpolation to evaluate the interpoland at any point
   double eval(const double &point) const { return linear_interp(f_mesh, point); }
   // Evaluates the periodic extension of the bosonic Green's function
@@ -382,7 +416,7 @@ class b_interp_1d : public interp_1d {
  private:
   // Linear interpolation function; approximates f(x) from mesh data.
   // NOTE: This algorithm applies regardless of mesh uniformity!
-  double linear_interp(const mesh_1d &f_mesh, const double &x) const {
+  double linear_interp(const fmesh_1d &f_mesh, const double &x) const {
     // If the values are outside the range of the x and y grids,
     // return 0 (i.e., use extrapolation with a fill value of zero)
     if ((x < f_mesh.x_grid.front()) || (x > f_mesh.x_grid.back())) {
@@ -414,19 +448,20 @@ class b_interp_1d : public interp_1d {
     return (f_1 * (x_2 - x) + f_2 * (x - x_1)) / (x_2 - x_1);
   }
 };
-// Define types for continuous-time bosonic Green's functions
-// on a hypercubic lattice with d = 2, 3 (periodic in beta)
-typedef std::vector<std::vector<b_interp_1d>> b_interp_mtx_2d;
-typedef std::vector<std::vector<std::vector<b_interp_1d>>> b_interp_mtx_3d;
+
+// Continuous-time bosonic Green's functions on a hypercubic lattice,
+// represented as a contiguous std::vector of linear interpolants
+typedef lattice_2d<b_interp_1d> lattice_2d_b_interp;
+typedef lattice_3d<b_interp_1d> lattice_3d_b_interp;
 
 // 2D interpolant class (used, e.g., to define
 // spatially continuous objects from r-grid data)
 class interp_2d {
  public:
   // Fields
-  mesh_2d f_mesh;
+  fmesh_2d f_mesh;
   // Constructor
-  interp_2d(const mesh_2d &f_mesh_) : f_mesh(f_mesh_) {}
+  interp_2d(const fmesh_2d &f_mesh_) : f_mesh(f_mesh_) {}
   // Use bilinear interpolation to evaluate the interpoland at any point
   double eval(const std::vector<double> &point) const { return bilinear_interp(f_mesh, point); }
   // Evaluates the antiperiodic extension of the interp_2d object in
@@ -448,7 +483,7 @@ class interp_2d {
 
  private:
   // Bilinear interpolation function
-  double bilinear_interp(const mesh_2d &f_mesh, const std::vector<double> &point) const {
+  double bilinear_interp(const fmesh_2d &f_mesh, const std::vector<double> &point) const {
     // Define the x and y values at which to evaluate the function
     double x = point[0], y = point[1];
     // If the values are outside the range of the x and y grids,
@@ -1090,6 +1125,26 @@ hc_lat_mf_coord first_brillouin_zone(const hc_lat_mf_coord &coord) {
 
 namespace develop {
 
+// Represent a 2D or 3D lattice of arbitrary objects using
+// a variable-size contiguous (1D) std::vector
+template <typename T, std::size_t dim>
+class lattice {
+  int N_i;
+  int N_j;
+  int N_k = 1;
+  std::vector<T> data;
+
+ public:
+  lattice(int N_i_, int N_j_) : N_i(N_i_), N_j(N_j_), data(N_i_ * N_j_) {}
+  lattice(int N_i_, int N_j_, int N_k_)
+      : N_i(N_i_), N_j(N_j_), N_k(N_k_), data(N_i_ * N_j_ * N_k_) {}
+  // Index the lattice
+  typename std::enable_if<dim == 2> &operator()(int i, int j) { return data[j + N_j * i]; }
+  typename std::enable_if<dim == 3> &operator()(int i, int j, int k) {
+    return data[k + N_k * (j + N_j * i)];
+  }
+};
+
 // Class representing a hypercubic lattice space - (imaginary) time coordinate;
 // position vectors are given in units of the lattice constant, i.e., they index
 // the lattice, and the d-toroidal lattice metric is used for spatial distances
@@ -1176,6 +1231,18 @@ double lat_dist(fcc_lat_st_coord v1, fcc_lat_st_coord v2) {
 }  // namespace develop
 
 namespace deprecated {
+
+// Defines types for continuous-time fermionic Green's functions
+// on a hypercubic lattice with explicit dimensionality
+// d = 2, 3 (antiperiodic in beta)
+typedef std::vector<std::vector<f_interp_1d>> lattice_f_interp_2d;
+typedef std::vector<std::vector<std::vector<f_interp_1d>>> lattice_f_interp_3d;
+
+// Defines types for continuous-time bosonic Green's functions
+// on a hypercubic lattice with explicit dimensionality
+// d = 2, 3 (periodic in beta)
+typedef std::vector<std::vector<b_interp_1d>> lattice_b_interp_2d;
+typedef std::vector<std::vector<std::vector<b_interp_1d>>> lattice_b_interp_3d;
 
 // Defines the permutation group representation of a graph, consisting
 // of one fermionic (psi) and one bosonic (phi) connection row vector
