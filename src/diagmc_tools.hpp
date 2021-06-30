@@ -225,8 +225,7 @@ class lattice_2d {
   lattice_2d(int N_i_, int N_j_, const std::vector<T> &data_)
       : /* N_i(N_i_), */ N_j(N_j_), data(data_) {}
   // Index the 2D lattice
-  // constexpr const T &operator()(int i, int j) const { return data[j + N_j * i]; }
-  constexpr T operator()(int i, int j) const { return data[j + N_j * i]; }
+  constexpr const T &operator()(int i, int j) const { return data[j + N_j * i]; }
 };
 
 // Represent a 3D lattice of arbitrary objects using
