@@ -21,7 +21,7 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
   int i_step = 0;
   int n_saved = 0;
   int n_accepted = 0;
-  // For checking d0 value / detailed balance
+  // For checking detailed balance and ergodicity
   int n_ascend = 0;
   int n_descend = 0;
   int n_mutate = 0;
@@ -195,7 +195,7 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
     rand_gen.seed(rd());
   }
   // Returns the results of the MCMC run; the default behaviour
-  // normalizes the integration by C / N_{s,0} =  D_0 / E_0
+  // normalizes the integration by C / N =  D_0 / E_0 = D_0 / N_{s,0}
   meas_t results(bool normalize = true) {
     if (normalize) {
       // Normalized results already calculated

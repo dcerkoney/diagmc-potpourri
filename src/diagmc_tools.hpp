@@ -217,15 +217,16 @@ void add_attribute_h5(Tattr param, std::string param_name, Tloc h5loc) {
 template <typename T>
 class lattice_2d {
  public:
-  int N_i;
+  // int N_i;
   int N_j;
   std::vector<T> data;
   // Constructors
   lattice_2d() = default;
-  lattice_2d(int N_i_, int N_j_) : N_i(N_i_), N_j(N_j_), data(N_j_ * N_i_) {}
-  lattice_2d(int N_i_, int N_j_, const std::vector<T> &data_) : N_i(N_i_), N_j(N_j_), data(data_) {}
+  lattice_2d(int N_i_, int N_j_, const std::vector<T> &data_)
+      : /* N_i(N_i_), */ N_j(N_j_), data(data_) {}
   // Index the 2D lattice
-  T &operator()(int i, int j) { return data[j + N_j * i]; }
+  // constexpr const T &operator()(int i, int j) const { return data[j + N_j * i]; }
+  constexpr T operator()(int i, int j) const { return data[j + N_j * i]; }
 };
 
 // Represent a 3D lattice of arbitrary objects using
@@ -233,17 +234,16 @@ class lattice_2d {
 template <typename T>
 class lattice_3d {
  public:
-  int N_i;
+  // int N_i;
   int N_j;
   int N_k;
   std::vector<T> data;
   // Constructors
   lattice_3d() = default;
-  lattice_3d(int N_i_, int N_j_, int N_k_) : N_i(N_i_), N_j(N_j_), N_k(N_k_), data(N_j_ * N_i_) {}
   lattice_3d(int N_i_, int N_j_, int N_k_, const std::vector<T> &data_)
-      : N_i(N_i_), N_j(N_j_), N_k(N_k_), data(data_) {}
+      : /* N_i(N_i_), */ N_j(N_j_), N_k(N_k_), data(data_) {}
   // Index the 3D lattice
-  T &operator()(int i, int j, int k) { return data[k + N_k * (j + N_j * i)]; }
+  constexpr const T &operator()(int i, int j, int k) const { return data[k + N_k * (j + N_j * i)]; }
 };
 
 // 1D mesh class (contains the 1D grid and function data)
