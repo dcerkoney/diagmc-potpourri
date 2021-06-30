@@ -216,10 +216,10 @@ void add_attribute_h5(Tattr param, std::string param_name, Tloc h5loc) {
 // a variable-size contiguous (1D) std::vector
 template <typename T>
 class lattice_2d {
+ public:
   // int N_i;
   int N_j;
   std::vector<T> data;
- public:
   // Constructors
   lattice_2d() = default;
   lattice_2d(int N_i_, int N_j_, const std::vector<T> &data_)
@@ -232,11 +232,11 @@ class lattice_2d {
 // a variable-size contiguous (1D) std::vector
 template <typename T>
 class lattice_3d {
+ public:
   // int N_i;
   int N_j;
   int N_k;
   std::vector<T> data;
- public:
   // Constructors
   lattice_3d() = default;
   lattice_3d(int N_i_, int N_j_, int N_k_, const std::vector<T> &data_)
