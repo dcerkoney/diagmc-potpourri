@@ -573,11 +573,8 @@ def plot_self_en(params, run_subdir, job_name, logfile):
                 r'MPI run with (\S+) thread\(s\)', line)
             if match_n_threads:
                 n_threads = int(float(match_n_threads.group(1)))
-                print(f'\nn_threads: {n_threads}')
+                # print(f'\nn_threads: {n_threads}')
                 break
-
-    for i in params.items():
-        print(i)
 
     # Load results from h5
     self_en_path = pathlib.PosixPath(
@@ -911,7 +908,7 @@ def main():
         for i in range(len(logfiles)):
             # Get parameters
             print(
-                f"\nGenerating plots for run subdirectory '{run_subdirs[i]}':\n")
+                f"\nGenerating plots for run subdirectory '{run_subdirs[i]}':")
             # Ignore this subdir if there is no complete run data in it
             if not glob.glob(f'{run_subdirs[i]}/*run*.h5'):
                 print('\nNo run data found in this working directory, skipping it!\n')
@@ -1021,10 +1018,6 @@ def main():
                 # Plot self energies
                 plot_self_en(
                     params, run_subdir, job_name, logfile)
-        # Finally, print the run parameters
-        print("\nRun parameters:")
-        for item in params.items():
-            print(item)
     else:
         raise ValueError("\nPlease supply a single run directory!\n" +
                          "Usage: 'python aggregate_and_plot_chi_ch.py run_dir'" +
@@ -1032,6 +1025,10 @@ def main():
                          "in the working directory will be used, if it exists." +
                          "\nIf keyword 'all' is specified, plots for all run " +
                          "subdirectories will be generated.")
+    # Finally, print the run parameters
+    print("\nRun parameters:")
+    for item in params.items():
+        print(item)
     return
 
 

@@ -18,9 +18,9 @@ bool normalize = true;    // Should the integration results be normalized?
 bool save_serial = true;  // Should the thread results be individually saved?
 bool batch_U = false;     // Should we perform a batch calculation for multiple U values?
 int n_warm = 100000;      // Number of steps in the burn-in / warmup phase
-int n_meas = 500000000;     // Total number of steps in the measurement phase (including skips)
+int n_meas = 5000000;     // Total number of steps in the measurement phase (including skips)
 int n_skip = 1;           // Number of steps to skip in ancy points to measure at
-int n_nu_meas = 10;        // Number of external frequency points to measure at
+int n_nu_meas = 10;       // Number of external frequency points to measure at
 int max_posn_shift = 3;   // Variable maximum step size in local position component shifts
 
 /* Lattice parameters */
@@ -31,7 +31,7 @@ int n_tau = (1 << 10);  // (= 2^10) Number of points in the imaginary-time mesh 
 // Cutoff for (BC) 'irreducible' lattice distances
 int n_site_irred = static_cast<int>(std::floor(n_site_pd / 2) + 1);
 double ef = 0.0;           // Fermi energy
-double beta = 2.0;        // Inverse temperature
+double beta = 2.0;         // Inverse temperature
 double t_hop = 1.0;        // Nearest-neighbor hopping parameter t
 double U_loc = 2.0;        // Hubbard U
 double s_ferm = 0.5;       // Fermion spin
