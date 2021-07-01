@@ -131,13 +131,13 @@ Finally, use the [plot.py](plot.py) script for postprocessing:
 <!-- EXAMPLES -->
 ## Examples
 
-![alt text](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/a207e13a9d8ffb90d8a9b66ab2cd6fd704e5e057/results/chi_ch_examples/beta=10,%20U=1/static_chi_ch_2dsqhub_run_1624927311.pdf?raw=true)
+![alt text](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/a207e13a9d8ffb90d8a9b66ab2cd6fd704e5e057/results/chi_ch_examples/beta=10,%20U=1/static_chi_ch_2dsqhub_run_1624927311.pdf)
 
-![alt text](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/a207e13a9d8ffb90d8a9b66ab2cd6fd704e5e057/results/chi_ch_examples/beta=10,%20U=1/chi_2_ch_2dsqhub_run_1624927311.pdf?raw=true)
+![alt text](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/a207e13a9d8ffb90d8a9b66ab2cd6fd704e5e057/results/chi_ch_examples/beta=10,%20U=1/chi_2_ch_2dsqhub_run_1624927311.pdf)
 
-![alt text](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/a207e13a9d8ffb90d8a9b66ab2cd6fd704e5e057/results/self_en_examples/beta=2,%20U=2/re_sigma_2_2dsqhub_run_1625109804.pdf?raw=true)
+![alt text](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/a207e13a9d8ffb90d8a9b66ab2cd6fd704e5e057/results/self_en_examples/beta=2,%20U=2/re_sigma_2_2dsqhub_run_1625109804.pdf)
 
-![alt text](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/a207e13a9d8ffb90d8a9b66ab2cd6fd704e5e057/results/self_en_examples/beta=2,%20U=2/sigma_2_iom0_2dsqhub_run_1625109804.pdf?raw=true)
+![alt text](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/a207e13a9d8ffb90d8a9b66ab2cd6fd704e5e057/results/self_en_examples/beta=2,%20U=2/sigma_2_iom0_2dsqhub_run_1625109804.pdf)
 
 
 <!-- CONTACT -->
