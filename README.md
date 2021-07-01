@@ -52,27 +52,27 @@ For detailed installation instructions, see [here](https://triqs.github.io/tprf/
    ```
 ### 2. Navigate to your local project directory, then build the executable:
    ```sh
-   cd diagmc-hubbard-2dsqlat && ./make.sh
+   cd diagmc-hubbard-2dsqlat && make
    ```
    
 
 <!-- USAGE -->
 ## Usage
 
-To use the code, first edit the test input parameters in 'hub_2dsqlat_rt_mcmc.cpp' as desired. In principle, the MCMC integrator is compatible with free energy, self energy, and polarization measurements, but only the latter have been tested. The provided example calculates the charge polarization up to 2nd order in U, and optionally compares with the RPA result (obtained via the TRIQS TPRF package). Several example sets of propagators/results are provided, but in order to run the code for a different set of test parameters, one may need to generate new propagators (i.e., if the code complains that a compatible lattice Green's function was not found). To this end, use the script [generate_propagators.py](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/9b82d1568875d67482f1bc3a151dabcaa85454f4/generate_propagators.py). The usage details are accessible as follows:
+To use the code, first edit the test input parameters in [hub_2dsqlat_rt_mcmc_chi_ch_example.cpp](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/c4b2223300b12f2341844567d7a2c45db2ffccba/src/hub_2dsqlat_rt_mcmc_chi_ch_example.cpp#L12) and [hub_2dsqlat_rt_mcmc_self_en_example.cpp](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/c4b2223300b12f2341844567d7a2c45db2ffccba/src/hub_2dsqlat_rt_mcmc_self_en_example.cpp#L12) as desired. The MCMC integrator is compatible with free energy, self energy, and charge/longitudinal spin susceptibility measurements. The provided examples calculate the charge susceptibility and self energy up to 2nd order in U. The charge susceptibility may optionally be compared with the RPA result obtained via the TRIQS TPRF package. Several example sets of propagators/results are provided, but in order to run the code for a different set of test parameters, one may need to generate new propagators (i.e., if the code complains that a compatible lattice Green's function was not found). To this end, use the script [generate_propagators.py](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/9b82d1568875d67482f1bc3a151dabcaa85454f4/generate_propagators.py). The usage details are accessible as follows:
    ```
 python3 generate_propagators.py -h
 Usage: generate_propagators.py [ options ]
 
 Options:
   -h, --help            show this help message and exit
-  --dim=DIM             Spatial dimension of the electron gas (default is 2);
+  --dim=DIM             Spatial dimension of the lattice (default is 2);
                          allowed values: {2, 3}.
   --target_n0=TARGET_N0
                          Target density in units of the lattice constant; since
                          the number of electrons is coarse-grained, the actual
                          density may differ slightly. Default (n0 = 1)
-                         corresponds to half-filling (mu = 0).
+                         corresponds to half-filling (mu0 ~= 0).
   --target_mu0=TARGET_MU0
                          Target (noninteracting) chemical potential. If
                          supplied, we work at fixed chemical potential and
@@ -84,11 +84,10 @@ Options:
   --n_site_pd=N_SITE_PD
                          Number of sites per direction.
   --lat_const=LAT_CONST
-                         Lattice constant, in Bohr radii (for working at fixed
-                         'N' and 'a'; we will calculate 'V' on-the-fly).
+                         Lattice constant in Bohr radii.
   --lat_length=LAT_LENGTH
-                         Lattice length, in Bohr radii (for working at fixed V;
-                         we will calculate 'a' on-the-fly).
+                         Lattice length in Bohr radii (for working at fixed V:
+                         calculate 'a' on-the-fly).
   --n_tau=N_TAU         Number of tau points in the nonuniform mesh used for
                          downsampling (an even number).
   --n_nu=N_NU           Number of bosonic frequency points (an even number).
@@ -98,19 +97,23 @@ Options:
   --plot_g0             Option for plotting the lattice Green's functions.
   --plot_pi0            Option for plotting the polarization bubble P_0.
    ```
-Then, rebuild the executable and run it:
+Then, rebuild the executables and run one:
    ```sh
-    ./make.sh && ./hub_2dsqlat_rt_mcmc.exe
+    make && ./hub_2dsqlat_rt_mcmc_chi_ch_example.exe
    ```
-or for a parallel run, e.g. with 8 threads,
+or
    ```sh
-    ./make.sh && mpirun -n 8 ./hub_2dsqlat_rt_mcmc.exe
+    make && ./hub_2dsqlat_rt_mcmc_self_en_example.exe
+   ```
+For a parallel run, e.g. with 8 threads,
+   ```sh
+    make && mpirun -n 8 ./hub_2dsqlat_rt_mcmc_chi_ch_example.exe
    ```
    
-Reproducing all the figures provided (by setting [`n_nu_meas = 5`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/9b82d1568875d67482f1bc3a151dabcaa85454f4/src/hub_2dsqlat_rt_mcmc.cpp#L25) and [`batch_U = true`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/9b82d1568875d67482f1bc3a151dabcaa85454f4/src/hub_2dsqlat_rt_mcmc.cpp#L21)) will take a while (around half an hour).
-For faster runs, try reducing n_meas by a factor of 10 (i.e., set [`n_meas = 5000000`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/9b82d1568875d67482f1bc3a151dabcaa85454f4/src/hub_2dsqlat_rt_mcmc.cpp#L23)) and/or calculate only static susceptibilities by leaving [`n_nu_meas = 1`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/9b82d1568875d67482f1bc3a151dabcaa85454f4/src/hub_2dsqlat_rt_mcmc.cpp#L25).
+Runing the examples at the default settings should take no more than a few minutes.
+However, reproducing all the figures provided (e.g., for the susceptibilities, by increasing [`n_meas = 50000000`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/9b82d1568875d67482f1bc3a151dabcaa85454f4/src/hub_2dsqlat_rt_mcmc.cpp#L23), [`n_nu_meas = 5`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/9b82d1568875d67482f1bc3a151dabcaa85454f4/src/hub_2dsqlat_rt_mcmc.cpp#L25), and setting [`batch_U = true`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/9b82d1568875d67482f1bc3a151dabcaa85454f4/src/hub_2dsqlat_rt_mcmc.cpp#L21)) will take more time (around half an hour).
 
-Finally, use [plot.py](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/9b82d1568875d67482f1bc3a151dabcaa85454f4/plot.py) for postprocessing:
+Finally, use the [plot.py](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/9b82d1568875d67482f1bc3a151dabcaa85454f4/plot.py) script for postprocessing:
 * To generate plots for all run subdirectories,
    ```sh
     python3 plot.py
