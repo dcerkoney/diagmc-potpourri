@@ -131,6 +131,12 @@ Finally, use the [plot.py](plot.py) script for postprocessing:
 <!-- EXAMPLES -->
 ## Examples
 
+<object data="https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/a207e13a9d8ffb90d8a9b66ab2cd6fd704e5e057/results/chi_ch_examples/beta=10,%20U=1/static_chi_ch_2dsqhub_run_1624927311.pdf" type="application/pdf" width="700px" height="700px">
+    <embed src="https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/a207e13a9d8ffb90d8a9b66ab2cd6fd704e5e057/results/chi_ch_examples/beta=10,%20U=1/static_chi_ch_2dsqhub_run_1624927311.pdf">
+        <p>This browser does not support PDFs. Please download the PDF to view it: <a href="http://yoursite.com/the.pdf">Download PDF</a>.</p>
+    </embed>
+</object>
+
 ![alt text](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/a207e13a9d8ffb90d8a9b66ab2cd6fd704e5e057/results/chi_ch_examples/beta=10,%20U=1/static_chi_ch_2dsqhub_run_1624927311.pdf)
 
 ![alt text](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/a207e13a9d8ffb90d8a9b66ab2cd6fd704e5e057/results/chi_ch_examples/beta=10,%20U=1/chi_2_ch_2dsqhub_run_1624927311.pdf)
