@@ -111,7 +111,7 @@ For a parallel run with, say, 8 threads,
    ```
    
 Runing the examples at the default settings should take no more than a few minutes.
-However, reproducing all the figures provided (e.g., for the susceptibilities, by increasing [`n_meas = 50000000`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/d8035967acc7e31e4fbbbb16093cc0b762f5004a/src/hub_2dsqlat_rt_mcmc_chi_ch_example.cpp#L21), [`n_nu_meas = 5`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/d8035967acc7e31e4fbbbb16093cc0b762f5004a/src/hub_2dsqlat_rt_mcmc_chi_ch_example.cpp#L23), and setting [`batch_U = true`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/d8035967acc7e31e4fbbbb16093cc0b762f5004a/src/hub_2dsqlat_rt_mcmc_chi_ch_example.cpp#L19)) will take more time (around half an hour).
+However, reproducing all the figures provided (e.g., for the susceptibilities, by increasing to [`n_meas = 50000000`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/d8035967acc7e31e4fbbbb16093cc0b762f5004a/src/hub_2dsqlat_rt_mcmc_chi_ch_example.cpp#L21), [`n_nu_meas = 5`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/d8035967acc7e31e4fbbbb16093cc0b762f5004a/src/hub_2dsqlat_rt_mcmc_chi_ch_example.cpp#L23), and setting [`batch_U = true`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/d8035967acc7e31e4fbbbb16093cc0b762f5004a/src/hub_2dsqlat_rt_mcmc_chi_ch_example.cpp#L19)) will take more time (around half an hour).
 
 Finally, use the [plot.py](plot.py) script for postprocessing:
 * To generate plots for all run subdirectories,
