@@ -36,7 +36,7 @@ For serial usage, remove the [`D_MPI`](https://github.com/dcerkoney/diagmc-hubba
 
 ### 4. (Optional) [TRIQS TPRF](https://triqs.github.io/tprf/latest/)
 
-The TRIQS TPRF package is optionally used for benchmarking purposes in the post-processing script 'plot.py' if [`plot_rpa = True`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/f6be749f6154e362187f15f14b11eaa1ded88616/plot.py#L569). It may be installed (along with [TRIQS](https://triqs.github.io/triqs/latest/) itself) via
+The TRIQS TPRF package is optionally used for benchmarking purposes in the post-processing script 'plot.py' if [`plot_rpa = True`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/d8035967acc7e31e4fbbbb16093cc0b762f5004a/plot.py#L888). It may be installed (along with [TRIQS](https://triqs.github.io/triqs/latest/) itself) via
    ```sh
     sudo apt-get install triqs_tprf
    ```
@@ -59,7 +59,7 @@ For detailed installation instructions, see [here](https://triqs.github.io/tprf/
 <!-- USAGE -->
 ## Usage
 
-To use the code, first edit the test input parameters in [hub_2dsqlat_rt_mcmc_chi_ch_example.cpp](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/c4b2223300b12f2341844567d7a2c45db2ffccba/src/hub_2dsqlat_rt_mcmc_chi_ch_example.cpp#L12) and [hub_2dsqlat_rt_mcmc_self_en_example.cpp](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/c4b2223300b12f2341844567d7a2c45db2ffccba/src/hub_2dsqlat_rt_mcmc_self_en_example.cpp#L12) as desired. The MCMC integrator is compatible with free energy, self energy, and charge/longitudinal spin susceptibility measurements. The provided examples calculate the charge susceptibility and self energy up to 2nd order in U. The charge susceptibility may optionally be compared with the RPA result obtained via the TRIQS TPRF package. Several example sets of propagators/results are provided, but in order to run the code for a different set of test parameters, one may need to generate new propagators (i.e., if the code complains that a compatible lattice Green's function was not found). To this end, use the script [generate_propagators.py](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/9b82d1568875d67482f1bc3a151dabcaa85454f4/generate_propagators.py). The usage details are accessible as follows:
+To use the code, first edit the test input parameters in [hub_2dsqlat_rt_mcmc_chi_ch_example.cpp](src/hub_2dsqlat_rt_mcmc_chi_ch_example.cpp) and [hub_2dsqlat_rt_mcmc_self_en_example.cpp](src/hub_2dsqlat_rt_mcmc_self_en_example.cpp) as desired. The MCMC integrator is compatible with free energy, self energy, and charge/longitudinal spin susceptibility measurements. The provided examples calculate the charge susceptibility and self energy up to 2nd order in U. The charge susceptibility may optionally be compared with the RPA result obtained via the TRIQS TPRF package. Several example sets of propagators/results are provided, but in order to run the code for a different set of test parameters, one may need to generate new propagators (i.e., if the code complains that a compatible lattice Green's function was not found). To this end, use the script [generate_propagators.py](generate_propagators.py). The usage details are accessible as follows:
    ```
 python3 generate_propagators.py -h
 Usage: generate_propagators.py [ options ]
@@ -111,9 +111,9 @@ For a parallel run, e.g. with 8 threads,
    ```
    
 Runing the examples at the default settings should take no more than a few minutes.
-However, reproducing all the figures provided (e.g., for the susceptibilities, by increasing [`n_meas = 50000000`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/9b82d1568875d67482f1bc3a151dabcaa85454f4/src/hub_2dsqlat_rt_mcmc.cpp#L23), [`n_nu_meas = 5`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/9b82d1568875d67482f1bc3a151dabcaa85454f4/src/hub_2dsqlat_rt_mcmc.cpp#L25), and setting [`batch_U = true`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/9b82d1568875d67482f1bc3a151dabcaa85454f4/src/hub_2dsqlat_rt_mcmc.cpp#L21)) will take more time (around half an hour).
+However, reproducing all the figures provided (e.g., for the susceptibilities, by increasing [`n_meas = 50000000`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/d8035967acc7e31e4fbbbb16093cc0b762f5004a/src/hub_2dsqlat_rt_mcmc_chi_ch_example.cpp#L21), [`n_nu_meas = 5`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/d8035967acc7e31e4fbbbb16093cc0b762f5004a/src/hub_2dsqlat_rt_mcmc_chi_ch_example.cpp#L23), and setting [`batch_U = true`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/d8035967acc7e31e4fbbbb16093cc0b762f5004a/src/hub_2dsqlat_rt_mcmc_chi_ch_example.cpp#L19)) will take more time (around half an hour).
 
-Finally, use the [plot.py](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/9b82d1568875d67482f1bc3a151dabcaa85454f4/plot.py) script for postprocessing:
+Finally, use the [plot.py](plot.py) script for postprocessing:
 * To generate plots for all run subdirectories,
    ```sh
     python3 plot.py
