@@ -134,9 +134,9 @@ Finally, use the [plot.py](plot.py) script for postprocessing:
 ![alt text](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/779b25f5414ce13ac169260bd66a82eafba893a1/results/chi_ch_examples/beta=10,%20U=1/chi_2_ch_2dsqhub_run_1624927311.png?raw=true)
 
 <p align="middle">
-  <img src="https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/779b25f5414ce13ac169260bd66a82eafba893a1/results/chi_ch_examples/beta=10,%20U=1/static_chi_ch_2dsqhub_run_1624927311.png?raw=true" width="275" />
-  <img src="https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/779b25f5414ce13ac169260bd66a82eafba893a1/results/self_en_examples/beta=2,%20U=2/re_sigma_2_2dsqhub_run_1625109804.png?raw=true" width="275" /> 
-  <img src="https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/779b25f5414ce13ac169260bd66a82eafba893a1/results/self_en_examples/beta=2,%20U=2/sigma_2_iom0_2dsqhub_run_1625109804.png?raw=true" width="275" />
+  <img src="https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/779b25f5414ce13ac169260bd66a82eafba893a1/results/chi_ch_examples/beta=10,%20U=1/static_chi_ch_2dsqhub_run_1624927311.png?raw=true" width="280" />
+  <img src="https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/779b25f5414ce13ac169260bd66a82eafba893a1/results/self_en_examples/beta=2,%20U=2/re_sigma_2_2dsqhub_run_1625109804.png?raw=true" width="280" /> 
+  <img src="https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/779b25f5414ce13ac169260bd66a82eafba893a1/results/self_en_examples/beta=2,%20U=2/sigma_2_iom0_2dsqhub_run_1625109804.png?raw=true" width="280" />
 </p>
 
 <!-- CONTACT -->
