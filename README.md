@@ -97,7 +97,7 @@ Options:
   --plot_g0             Option for plotting the lattice Green's functions.
   --plot_pi0            Option for plotting the polarization bubble P_0.
    ```
-Then, rebuild the executables and run one:
+Then, rebuild the executables and run either of them:
    ```sh
     make && ./hub_2dsqlat_rt_mcmc_chi_ch_example.exe
    ```
