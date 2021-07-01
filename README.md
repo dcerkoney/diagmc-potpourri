@@ -105,7 +105,7 @@ or
    ```sh
     make && ./hub_2dsqlat_rt_mcmc_self_en_example.exe
    ```
-For a parallel run, e.g. with 8 threads,
+For a parallel run with, say, 8 threads,
    ```sh
     make && mpirun -n 8 ./hub_2dsqlat_rt_mcmc_chi_ch_example.exe
    ```
