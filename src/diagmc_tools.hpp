@@ -1125,26 +1125,6 @@ hc_lat_mf_coord first_brillouin_zone(const hc_lat_mf_coord &coord) {
 
 namespace develop {
 
-// Represent a 2D or 3D lattice of arbitrary objects using
-// a variable-size contiguous (1D) std::vector
-template <typename T, std::size_t dim>
-class lattice {
-  int N_i;
-  int N_j;
-  int N_k = 1;
-  std::vector<T> data;
-
- public:
-  lattice(int N_i_, int N_j_) : N_i(N_i_), N_j(N_j_), data(N_i_ * N_j_) {}
-  lattice(int N_i_, int N_j_, int N_k_)
-      : N_i(N_i_), N_j(N_j_), N_k(N_k_), data(N_i_ * N_j_ * N_k_) {}
-  // Index the lattice
-  typename std::enable_if<dim == 2> &operator()(int i, int j) { return data[j + N_j * i]; }
-  typename std::enable_if<dim == 3> &operator()(int i, int j, int k) {
-    return data[k + N_k * (j + N_j * i)];
-  }
-};
-
 // Class representing a hypercubic lattice space - (imaginary) time coordinate;
 // position vectors are given in units of the lattice constant, i.e., they index
 // the lattice, and the d-toroidal lattice metric is used for spatial distances
