@@ -45,7 +45,7 @@ Open MPI is packaged with most Linux distros nowadays; you can check that it is 
    ```
 To link `h5c++` against an alternative MPI compiler (e.g., Intel or MPICH2), you will need to modify the [CXX](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/e00ea5a7d17f2076fe5889a23ca7152f3c5846d3/build/Makefile#L9) and [linker](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/e00ea5a7d17f2076fe5889a23ca7152f3c5846d3/build/Makefile#L10) flags in the Makefile accordingly.
 
-For serial usage, remove the [`D_MPI`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/e00ea5a7d17f2076fe5889a23ca7152f3c5846d3/build/Makefile#L2) preprocessor macro from the Makefile.
+For serial usage, remove the [`D_MPI`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/a8ae6ea8c15e2142e7d554ae6f5582f5bfd03832/build/makefile.chi_ch#L2) preprocessor macro from each makefile.
 
 ### 4. (Optional) [TRIQS TPRF](https://triqs.github.io/tprf/latest/)
 
