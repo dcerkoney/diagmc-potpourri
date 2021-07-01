@@ -2,7 +2,7 @@
 Low-order diagrammatic Monte-Carlo (DiagMC) for the Hubbard model on the 2D square lattice.
 
 <p align="middle">
-  <img src="https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/ae3898311cf53d8a9cbba1fedbe227ca32552141/results/self_en_examples/self_en_dyn_n=2_bHFI.png?raw=true" width="200" />
+  <img src="https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/ae3898311cf53d8a9cbba1fedbe227ca32552141/results/self_en_examples/self_en_dyn_n=2_bHFI.png?raw=true" width="100" />
   <img src="https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/ae3898311cf53d8a9cbba1fedbe227ca32552141/results/chi_ch_examples/charge_poln_diags_n=2_bHFI.png?raw=true" width="628" /> 
 </p>
 
