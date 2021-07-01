@@ -29,8 +29,7 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
   int idx_ss_curr = 0;
   int idx_ss_prop = 0;
   int max_order;  // Maximum diagram order in the run
-  int n_ext;      // Number of externally-constrained vertices (includies internal
-                  // vertices tethered to external ones)
+  int v_meas_ext;      // Index of the external measurement coordinate (for Fourier transforms)
   int diag_type;
   int n_subspaces;
   // The proposal probability ratio is P(nu | nu') / P(nu' | nu), where
@@ -147,12 +146,13 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
         constraints = {-1, -1, 0, 1};
         break;
     }
-    // Store the number of external vertices as a class field
-    n_ext = constraints.size();
+    int n_ext_constr = constraints.size();
     // Use a pairwise basis for internal vertex constraints
-    for (int i = n_ext; i < 2 * max_order; ++i) {
+    for (int i = n_ext_constr; i < 2 * max_order; ++i) {
       constraints.push_back((i % 2 == 1 ? (i - 1) : -1));
     }
+    // Index of the outgoing external leg, used for the measurement Fourier transformation(s)
+    v_meas_ext = ss_diags[subspaces.size() - 1].n_legs - 1;
     // Also save constrained mates for quick access and diagram-type generality;
     // the constrained mate vertices are: v_mate = argwhere(constraints == v_modif).
     // Analagous to the constraint vector, a -1 represents a mate vertex itself.
@@ -263,7 +263,7 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
     add_attribute_h5<int>(n_descend, "n_descend", h5file);
     add_attribute_h5<int>(n_mutate, "n_mutate", h5file);
     add_attribute_h5<int>(max_order, "max_order", h5file);
-    add_attribute_h5<int>(n_ext, "n_ext", h5file);
+    add_attribute_h5<int>(v_meas_ext, "v_meas_ext", h5file);
     add_attribute_h5<int>(n_subspaces, "n_subspaces", h5file);
     add_attribute_h5<int>(static_cast<int>(timestamp), "timestamp", h5file);
     add_attribute_h5<double>(norm_const, "norm_const", h5file);
@@ -496,20 +496,27 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
     int lat_offset = -params.n_site_pd / 2;
     // Seed the vertices
     int n_seeded = 0;
-    // Seed the center-of-mass coordinate (default constructor with N and beta
-    // defined from params)
-    if (v_start == 0) {
-      coords_prop.push_back(hc_lat_st_coord(params.dim, params.n_site_pd, params.beta,
-                                            params.delta_tau, params.lat_const, debug));
-      // Start at the next vertex for the usual seeding procedure to follow
-      ++v_start;
-      ++n_seeded;
-    }
+    // // Seed the center-of-mass coordinate (default constructor with N and beta defined from params)
+    // if (v_start == 0) {
+    //   coords_prop.push_back(hc_lat_st_coord(params.dim, params.n_site_pd, params.beta,
+    //                                         params.delta_tau, params.lat_const, debug));
+    //   // Start at the next vertex for the usual seeding procedure to follow
+    //   ++v_start;
+    //   ++n_seeded;
+    // }
     for (int i = v_start; i < v_stop; ++i) {
       // Seed spacetime variables for new unconstrained vertices
       if (constraints[i] == -1) {
         if (debug) {
           std::cout << "Seeding vertex v_" << i << "..." << std::endl;
+        }
+        // Seed the center-of-mass coordinate (default
+        // constructor with N and beta defined from params)
+        if (i == 0) {
+          coords_prop.push_back(hc_lat_st_coord(params.dim, params.n_site_pd, params.beta,
+                                                params.delta_tau, params.lat_const, debug));
+          ++n_seeded;
+          continue;
         }
         v_seed_id = i;
         v_seed_itime = params.beta * std_uniform(rand_gen);
@@ -546,26 +553,32 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
     // The proposal subspace is one higher in the list
     idx_ss_prop = idx_ss_curr + 1;
     // Get the number of new interaction lines (i.e., vertex pairs)
-    const int n_new_lines = subspaces[idx_ss_prop] - subspaces[idx_ss_curr];
-    const int n_verts_curr = 2 * subspaces[idx_ss_curr];
-    const int n_new_verts = 2 * n_new_lines;
+    int n_new_lines = ss_diags[idx_ss_prop].n_intn - ss_diags[idx_ss_curr].n_intn;
+    int n_new_times = ss_diags[idx_ss_prop].n_times - ss_diags[idx_ss_curr].n_times;
+    int n_verts_curr = ss_diags[idx_ss_curr].n_verts;
+    int n_verts_prop = ss_diags[idx_ss_prop].n_verts;
+    // The proposal ratio is the product of all inverse generation probabilities of
+    // the new variables; we initialize it with the temporal part, and the rest
+    // is computed in the seeding process (function 'seed_coords_prop')
+    proposal_ratio = std::pow(params.beta, n_new_times);
     // There is one extra time for outgoing vertex of polarization diagrams
-    const int n_new_times = n_new_lines + (diag_type == 1);
+    // int n_new_times = n_new_lines + (diag_type == 1);
     // The proposal ratio is the product of all inverse generation probabilities
     // of the new variables; for the temporal part of the distribution, the
     // factor of -1 accounts for the fixed COM coordinate
-    proposal_ratio = std::pow(params.beta, n_new_times - 1);
+    // proposal_ratio = std::pow(params.beta, n_new_times - 1);
     // Seed the new internal vertices (range(i) defined s.t. new ids start at
     // n_verts_curr), and update the proposal ratio to include the distribution
     // of each spatial variable
     int n_seeded = 0;
     coords_prop = coords_curr;
-    n_seeded += seed_coords_prop(n_verts_curr, n_verts_curr + n_new_verts);
+    n_seeded += seed_coords_prop(n_verts_curr, n_verts_prop);
     if (debug) {
       std::cout << "n_seeded = " << n_seeded << std::endl;
       std::cout << "n_new_times = " << n_new_times << std::endl;
     }
-    assert(n_seeded == n_new_times);
+    // Factor of -1 due to COM vertex (non-modifiable => does not contribute to n_times)
+    assert(n_new_times == n_seeded - 1);
     // Update the proposal diagram weight
     weight_prop = get_weight_prop();
     if (debug) {
@@ -580,20 +593,22 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
     // The proposal subspace is one lower in the list
     idx_ss_prop = idx_ss_curr - 1;
     // Get the number of removed interaction lines (i.e., vertex pairs)
-    const int n_rem_lines = subspaces[idx_ss_curr] - subspaces[idx_ss_prop];
-    const int n_verts_curr = 2 * subspaces[idx_ss_curr];
-    const int n_verts_prop = 2 * subspaces[idx_ss_prop];
-    const int n_rem_verts = 2 * n_rem_lines;
+    int n_rem_lines = ss_diags[idx_ss_curr].n_intn - ss_diags[idx_ss_prop].n_intn;
+    int n_rem_times = ss_diags[idx_ss_curr].n_times - ss_diags[idx_ss_prop].n_times;
+    int n_verts_curr = ss_diags[idx_ss_curr].n_verts;
+    int n_verts_prop = ss_diags[idx_ss_prop].n_verts;
+    // The proposal ratio is the product of all generation probabilities of the
+    // variables to be removed; we initialize it with the temporal part
+    proposal_ratio = std::pow(1.0 / params.beta, n_rem_times);
     // There is one extra time for outgoing vertex of polarization diagrams
-    const int n_rem_times = n_rem_lines + (diag_type == 1);
-    // We shift to an origin-centered binomial distribution: B(N, 1/2) - N/2
-    int lat_offset = -params.n_site_pd / 2;
-    int this_lat_posn;
+    // int n_rem_times = n_rem_lines + (diag_type == 1);
     // The proposal ratio is the product of all generation probabilities of the
     // variables to be removed; for the temporal part of the distribution, the
     // factor of -1 accounts for the fixed COM coordinate
-    proposal_ratio = std::pow(1.0 / params.beta, n_rem_times - 1);
-    for (int i = n_verts_curr - n_rem_verts; i < n_verts_curr; ++i) {
+    // proposal_ratio = std::pow(1.0 / params.beta, n_rem_times - 1);
+    // We shift to an origin-centered binomial distribution: B(N, 1/2) - N/2
+    int lat_offset = -params.n_site_pd / 2;
+    for (int i = n_verts_prop; i < n_verts_curr; ++i) {
       // Only the independent (non-COM and unconstrained)
       // vertices contribute a non-unity proposal distribution
       if ((i == 0) || (constraints[i] != -1)) {
@@ -601,7 +616,7 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
       }
       for (int j = 0; j < params.dim; ++j) {
         // std::cout << "current coordinate index: " << i << std::endl;
-        this_lat_posn = coords_curr[i].posn[j];
+        int this_lat_posn = coords_curr[i].posn[j];
         // Shift back to a binomial distribution centered at N / 2 to compute the pmf correctly
         if (this_lat_posn >= params.n_site_pd / 2.0) {
           this_lat_posn -= params.n_site_pd;
@@ -732,7 +747,7 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
       // Fourier transform to the Matsubara representation by MC, i.e., we
       // sample it; note that by convention, for any correlation function, the
       // second vertex in the list (v = 1) is the outgoing leg.
-      const hc_lat_st_coord &v_out_rt = coords_curr[n_ext - 1];
+      const hc_lat_st_coord &v_out_rt = coords_curr[v_meas_ext];
       // Increment each measurement sum with the current diagram sign and associated FT factor
       for (std::size_t j = 0; j < meas_sums[idx_ss_curr].size(); ++j) {
         // The current measurement coordinate for the
@@ -926,8 +941,11 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
     // Add the fermionic connections to the weight for every diagram
     const diagram_pool_el &diags = ss_diags[idx_ss_prop];
     // Constant prefactors
-    double prefactor = (2 * diags.s_ferm + 1) * std::pow(-params.U_loc, diags.n_intn) *
+    double prefactor = std::pow(-params.U_loc, diags.n_intn) *
                        std::pow(params.lat_const, params.dim * diags.n_posns);
+    if (diag_type < 2) {
+      prefactor *= (2 * diags.s_ferm + 1);
+    }
     // Get a reference to the bosonic edge list(s) (same for all diagrams!)
     for (int i_diag = 0; i_diag < diags.n_diags; ++i_diag) {
       // std::cout << "\nDiagram #" << i_diag << ":" << std::endl;

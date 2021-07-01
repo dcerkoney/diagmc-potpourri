@@ -18,9 +18,9 @@ bool normalize = true;    // Should the integration results be normalized?
 bool save_serial = true;  // Should the thread results be individually saved?
 bool batch_U = false;     // Should we perform a batch calculation for multiple U values?
 int n_warm = 100000;      // Number of steps in the burn-in / warmup phase
-int n_meas = 500000000;    // Total number of steps in the measurement phase (including skips)
+int n_meas = 500000000;     // Total number of steps in the measurement phase (including skips)
 int n_skip = 1;           // Number of steps to skip in ancy points to measure at
-int n_nu_meas = 1;        // Number of external frequency points to measure at
+int n_nu_meas = 10;        // Number of external frequency points to measure at
 int max_posn_shift = 3;   // Variable maximum step size in local position component shifts
 
 /* Lattice parameters */
@@ -31,9 +31,9 @@ int n_tau = (1 << 10);  // (= 2^10) Number of points in the imaginary-time mesh 
 // Cutoff for (BC) 'irreducible' lattice distances
 int n_site_irred = static_cast<int>(std::floor(n_site_pd / 2) + 1);
 double ef = 0.0;           // Fermi energy
-double beta = 10.0;        // Inverse temperature
+double beta = 2.0;        // Inverse temperature
 double t_hop = 1.0;        // Nearest-neighbor hopping parameter t
-double U_loc = 1.0;        // Hubbard U
+double U_loc = 2.0;        // Hubbard U
 double s_ferm = 0.5;       // Fermion spin
 double lat_const = 1.0;    // Hypercubic lattice constant a
 double delta_tau = 1e-10;  // Numerical imaginary time infinitesimal (defined by tau mesh)
@@ -49,19 +49,19 @@ double rs = rad_d_ball(1.0 / n0, dim);       // Wigner-Seitz radius (for HEG cor
 int num_elec = static_cast<int>(std::round(n_site * n0));  // Number of electrons in the lattice
 
 /* Diagram parameters */
-int order = 3;             // Order n in perturbation theory, measurement space V_n
+int order = 2;             // Order n in perturbation theory, measurement space V_n
 int n_legs = 2;            // Number of external legs in the V_n measurement
-int n_intn = order - 1;    // Number of interaction lines in all V_n graphs (order in U)
-int n_times = n_intn + 1;  // One time per internal line (static U), plus outgoing leg
-int n_posns = n_intn + 1;  // One position per internal line (local U), plus outgoing leg
+int n_intn = order;        // Number of interaction lines in all V_n graphs (order in U)
+int n_times = n_intn - 1;  // One modifiable time per internal line (static U)
+int n_posns = n_intn - 1;  // One modifiable position per internal line (local U)
 // Normalization diagram weight D_0 from quadratic fit vs. U at
 // beta = 10 and beta at U = 1 to produce ~80-90% sample time in V_n
 double D_0 = (-0.000143769 + 0.0143555 * U_loc + 0.0571346 * U_loc * U_loc) *
              (-0.0630317 + 0.0794737 * beta + 0.00206871 * beta * beta);
 
-std::string save_name = "chi_ch_hub_2dsqlat";  // Prefix for saved files
-std::string diag_type = "charge_poln";         // The class of measurement diagram(s)
-std::vector<int> subspaces = {0, order};       // V = V_0 \oplus V_n
+std::string save_name = "self_en_dyn_hub_2dsqlat";  // Prefix for saved files
+std::string diag_type = "self_en_dyn";              // The class of measurement diagram(s)
+std::vector<int> subspaces = {0, order};            // V = V_0 \oplus V_n
 
 /* Derived parameters loaded from Green's function data */
 double mu_tilde;  // The HF renormalized, aka reduced chemical potential,
@@ -382,7 +382,7 @@ void aggregate_and_save(int mpi_size, int mpi_rank, int mpi_main,
     add_attribute_h5<int>(integrator.n_descend, "n_descend", h5file);
     add_attribute_h5<int>(integrator.n_mutate, "n_mutate", h5file);
     add_attribute_h5<int>(integrator.max_order, "max_order", h5file);
-    add_attribute_h5<int>(integrator.n_ext, "n_ext", h5file);
+    add_attribute_h5<int>(integrator.v_meas_ext, "v_meas_ext", h5file);
     add_attribute_h5<int>(integrator.n_subspaces, "n_subspaces", h5file);
     add_attribute_h5<int>(static_cast<int>(integrator.timestamp), "timestamp", h5file);
     add_attribute_h5<double>(integrator.norm_const, "norm_const", h5file);
@@ -549,27 +549,24 @@ int main(int argc, char* argv[]) {
       // Build V_0 diagram pool (empty)
       const diagram_pool_el diags_v0;
 
-      // Build V_3 diagram pool; there are 5 nonzero topologies at third order (O(U^2))
-      const edge_list b_edge_list = {{2, 3}, {4, 5}};  // bos_edges(D^i_n) (common basis)
+      // Build V_2 diagram pool; there is only 1 nonzero topology at 2nd order (O(U^2))
+      const edge_list b_edge_list = {{0, 2}, {1, 3}};  // bos_edges(D^1_n)
       const edge_lists f_edge_lists = {
-          {{0, 4}, {4, 2}, {2, 1}, {1, 0}, {3, 5}, {5, 3}},  // ferm_edges(D^1_n)
-          {{1, 4}, {4, 2}, {2, 0}, {0, 1}, {3, 5}, {5, 3}},  // ferm_edges(D^2_n)
-          {{0, 4}, {4, 1}, {1, 2}, {2, 0}, {3, 5}, {5, 3}},  // ferm_edges(D^3_n)
-          {{0, 4}, {4, 2}, {2, 0}, {1, 3}, {3, 5}, {5, 1}},  // ferm_edges(D^4_n)
-          {{0, 4}, {4, 2}, {2, 0}, {1, 5}, {5, 3}, {3, 1}},  // ferm_edges(D^5_n)
+          {{0, 1}, {2, 3}, {3, 2}},  // ferm_edges(D^1_n)
       };
       const graphs_el graphs_vn(b_edge_list, f_edge_lists);
-      const std::vector<int> symm_factors = {1, 1, 1, 1, 1};
-      const std::vector<int> n_loops = {2, 2, 2, 2, 2};
+      const std::vector<int> symm_factors = {1};
+      const std::vector<int> n_loops = {1};
+
       const vertices_3pt_el nn_vertices(f_edge_lists);
       const diagram_pool_el diags_vn(s_ferm, order, n_legs, n_intn, n_times, n_posns, graphs_vn,
                                      symm_factors, n_loops, nn_vertices);
       if (debug && main_thread) {
-        double n_diags = 5;
-        double n_edges = 2 * order;
+        double n_diags = 1;
+        double n_ferm_edges = 2 * order - 1;
         for (size_t i = 0; i < n_diags; i++) {
           std::cout << "\nDiagram #" << i << ":\n";
-          for (size_t j = 0; j < n_edges; j++) {
+          for (size_t j = 0; j < n_ferm_edges; j++) {
             edge_t f_edge_in = nn_vertices.f_edge_in_lists[i][j];
             edge_t f_edge_out = nn_vertices.f_edge_out_lists[i][j];
             std::cout << "Fermionic edges in 3-vertex with base v_" << i << ": ";
@@ -583,9 +580,9 @@ int main(int argc, char* argv[]) {
       const diagram_pools_el diag_pools = {diags_v0, diags_vn};
 
       // External measurement frequencies
-      std::vector<double> nu_list;
-      for (int m = 0; m < n_nu_meas; m++) {
-        nu_list.push_back((2 * m) * M_PI / beta);  // i nu_m = i (2 m pi T)
+      std::vector<double> omega_list;
+      for (int n = 0; n < n_nu_meas; n++) {
+        omega_list.push_back((2 * n + 1) * M_PI / beta);  // i nu_m = i ((2 n + 1) pi T)
       }
 
       // External measurement k-path coordinate indices;
@@ -621,13 +618,15 @@ int main(int argc, char* argv[]) {
         for (int j = 0; j < n_k_meas; j++) {
           const int id = i * n_k_meas + j;
           mf_meas_coords.push_back(
-              hc_lat_mf_coord(id, nu_list[i], path_nk_coords[j], n_site_pd, lat_const));
+              hc_lat_mf_coord(id, omega_list[i], path_nk_coords[j], n_site_pd, lat_const));
         }
       }
       assert(n_meas_coords == mf_meas_coords.size());
       if (debug) {
-        for (auto coord : mf_meas_coords) {
-          coord.print();
+        // Print the list of current spacetime coordinates
+        for (size_t i = 0; i < mf_meas_coords.size(); i++) {
+          const bool toprule = (i == 0);
+          mf_meas_coords[i].print(std::cout.rdbuf(), toprule);
         }
       }
 

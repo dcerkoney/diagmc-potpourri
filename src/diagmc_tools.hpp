@@ -264,7 +264,7 @@ struct fmesh_2d {
   std::vector<double> y_grid;
   // Constructor
   fmesh_2d(const std::vector<std::vector<double>> &data_, const std::vector<double> &x_grid_,
-          const std::vector<double> &y_grid_)
+           const std::vector<double> &y_grid_)
       : data(data_), x_grid(x_grid_), y_grid(y_grid_) {}
 };
 
