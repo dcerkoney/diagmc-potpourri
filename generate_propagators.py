@@ -238,9 +238,10 @@ def main():
 
     print(r'High-symmetry path: \Gamma - X - M - \Gamma')
     print('Number of k-points in the path: ', n_k_pts)
-    print('Fermi momentum indices along path:\n', i_path_kf_locs)
-    print('Fermi momentum coordinates along path:\n',
-          path_nk_coords[i_path_kf_locs])
+    if len(i_path_kf_locs) > 0:
+        print('Fermi momentum indices along path:\n', i_path_kf_locs)
+        print('Fermi momentum coordinates along path:\n',
+              path_nk_coords[i_path_kf_locs])
     print('k'+str(path_nk_coords[len(i_path) // 3]) +
           ': '+str(path_k_coords[len(i_path) // 3]))
     assert len(np.unique(path_k_coords, axis=0)) == len(path_k_coords)
@@ -463,12 +464,12 @@ def main():
             fig, ax = plt.subplots()
             i_path = range(len(path_k_coords))
             # print(len(i_path))
-            ax.axvline(x=i_path_kf_locs[0], linestyle='-', color='0.0',
-                       zorder=-1, linewidth=1, label=r'$\mathbf{k}_F$')
-            for i_path_kf_loc in i_path_kf_locs[1:]:
-                ax.axvline(x=i_path_kf_loc, linestyle='-',
-                           color='0.0', zorder=-1, linewidth=1)
-
+            if len(i_path_kf_locs) > 0:
+                ax.axvline(x=i_path_kf_locs[0], linestyle='-', color='0.0',
+                           zorder=-1, linewidth=1, label=r'$\mathbf{k}_F$')
+                for i_path_kf_loc in i_path_kf_locs[1:]:
+                    ax.axvline(x=i_path_kf_loc, linestyle='-',
+                               color='0.0', zorder=-1, linewidth=1)
             ax.plot(i_path, 2 * pi0_sigma_quad_path[..., this_m], color='k', alpha=1,
                     label=r'$m = {}$ (FT via quadrature on dense cubic interpolant)'.format(this_m))
             # ax.plot(i_path, pi0_om_dense_path, '.-', color='b', alpha=1,

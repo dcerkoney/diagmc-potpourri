@@ -935,20 +935,22 @@ def get_lat_g0_r_tau(lat_const, n_site_pd, t_hop, taulist, dim, beta,
                 (np.zeros(ri_list.shape),) + (this_tau*np.ones(ri_list.shape),)
             ax3.plot((ri_list / rscale), g0_r_tau_interp(r_tau_eval), 'o-',
                      markersize=3, label=r'$\tau/\beta = $'+str('%g' % (this_tau/beta)))
-        ax3.plot((ri_list / rscale), np.ones((ri_list / rscale).shape)
-                 * n0 / 2.0, 'k--', label=r'$G(\mathbf{0},0^-) = n_0 / 2$')
-        ax3.plot((ri_list / rscale), -np.ones((ri_list / rscale).shape)
-                 * n0 / 2.0, 'k--', label=r'$G(\mathbf{0},\beta^-) = -n_0 / 2$')
-        if dim == 3:
+        if n0 == 1:
+            ax3.plot((ri_list / rscale), np.ones((ri_list / rscale).shape)
+                     * n0 / 2.0, 'k--', label=r'$G(\mathbf{0},0^-) = n_0 / 2$')
             ax3.plot((ri_list / rscale), -np.ones((ri_list / rscale).shape)
-                     * n0, 'k--', label=r'$G(\mathbf{0},\beta/2) = -n_0$')
-            # print(-n0 / g0_r_tau_interp((0.0, beta/2.0)), -g0_r_tau_interp((0.0, beta/2.0)) / n0)
+                     * n0 / 2.0, 'k--', label=r'$G(\mathbf{0},\beta^-) = -n_0 / 2$')
+            if dim == 3:
+                ax3.plot((ri_list / rscale), -np.ones((ri_list / rscale).shape)
+                         * n0, 'k--', label=r'$G(\mathbf{0},\beta/2) = -n_0$')
+                # print(-n0 / g0_r_tau_interp((0.0, beta/2.0)), -g0_r_tau_interp((0.0, beta/2.0)) / n0)
         ax3.set_xlabel(r'$r_x/a$')
         ax3.set_ylabel(r'$G_0(r_x,\tau)$')
         ax3.legend(loc='lower right')
         fig3.tight_layout()
         ax3.set_xlim(0, min(5, (ri_list / rscale)[-1]))
-        ax3.set_ylim(-1.1*n0/2.0, 1.1*n0/2.0)
+        if n0 == 1:
+            ax3.set_ylim(-1.1*n0/2.0, 1.1*n0/2.0)
         ax3_tick_spacing = 0.1
         ax3.yaxis.set_major_locator(ticker.MultipleLocator(ax3_tick_spacing))
         savename3 = safe_filename(
@@ -967,17 +969,19 @@ def get_lat_g0_r_tau(lat_const, n_site_pd, t_hop, taulist, dim, beta,
                 (np.zeros(ri_list.shape),) + (this_tau*np.ones(ri_list.shape),)
             ax4.plot((ri_list / rscale), g0_r_tau_interp(r_tau_eval), '-',
                      markersize=3, label=r'$\tau/\beta = $'+str('%g' % (this_tau/beta)))
-        ax4.plot((ri_list / rscale), np.ones((ri_list / rscale).shape)
-                 * n0 / 2.0, 'k--', label=r'$G(\mathbf{0},0^-) = n_0 / 2$')
-        ax4.plot((ri_list / rscale), -np.ones((ri_list / rscale).shape)
-                 * n0 / 2.0, 'k--', label=r'$G(\mathbf{0},\beta^-) = -n_0 / 2$')
-        if dim == 3:
+        if n0 == 1:
+            ax4.plot((ri_list / rscale), np.ones((ri_list / rscale).shape)
+                     * n0 / 2.0, 'k--', label=r'$G(\mathbf{0},0^-) = n_0 / 2$')
             ax4.plot((ri_list / rscale), -np.ones((ri_list / rscale).shape)
-                     * n0, 'k--', label=r'$G(\mathbf{0},\beta/2) = -n_0$')
+                     * n0 / 2.0, 'k--', label=r'$G(\mathbf{0},\beta^-) = -n_0 / 2$')
+            if dim == 3:
+                ax4.plot((ri_list / rscale), -np.ones((ri_list / rscale).shape)
+                         * n0, 'k--', label=r'$G(\mathbf{0},\beta/2) = -n_0$')
         ax4.set_xlabel(r'$r_x/a$')
         ax4.set_ylabel(r'$G_0(r_x,\tau)$')
         ax4.legend(loc='lower right')
-        ax4.set_ylim(-1.1*n0/2.0, 1.1*n0/2.0)
+        if n0 == 1:
+            ax4.set_ylim(-1.1*n0/2.0, 1.1*n0/2.0)
         ax4_tick_spacing = 0.1
         ax4.yaxis.set_major_locator(ticker.MultipleLocator(ax4_tick_spacing))
         fig4.tight_layout()

@@ -18,7 +18,7 @@ bool normalize = true;    // Should the integration results be normalized?
 bool save_serial = true;  // Should the thread results be individually saved?
 bool batch_U = false;     // Should we perform a batch calculation for multiple U values?
 int n_warm = 100000;      // Number of steps in the burn-in / warmup phase
-int n_meas = 5000000;     // Total number of steps in the measurement phase (including skips)
+int n_meas = 50000000;     // Total number of steps in the measurement phase (including skips)
 int n_skip = 1;           // Number of steps to skip in ancy points to measure at
 int n_nu_meas = 10;       // Number of external frequency points to measure at
 int max_posn_shift = 3;   // Variable maximum step size in local position component shifts
@@ -42,7 +42,8 @@ double delta_tau = 1e-10;  // Numerical imaginary time infinitesimal (defined by
 std::vector<double> U_batch = {0.1, 0.5, 1.0, 2.0, 4.0};
 
 /* Order-dependent (fluctuating) lattice parameters */
-double n0 = 1.0;  // Initial lattice electron density n0, set to half-filling
+double n0 = 0.3;  // Initial lattice electron density n0
+// double n0 = 1.0;  // Initial lattice electron density n0, set to half-filling
 double lat_length = lat_const * n_site_pd;   // Lattice length in Bohr radii
 double vol_lat = std::pow(lat_length, dim);  // Volume of the lattice
 double rs = rad_d_ball(1.0 / n0, dim);       // Wigner-Seitz radius (for HEG correspondence)

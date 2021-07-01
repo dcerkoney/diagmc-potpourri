@@ -251,11 +251,12 @@ def plot_chi_n_ch(params, run_subdir, job_name, logfile):
     if n_nu_meas == 1:
         # Make singleton axis list for compatibility with the static case (n_nu_meas = 1)
         fig, axes = plt.subplots()
-        axes.axvline(x=i_path_kf_locs[0], linestyle='-', color='0.0',
-                     zorder=-1, linewidth=1, label=r'$\mathbf{k}_F$')
-        for i_path_kf_loc in i_path_kf_locs[1:]:
-            axes.axvline(x=i_path_kf_loc, linestyle='-',
-                         color='0.0', zorder=-1, linewidth=1)
+        if len(i_path_kf_locs) > 0:
+            axes.axvline(x=i_path_kf_locs[0], linestyle='-', color='0.0',
+                         zorder=-1, linewidth=1, label=r'$\mathbf{k}_F$')
+            for i_path_kf_loc in i_path_kf_locs[1:]:
+                axes.axvline(x=i_path_kf_loc, linestyle='-',
+                             color='0.0', zorder=-1, linewidth=1)
         axes = [axes]
     # Plot the susceptibility for at most the first 5 frequency points as a function of momentum
     else:
@@ -484,11 +485,12 @@ def plot_static_chi_ch_together(params, run_subdir, job_name, logfile, plot_rpa=
 
     # Plot the susceptibility for the first 5 frequency points as a function of momentum
     fig, ax = plt.subplots()
-    ax.axvline(x=i_path_kf_locs[0], linestyle='-', color='0.0',
-               zorder=-1, linewidth=1, label=r'$\mathbf{k}_{\mathrm{F}}$')
-    for i_path_kf_loc in i_path_kf_locs[1:]:
-        ax.axvline(x=i_path_kf_loc, linestyle='-',
-                   color='0.0', zorder=-1, linewidth=1)
+    if len(i_path_kf_locs) > 0:
+        ax.axvline(x=i_path_kf_locs[0], linestyle='-', color='0.0',
+                   zorder=-1, linewidth=1, label=r'$\mathbf{k}_{\mathrm{F}}$')
+        for i_path_kf_loc in i_path_kf_locs[1:]:
+            ax.axvline(x=i_path_kf_loc, linestyle='-',
+                       color='0.0', zorder=-1, linewidth=1)
 
     # The expansion order n denotes order in U, i.e., N = (order - 1) = n_intn
     ax.plot(i_path, chi_0_ch_exact[0, :][i_path % params['n_k_meas']], 'o-',
@@ -681,11 +683,12 @@ def plot_self_en(params, run_subdir, job_name, logfile):
     ###########################################################
 
     fig, ax = plt.subplots()
-    ax.axvline(x=i_path_kf_locs[0], linestyle='-', color='0.0',
-                 zorder=-1, linewidth=1, label=r'$\mathbf{k}_F$')
-    for i_path_kf_loc in i_path_kf_locs[1:]:
-        ax.axvline(x=i_path_kf_loc, linestyle='-',
-                   color='0.0', zorder=-1, linewidth=1)
+    if len(i_path_kf_locs) > 0:
+        ax.axvline(x=i_path_kf_locs[0], linestyle='-', color='0.0',
+                    zorder=-1, linewidth=1, label=r'$\mathbf{k}_F$')
+        for i_path_kf_loc in i_path_kf_locs[1:]:
+            ax.axvline(x=i_path_kf_loc, linestyle='-',
+                    color='0.0', zorder=-1, linewidth=1)
     for i, self_en_means_cmpt in enumerate(cplx_cmpts(self_en_means)):
         ax.plot(i_path, self_en_means_cmpt[0, :][i_path % params['n_k_meas']], 'o-',
                 markersize=2.5, color=component_colors[i],
@@ -770,11 +773,12 @@ def plot_self_en(params, run_subdir, job_name, logfile):
                     self_en_means_compt[iom, :][i_path % params['n_k_meas']] -
                     self_en_errs[iom, :][i_path % params['n_k_meas']],
                     color=colorlist[iom], alpha=0.3)
-        ax.axvline(x=i_path_kf_locs[0], linestyle='-', color='0.0',
-                   zorder=-1, linewidth=1, label=r'$\mathbf{k}_F$')
-        for i_path_kf_loc in i_path_kf_locs[1:]:
-            ax.axvline(x=i_path_kf_loc, linestyle='-',
-                       color='0.0', zorder=-1, linewidth=1)
+        if len(i_path_kf_locs) > 0:
+            ax.axvline(x=i_path_kf_locs[0], linestyle='-', color='0.0',
+                       zorder=-1, linewidth=1, label=r'$\mathbf{k}_F$')
+            for i_path_kf_loc in i_path_kf_locs[1:]:
+                ax.axvline(x=i_path_kf_loc, linestyle='-',
+                           color='0.0', zorder=-1, linewidth=1)
         legend = ax.legend(loc='upper left', ncol=3, framealpha=1.0)
         # Add some evenly-spaced minor ticks to the axis
         n_minor_ticks = 9
@@ -836,7 +840,7 @@ def plot_self_en(params, run_subdir, job_name, logfile):
 
     for i, ax in enumerate(axes):
         local_self_en_means_compt = cplx_cmpts(local_self_en_means)[i]
-        ax.axhline(y=0, linestyle='--', color='0.0', zorder=-1, linewidth=1)
+        # ax.axhline(y=0, linestyle='--', color='0.0', zorder=-1, linewidth=1)
         ax.plot(om_list, local_self_en_means_compt, 'o-',
                 markersize=2.5, color=component_colors[i])
         if n_threads > 1:
@@ -846,8 +850,8 @@ def plot_self_en(params, run_subdir, job_name, logfile):
         ax.set_title(rf"{component_names[i]}$\Sigma^{{({params['n_intn']})}}_{{\mathrm{{loc}}}}$" +
                      rf'$[G_{{H}}, U](i\omega_n)$', pad=13)
         ax.text(
-            x=0.73 - 0.02,
-            y=0.88,
+            x=0.021,
+            y=0.953,
             s=fr"$n = {params['n0']:g},\; U = {params['U_loc']:g},\; \beta = {params['beta']:g}$",
             horizontalalignment='left',
             verticalalignment='center',
@@ -856,8 +860,8 @@ def plot_self_en(params, run_subdir, job_name, logfile):
                 0.8, 0.8, 0.8), fc=(1, 1, 1), alpha=1.0),
         )
         ax.text(
-            x=0.625 - 0.02,
-            y=0.88 - 0.08,
+            x=0.021,
+            y=0.878,
             s=fr"$N_{{\mathrm{{thread}}}}={n_threads},\, N_{{\mathrm{{meas}}}} = {params['n_meas']:g}$",
             horizontalalignment='left',
             verticalalignment='center',
