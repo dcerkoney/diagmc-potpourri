@@ -109,7 +109,7 @@ For a parallel run with, say, 8 threads,
    ```sh
     make && mpirun -n 8 ./hub_2dsqlat_rt_mcmc_chi_ch_example.exe
    ```
-   
+
 Runing the examples at the default settings should take no more than a few minutes.
 However, reproducing all the figures provided (e.g., for the susceptibilities, by increasing to [`n_meas = 50000000`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/d8035967acc7e31e4fbbbb16093cc0b762f5004a/src/hub_2dsqlat_rt_mcmc_chi_ch_example.cpp#L21), [`n_nu_meas = 5`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/d8035967acc7e31e4fbbbb16093cc0b762f5004a/src/hub_2dsqlat_rt_mcmc_chi_ch_example.cpp#L23), and setting [`batch_U = true`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/d8035967acc7e31e4fbbbb16093cc0b762f5004a/src/hub_2dsqlat_rt_mcmc_chi_ch_example.cpp#L19)) will take more time—around half an hour on a typical machine.
 
@@ -126,6 +126,19 @@ Finally, use the [plot.py](plot.py) script for postprocessing:
    ```sh
     python3 plot.py latest
    ```
+
+
+<!-- EXAMPLES -->
+## Examples
+
+![alt text](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/a207e13a9d8ffb90d8a9b66ab2cd6fd704e5e057/results/chi_ch_examples/beta=10,%20U=1/static_chi_ch_2dsqhub_run_1624927311.pdf?raw=true)
+
+![alt text](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/a207e13a9d8ffb90d8a9b66ab2cd6fd704e5e057/results/chi_ch_examples/beta=10,%20U=1/chi_2_ch_2dsqhub_run_1624927311.pdf?raw=true)
+
+![alt text](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/a207e13a9d8ffb90d8a9b66ab2cd6fd704e5e057/results/self_en_examples/beta=2,%20U=2/re_sigma_2_2dsqhub_run_1625109804.pdf?raw=true)
+
+![alt text](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/a207e13a9d8ffb90d8a9b66ab2cd6fd704e5e057/results/self_en_examples/beta=2,%20U=2/sigma_2_iom0_2dsqhub_run_1625109804.pdf?raw=true)
+
 
 <!-- CONTACT -->
 ## Contact
