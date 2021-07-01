@@ -1,5 +1,5 @@
 # diagmc-hubbard-2dsqlat
-Low-order diagrammatic Monte-Carlo (DiagMC) for the Hubbard model on the 2D square lattice.
+Low-order diagrammatic Monte-Carlo (DiagMC) for the Hubbard model on the 2D square lattice in real space.
 
 ![alt text](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/779b25f5414ce13ac169260bd66a82eafba893a1/results/chi_ch_examples/beta=10,%20U=1/chi_2_ch_2dsqhub_run_1624927311.png?raw=true)
 
