@@ -10,8 +10,8 @@ Low-order diagrammatic Monte-Carlo (DiagMC) for the Hubbard model on the 2D squa
 </p>
 
 <p align="middle">
-  <img src="https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/5cdef140969020ceec51c41c87d8479fb56c512b/results/self_en_examples/n=0.3,%20beta=2,%20U=2/re_sigma_2_loc_2dsqhub_run_1625172983.png?raw=true" width="276" />
   <img src="https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/5cdef140969020ceec51c41c87d8479fb56c512b/results/self_en_examples/n=0.3,%20beta=2,%20U=2/im_sigma_2_loc_2dsqhub_run_1625172983.png?raw=true" width="276" /> 
+  <img src="https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/5cdef140969020ceec51c41c87d8479fb56c512b/results/self_en_examples/n=0.3,%20beta=2,%20U=2/re_sigma_2_loc_2dsqhub_run_1625172983.png?raw=true" width="276" />
   <img src="https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/5cdef140969020ceec51c41c87d8479fb56c512b/results/self_en_examples/n=0.3,%20beta=2,%20U=2/sigma_2_iom0_2dsqhub_run_1625172983.png?raw=true" width="276" />
 </p>
 
