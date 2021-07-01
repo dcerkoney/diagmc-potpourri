@@ -49,11 +49,11 @@ def main():
     usage = """usage: %prog [ options ]"""
     parser = optparse.OptionParser(usage)
     parser.add_option("--dim", type="int",    default=2,
-                      help="Spatial dimension of the electron gas (default is 2); allowed values: {2, 3}.")
+                      help="Spatial dimension of the lattice (default is 2); allowed values: {2, 3}.")
     parser.add_option("--target_n0", type="float",  default=None,
                       help="Target density in units of the lattice constant; since the number of electrons "
                       + "is coarse-grained, the actual density may differ slightly. Default (n0 = 1) "
-                      + "corresponds to half-filling (mu = 0).")
+                      + "corresponds to half-filling (mu0 ~= 0).")
     parser.add_option("--target_mu0", type="float",  default=None,
                       help="Target (noninteracting) chemical potential. If supplied, we work at "
                       + "fixed chemical potential and variable density; otherwise, we use a "
@@ -67,11 +67,10 @@ def main():
     parser.add_option("--n_site_pd", type="int",    default=30,
                       help="Number of sites per direction.")
     parser.add_option("--lat_const", type="float",    default=1.0,
-                      help="Lattice constant, in Bohr radii (for working at fixed "
-                      + "'N' and 'a'; we will calculate 'V' on-the-fly).")
+                      help="Lattice constant in Bohr radii.")
     parser.add_option("--lat_length", type="float",    default=None,
-                      help="Lattice length, in Bohr radii (for working at "
-                      + "fixed V; we will calculate 'a' on-the-fly).")
+                      help="Lattice length in Bohr radii (for working at "
+                      + "fixed V: calculate 'a' on-the-fly).")
     parser.add_option("--n_tau",  type="int",   default=2**9,
                       help="Number of tau points in the nonuniform mesh "
                       + "used for downsampling (an even number).")
@@ -84,7 +83,7 @@ def main():
     parser.add_option("--overwrite",   default=False,  action="store_true",
                       help="Overwrite existing propagator data?")
     parser.add_option("--plot_g0",   default=False,  action="store_true",
-                      help="Option for plotting the lattice Green's functions.")
+                      help="Option for plotting the lattice Green's function.")
     parser.add_option("--plot_pi0",   default=False,  action="store_true",
                       help="Option for plotting the polarization bubble P_0.")
 
