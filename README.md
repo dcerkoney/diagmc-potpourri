@@ -1,6 +1,11 @@
 # diagmc-hubbard-2dsqlat
 Low-order diagrammatic Monte-Carlo (DiagMC) for the Hubbard model on the 2D square lattice.
 
+<p align="middle">
+  <img src="https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/ae3898311cf53d8a9cbba1fedbe227ca32552141/results/self_en_examples/self_en_dyn_n=2_bHFI.png?raw=true" width="100" />
+  <img src="https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/ae3898311cf53d8a9cbba1fedbe227ca32552141/results/chi_ch_examples/charge_poln_diags_n=2_bHFI.png?raw=true" width="728" /> 
+</p>
+
 ![alt text](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/779b25f5414ce13ac169260bd66a82eafba893a1/results/chi_ch_examples/beta=10,%20U=1/chi_2_ch_2dsqhub_run_1624927311.png?raw=true)
 
 <p align="middle">
