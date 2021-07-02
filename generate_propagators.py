@@ -459,7 +459,6 @@ def main():
                 # ax.set_ylabel('Absolute error')
                 # ax.grid(True)
                 # fig.savefig(savename)
-
             # Plot the results
             fig, ax = plt.subplots()
             i_path = range(len(path_k_coords))
