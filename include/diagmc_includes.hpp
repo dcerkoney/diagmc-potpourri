@@ -14,7 +14,7 @@
 #include <random>  // std::random_device
 #include <stdexcept>
 
-/* Data structures */
+/* Standard data structures */
 #include <array>
 #include <bitset>
 #include <cmath>
@@ -24,9 +24,6 @@
 #include <tuple>
 #include <vector>
 
-/* HDF5 includes */
-#include "H5Cpp.h"
-
 /* Boost includes */
 #include <boost/math/distributions/arcsine.hpp>
 #include <boost/math/distributions/binomial.hpp>
@@ -35,7 +32,14 @@
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
 #include <boost/random/uniform_real_distribution.hpp>
+
 // NOTE: We have used the stdlib random_device for simplicity.
 //       This will not generate true random seeds on all systems,
 //       so should be changed to the following in the future!
 // #include <boost/random/random_device.hpp>
+
+/* HDF5 header */
+#include "H5Cpp.h"
+
+/* JSON header */
+#include "json.hpp"
