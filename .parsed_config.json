@@ -1,0 +1,48 @@
+{
+    "diag_params": {
+        "D_0": null,
+        "diag_type": "charge_poln",
+        "n_intn": 2,
+        "n_legs": 2,
+        "n_posns": 3,
+        "n_times": 3,
+        "order": 3,
+        "save_name": "chi_ch_hub_2dsqlat",
+        "subspaces": [
+            0,
+            3
+        ]
+    },
+    "lattice_params": {
+        "U_batch": [
+            0.1,
+            0.5,
+            1.0,
+            2.0,
+            4.0
+        ],
+        "U_loc": 1.0,
+        "beta": 10.0,
+        "delta_tau": 1e-10,
+        "dim": 2,
+        "ef": 0.0,
+        "lat_const": 1.0,
+        "n0": 1.0,
+        "n_site_pd": 30,
+        "n_tau": 1024,
+        "s_ferm": 0.5,
+        "t_hop": 1.0
+    },
+    "mcmc_params": {
+        "batch_U": false,
+        "debug": false,
+        "max_posn_shift": 3,
+        "n_meas": 5000000,
+        "n_nu_meas": 1,
+        "n_skip": 1,
+        "n_warm": 100000,
+        "normalize": true,
+        "save_serial": true,
+        "verbose": true
+    }
+}

@@ -8,6 +8,9 @@
 //                               for the Hubbard model on a 2D square lattice
 using meas_t = mcmc_cfg_2d_sq_hub_mf_meas::meas_t;
 
+// Simplify namespace for convenience
+using json = nlohmann::json;
+
 // Hard-coded parameters for a test calculation
 namespace test_input {
 
@@ -27,9 +30,9 @@ int max_posn_shift = 3;   // Variable maximum step size in local position compon
 int dim = 2;         // Spatial dimensionality of the problem
 int n_site_pd = 30;  // Number of lattice sites along a single direction (i.e., L / a)
 int n_site = static_cast<int>(std::pow(n_site_pd, dim));  // Total number of lattice sites
-int n_tau = (1 << 10);  // (= 2^10) Number of points in the imaginary-time mesh [0, beta)
 // Cutoff for (BC) 'irreducible' lattice distances
 int n_site_irred = static_cast<int>(std::floor(n_site_pd / 2) + 1);
+int n_tau = (1 << 10);  // (= 2^10) Number of points in the imaginary-time mesh [0, beta)
 double ef = 0.0;           // Fermi energy
 double beta = 10.0;        // Inverse temperature
 double t_hop = 1.0;        // Nearest-neighbor hopping parameter t
@@ -476,6 +479,14 @@ int main(int argc, char* argv[]) {
   // Don't save serial results if we run with MPI
   save_serial = false;
 #endif
+
+  // Parse the config file (JSON with Comments) as JSON
+  std::ifstream config_file("config.jsonc");
+  json config = jsonc_parse(config_file);
+
+  // Write parsed JSON to file for debugging
+  std::ofstream jout_file(".parsed_config.json");
+  jout_file << std::setw(4) << config << std::endl;
 
   std::vector<double> U_list;
   if (batch_U) {

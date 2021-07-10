@@ -8,6 +8,9 @@
 //                               for the Hubbard model on a 2D square lattice
 using meas_t = mcmc_cfg_2d_sq_hub_mf_meas::meas_t;
 
+// Simplify namespace for convenience
+using json = nlohmann::json;
+
 // Hard-coded parameters for a test calculation
 namespace test_input {
 

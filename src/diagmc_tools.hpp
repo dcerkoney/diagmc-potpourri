@@ -133,6 +133,13 @@ constexpr bool is_pinned(int i_constr, int i_vert, int n_legs, int i_first_bos, 
   }
 }
 
+// Convenience function for parsing JSONC (JSON with Comments) files
+template <typename InputType>
+static json::basic_json_t jsonc_parse(InputType &&i) {
+  bool ignore_comments = true;
+  return json::parse(std::forward<InputType>(i), nullptr, true, ignore_comments);
+}
+
 // Perform some simple checks on H5 data/pred types (to avoid unexpected casting)
 template <typename Tstd, typename Th5 = H5::PredType>
 void check_h5type(std::string name, H5::DataType datatype, Th5 predtype) {
