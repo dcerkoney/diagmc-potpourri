@@ -5,7 +5,6 @@
 #include <cassert>
 #include <cmath>  // std::pow
 #include <ctime>
-#include <filesystem>
 #include <fstream>
 #include <functional>
 #include <iostream>
@@ -13,6 +12,7 @@
 #include <numeric>
 #include <random>  // std::random_device
 #include <stdexcept>
+#include <type_traits>
 
 /* Standard data structures */
 #include <array>
@@ -25,7 +25,10 @@
 #include <vector>
 
 /* Boost includes */
+#include <boost/version.hpp>
+#if BOOST_VERSION >= 106500
 #include <boost/math/distributions/arcsine.hpp>
+#endif
 #include <boost/math/distributions/binomial.hpp>
 #include <boost/random/binomial_distribution.hpp>
 #include <boost/random/discrete_distribution.hpp>

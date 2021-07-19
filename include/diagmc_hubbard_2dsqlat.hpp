@@ -756,15 +756,15 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
         // The FT factor is: e^{-i (p * r - nu * tau)}
         p_dot_r = 0.0;
         nu_tau = v_out_mf_j.imfreq * v_out_rt.itime;
-        // for (std::size_t k = 0; k < params.dim; ++k) {
-        //   p_dot_r += v_out_mf_j.mom[k] * v_out_rt.posn[k];
-        // }
-        // p_dot_r *= (2.0 * M_PI / static_cast<double>(params.n_site_pd));
+        for (std::size_t k = 0; k < params.dim; ++k) {
+          p_dot_r += v_out_mf_j.mom[k] * v_out_rt.posn[k];
+        }
         // Since the stored vectors mom and posn are index vectors,
         // include the missing scale factor (2 pi a / L) = (2 pi / N)
-        p_dot_r = (2.0 * M_PI / static_cast<double>(params.n_site_pd)) *
-                  std::inner_product(v_out_mf_j.mom.begin(), v_out_mf_j.mom.end(),
-                                     v_out_rt.posn.begin(), 0.0);
+        p_dot_r *= (2.0 * M_PI / static_cast<double>(params.n_site_pd));
+        // p_dot_r = (2.0 * M_PI / static_cast<double>(params.n_site_pd)) *
+        //           std::inner_product(v_out_mf_j.mom.begin(), v_out_mf_j.mom.end(),
+        //                              v_out_rt.posn.begin(), 0.0);
         // Explicitly enforce the time-reversal symmetry (TRS) for
         // charge (and longitudinal spin) polarization measurements
         if (diag_type == 1) {

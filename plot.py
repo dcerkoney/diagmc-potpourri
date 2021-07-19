@@ -360,9 +360,21 @@ def plot_static_chi_ch_together(params, run_subdir, job_name, logfile, plot_rpa=
     for propr_path in propr_paths:
         pi0_path = pathlib.PosixPath(propr_path)
         pi0_data = h5py.File(pi0_path, 'r')
-        # Check for consistency of relevant attributes
-        params_consistent = (params['beta'] == pi0_data.attrs['beta']
-                             and params['n_site_pd'] == pi0_data.attrs['n_site_pd'])
+        # Check for consistency of relevant h5 attributes
+        try:
+            params_consistent = (params['n0'] == pi0_data.attrs['n0']
+                                 and params['mu'] == pi0_data.attrs['mu']
+                                 and params['mu_tilde'] == pi0_data.attrs['mu_tilde']
+                                 and params['lat_const'] == pi0_data.attrs['lat_const']
+                                 and params['n_site_pd'] == pi0_data.attrs['n_site_pd']
+                                 and params['dim'] == pi0_data.attrs['dim']
+                                 and params['beta'] == pi0_data.attrs['beta']
+                                 and params['t_hop'] == pi0_data.attrs['t_hop']
+                                 and params['U_loc'] == pi0_data.attrs['U_loc'])
+        except AttributeError:
+            continue
+        # params_consistent = (params['beta'] == pi0_data.attrs['beta']
+        #                      and params['n_site_pd'] == pi0_data.attrs['n_site_pd'])
         if params_consistent:
             consistent_poln_path = pi0_path
             found_consistent_poln = True

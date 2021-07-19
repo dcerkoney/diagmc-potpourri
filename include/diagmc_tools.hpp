@@ -9,7 +9,6 @@ typedef std::bitset<16> IntBits;
 // Distribution / random number generator typedefs
 typedef boost::random::mt19937 Rand_engine;
 typedef boost::math::binomial Binom_dist;
-typedef boost::math::arcsine_distribution<double> Arcsin_dist;
 typedef boost::random::binomial_distribution<int> Binom_gen;
 typedef boost::random::uniform_int_distribution<int> DUnif_gen;
 typedef boost::random::uniform_real_distribution<double> Unif_gen;
@@ -31,30 +30,43 @@ DUnif_gen select_modifiable;
 Discr_gen posn_shift_gen;
 Binom_gen lat_binomial;
 Binom_dist lat_binomial_dist;
-Arcsin_dist arcsin_dist(0.0, 1.0);
 
 class not_implemeted_error : public virtual std::logic_error {
  public:
   using std::logic_error::logic_error;
 };
 
-// Arcsine distribution for imaginary time generation
-double arcsin_gen(Rand_engine rand_gen) {
-  return boost::math::quantile(arcsin_dist, std_uniform(rand_gen));
-}
-
+#if __cplusplus >= 201703L
 // Computes (a modulo b) for integral or floating types
 // following the standard mathematical (Pythonic) convention
 // for negative numbers, i.e., pymod(a,b) = (b + (a % b)) % b.
 template <typename T>
-constexpr T pymod(const T &a, const T &b) {
-  static_assert(std::is_integral_v<T> || std::is_floating_point_v<T>);
-  if constexpr (std::is_integral_v<T>) {
+constexpr T pymod(T a, T b) {
+  static_assert(std::is_integral<T>::value || std::is_floating_point<T>::value);
+  if constexpr (std::is_integral<T>::value) {
     return (b + (a % b)) % b;
   } else {
     return std::fmod(b + std::fmod(a, b), b);
   }
 }
+#else
+// Computes (a modulo b) for integers following
+// the standard mathematical (Pythonic) convention for
+// negative numbers, i.e., pymod(a,b) = (b + (a % b)) % b.
+template <typename T, std::enable_if_t<std::is_integral<T>::value, bool> = true>
+constexpr T pymod(T a, T b) {
+  static_assert(std::is_integral<T>::value);
+  return (b + (a % b)) % b;
+}
+// Computes (a modulo b) for floating-point doubles
+// following the standard mathematical (Pythonic) convention
+// for negative numbers, i.e., pymod(a,b) = (b + (a % b)) % b.
+template <typename T, std::enable_if_t<std::is_floating_point<T>::value, bool> = true>
+constexpr T pymod(T a, T b) {
+  static_assert(std::is_floating_point<T>::value);
+  return std::fmod(b + std::fmod(a, b), b);
+}
+#endif
 
 // Type-safe signum function template; see:
 // https://stackoverflow.com/questions/1903954/is-there-a-standard-sign-function-signum-sgn-in-c-c
@@ -133,13 +145,6 @@ constexpr bool is_pinned(int i_constr, int i_vert, int n_legs, int i_first_bos, 
   }
 }
 
-// Convenience function for parsing JSONC (JSON with Comments) files
-template <typename InputType>
-static json::basic_json_t jsonc_parse(InputType &&i) {
-  bool ignore_comments = true;
-  return json::parse(std::forward<InputType>(i), nullptr, true, ignore_comments);
-}
-
 // Perform some simple checks on H5 data/pred types (to avoid unexpected casting)
 template <typename Tstd, typename Th5 = H5::PredType>
 void check_h5type(std::string name, H5::DataType datatype, Th5 predtype) {
@@ -157,27 +162,27 @@ void check_h5type(std::string name, H5::DataType datatype, Th5 predtype) {
 template <typename Tattr, typename Tloc = H5::Group>
 Tattr load_attribute_h5(std::string attr_name, Tloc h5loc) {
   Tattr attr_buffer;
-  if (!(std::is_base_of_v<H5::Group, Tloc> || std::is_same_v<H5::DataSet, Tloc>)) {
+  if (!(std::is_base_of<H5::Group, Tloc>::value || std::is_same<H5::DataSet, Tloc>::value)) {
     throw not_implemeted_error(
         "Invalid H5 object supplied; should be an H5 file, group, or dataset.");
   }
-  if (std::is_same_v<Tattr, bool>) {
+  if (std::is_same<Tattr, bool>::value) {
     H5::Attribute attr = h5loc.openAttribute(attr_name);
     H5::DataType attr_type = attr.getDataType();
     check_h5type<bool>(attr_name, attr_type, H5::PredType::NATIVE_HBOOL);
     attr.read(H5::PredType::NATIVE_HBOOL, &attr_buffer);
-  } else if (std::is_same_v<Tattr, std::string>) {
+  } else if (std::is_same<Tattr, std::string>::value) {
     H5::StrType h5str_type(H5::PredType::C_S1, H5T_VARIABLE);
     H5::Attribute attr = h5loc.openAttribute(attr_name);
     H5::DataType attr_type = attr.getDataType();
     check_h5type<std::string, H5::StrType>(attr_name, attr_type, h5str_type);
     attr.read(h5str_type, &attr_buffer);
-  } else if (std::is_integral_v<Tattr>) {
+  } else if (std::is_integral<Tattr>::value) {
     H5::Attribute attr = h5loc.openAttribute(attr_name);
     H5::DataType attr_type = attr.getDataType();
     check_h5type<long>(attr_name, attr_type, H5::PredType::NATIVE_LONG);
     attr.read(H5::PredType::NATIVE_LONG, &attr_buffer);
-  } else if (std::is_floating_point_v<Tattr>) {
+  } else if (std::is_floating_point<Tattr>::value) {
     H5::Attribute attr = h5loc.openAttribute(attr_name);
     H5::DataType attr_type = attr.getDataType();
     check_h5type<double>(attr_name, attr_type, H5::PredType::NATIVE_DOUBLE);
@@ -193,23 +198,23 @@ Tattr load_attribute_h5(std::string attr_name, Tloc h5loc) {
 // NOTE: may throw an exception, which should be caught!
 template <typename Tattr, typename Tloc = H5::Group>
 void add_attribute_h5(Tattr param, std::string param_name, Tloc h5loc) {
-  if (!(std::is_base_of_v<H5::Group, Tloc> || std::is_same_v<H5::DataSet, Tloc>)) {
+  if (!(std::is_base_of<H5::Group, Tloc>::value || std::is_same<H5::DataSet, Tloc>::value)) {
     throw not_implemeted_error(
         "Invalid H5 object supplied; should be an H5 file, group, or dataset.");
   }
   H5std_string attr_name(param_name);
   H5::DataSpace attr_space(H5S_SCALAR);
-  if (std::is_same_v<Tattr, bool>) {
+  if (std::is_same<Tattr, bool>::value) {
     H5::Attribute attr = h5loc.createAttribute(attr_name, H5::PredType::NATIVE_HBOOL, attr_space);
     attr.write(H5::PredType::NATIVE_HBOOL, &param);
-  } else if (std::is_same_v<Tattr, std::string>) {
+  } else if (std::is_same<Tattr, std::string>::value) {
     H5::StrType h5str_type(H5::PredType::C_S1, H5T_VARIABLE);
     H5::Attribute attr = h5loc.createAttribute(attr_name, h5str_type, attr_space);
     attr.write(h5str_type, &param);
-  } else if (std::is_integral_v<Tattr>) {
+  } else if (std::is_integral<Tattr>::value) {
     H5::Attribute attr = h5loc.createAttribute(attr_name, H5::PredType::NATIVE_INT, attr_space);
     attr.write(H5::PredType::NATIVE_INT, &param);
-  } else if (std::is_floating_point_v<Tattr>) {
+  } else if (std::is_floating_point<Tattr>::value) {
     H5::Attribute attr = h5loc.createAttribute(attr_name, H5::PredType::NATIVE_DOUBLE, attr_space);
     attr.write(H5::PredType::NATIVE_DOUBLE, &param);
   } else {
@@ -286,10 +291,10 @@ class interp_1d {
   // An explicit default constructor
   interp_1d() : f_mesh({}, {}) {}
   // Use bilinear interpolation to evaluate the interpoland at any point
-  double eval(const double &point) const { return linear_interp(f_mesh, point); }
+  double eval(double point) const { return linear_interp(f_mesh, point); }
   // Evaluates the antiperiodic extension of the interp_1d object
   // using information on the principle interval [0, period).
-  double ap_eval(const double &point, const double &period) const {
+  double ap_eval(double point, double period) const {
     int sign = 1;
     double point_shifted = point;
     while (point_shifted < 0) {
@@ -306,7 +311,7 @@ class interp_1d {
  private:
   // Linear interpolation function; approximates f(x) from mesh data.
   // NOTE: This algorithm applies regardless of mesh uniformity!
-  double linear_interp(const fmesh_1d &f_mesh, const double &x) const {
+  double linear_interp(const fmesh_1d &f_mesh, double x) const {
     // If the values are outside the range of the x and y grids,
     // return 0 (i.e., use extrapolation with a fill value of zero)
     if ((x < f_mesh.x_grid.front()) || (x > f_mesh.x_grid.back())) {
@@ -345,12 +350,12 @@ class f_interp_1d : public interp_1d {
   // Fields
   double beta;
   // Constructor
-  f_interp_1d(const fmesh_1d &f_mesh_, const double beta_) : interp_1d(f_mesh_), beta(beta_) {}
+  f_interp_1d(const fmesh_1d &f_mesh_, double beta_) : interp_1d(f_mesh_), beta(beta_) {}
   // Use bilinear interpolation to evaluate the interpoland at any point
-  double eval(const double &point) const { return linear_interp(f_mesh, point); }
+  double eval(double point) const { return linear_interp(f_mesh, point); }
   // Evaluates the antiperiodic extension of the fermionic Green's function
   // object using information on the principle interval [0, beta).
-  double ap_eval(const double &point) const {
+  double ap_eval(double point) const {
     int sign = 1;
     double point_shifted = point;
     while (point_shifted < 0) {
@@ -367,7 +372,7 @@ class f_interp_1d : public interp_1d {
  private:
   // Linear interpolation function; approximates f(x) from mesh data.
   // NOTE: This algorithm applies regardless of mesh uniformity!
-  double linear_interp(const fmesh_1d &f_mesh, const double &x) const {
+  double linear_interp(const fmesh_1d &f_mesh, double x) const {
     // If the values are outside the range of the x and y grids,
     // return 0 (i.e., use extrapolation with a fill value of zero)
     if ((x < f_mesh.x_grid.front()) || (x > f_mesh.x_grid.back())) {
@@ -409,21 +414,21 @@ typedef lattice_3d<f_interp_1d> lattice_3d_f_interp;
 class b_interp_1d : public interp_1d {
  public:
   // Fields
-  const double beta;
+  double beta;
   // Constructor
-  b_interp_1d(const fmesh_1d &f_mesh_, const double beta_) : interp_1d(f_mesh_), beta(beta_) {}
+  b_interp_1d(const fmesh_1d &f_mesh_, double beta_) : interp_1d(f_mesh_), beta(beta_) {}
   // Use bilinear interpolation to evaluate the interpoland at any point
-  double eval(const double &point) const { return linear_interp(f_mesh, point); }
+  double eval(double point) const { return linear_interp(f_mesh, point); }
   // Evaluates the periodic extension of the bosonic Green's function
   // object using information on the principle interval [0, beta).
-  double p_eval(const double &point) const {
-    return linear_interp(f_mesh, pymod<const double>(point, beta));
+  double p_eval(double point) const {
+    return linear_interp(f_mesh, pymod<double>(point, beta));
   }
 
  private:
   // Linear interpolation function; approximates f(x) from mesh data.
   // NOTE: This algorithm applies regardless of mesh uniformity!
-  double linear_interp(const fmesh_1d &f_mesh, const double &x) const {
+  double linear_interp(const fmesh_1d &f_mesh, double x) const {
     // If the values are outside the range of the x and y grids,
     // return 0 (i.e., use extrapolation with a fill value of zero)
     if ((x < f_mesh.x_grid.front()) || (x > f_mesh.x_grid.back())) {
@@ -622,8 +627,8 @@ struct diagram_pool_el {
   // Constructors
   diagram_pool_el();
   // Constructor for the case of spinless (Hubbard, G0W0) integrators
-  diagram_pool_el(const double s_ferm_, const int order_, const int n_legs_, const int n_intn_,
-                  const int n_times_, const int n_posns_, const graphs_el &graphs_,
+  diagram_pool_el(double s_ferm_, int order_, int n_legs_, int n_intn_,
+                  int n_times_, int n_posns_, const graphs_el &graphs_,
                   const std::vector<int> &symm_factors_, const std::vector<int> &n_loops_,
                   const vertices_3pt_el &nn_vertices_ = vertices_3pt_el())
       : s_ferm(s_ferm_),
@@ -639,8 +644,8 @@ struct diagram_pool_el {
         n_verts(2 * order_),
         n_diags(graphs_.f_edge_lists.size()) {}
   // Constructor for the case of spinful (Extended Hubbard) integrators
-  diagram_pool_el(const double s_ferm_, const int order_, const int n_legs_, const int n_intn_,
-                  const int n_times_, const int n_posns_, const graphs_el &graphs_,
+  diagram_pool_el(double s_ferm_, int order_, int n_legs_, int n_intn_,
+                  int n_times_, int n_posns_, const graphs_el &graphs_,
                   const std::vector<int> &symm_factors_, const std::vector<int> &n_loops_,
                   const std::vector<std::vector<std::vector<int>>> &loops_,
                   const vertices_3pt_el &nn_vertices_ = vertices_3pt_el())
@@ -1131,6 +1136,22 @@ hc_lat_mf_coord first_brillouin_zone(const hc_lat_mf_coord &coord) {
 }
 
 namespace develop {
+
+// Convenience function for parsing JSONC (JSON with Comments) files
+template <typename InputType>
+nlohmann::json jsonc_parse(InputType &&i) {
+  bool ignore_comments = true;
+  return nlohmann::json::parse(std::forward<InputType>(i), nullptr, true, ignore_comments);
+}
+
+#if BOOST_VERSION >= 106500
+typedef boost::math::arcsine_distribution<double> Arcsin_dist;
+Arcsin_dist arcsin_dist(0.0, 1.0);
+// Arcsine distribution for imaginary time generation
+double arcsin_gen(Rand_engine rand_gen) {
+  return boost::math::quantile(arcsin_dist, std_uniform(rand_gen));
+}
+#endif
 
 // Class representing a hypercubic lattice space - (imaginary) time coordinate;
 // position vectors are given in units of the lattice constant, i.e., they index
