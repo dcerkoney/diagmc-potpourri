@@ -1,15 +1,27 @@
 #include "diagmc_hubbard_2dsqlat.hpp"
 
-#ifdef _MPI
+#ifdef HAVE_MPI
 #include <mpi.h>
 #endif
+
+// Filesystem features are part of the standard library as of C++17
+#if HAVE_STD_FS
+#include <filesystem>
+namespace fs = std::filesystem;
+#elif HAVE_EXPTL_FS
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
+#elif HAVE_BOOST_FS
+#include <boost/filesystem.hpp>
+namespace fs = boost::filesystem;
+#endif
+
+// Simplify json class alias for convenience
+using json = nlohmann::json;
 
 // Defines the measurement type: a Matsubara (4-momentum) correlation function
 //                               for the Hubbard model on a 2D square lattice
 using meas_t = mcmc_cfg_2d_sq_hub_mf_meas::meas_t;
-
-// Simplify namespace for convenience
-using json = nlohmann::json;
 
 // Hard-coded parameters for a test calculation
 namespace test_input {
@@ -267,7 +279,7 @@ lattice_2d_f_interp load_g0_h5(std::string filename, bool debug = false) {
   return lat_g0_r_tau;
 }
 
-#ifdef _MPI
+#ifdef HAVE_MPI
 // Aggregate MPI results, compute the standard error over threads, and save the results to HDF5
 void aggregate_and_save(int mpi_size, int mpi_rank, int mpi_main,
                         mcmc_cfg_2d_sq_hub_mf_meas integrator, std::string job_id = "",
@@ -464,7 +476,7 @@ int main(int argc, char* argv[]) {
   int mpi_main = 0;
   bool main_thread = true;
 
-#ifdef _MPI
+#ifdef HAVE_MPI
   // Get MPI parameters for parallel runs
   MPI_Init(&argc, &argv);
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -481,8 +493,9 @@ int main(int argc, char* argv[]) {
 #endif
 
   // Parse the config file (JSON with Comments) as JSON
-  std::ifstream config_file("config.jsonc");
-  json config = jsonc_parse(config_file);
+  std::ifstream config_file("config.json");
+  json config;
+  config_file >> config;
 
   // Write parsed JSON to file for debugging
   std::ofstream jout_file(".parsed_config.json");
@@ -510,7 +523,7 @@ int main(int argc, char* argv[]) {
 
     if (main_thread) {
       // Make subdirectory for results (if it doesn't already exist)
-      std::filesystem::create_directory(job_id);
+      fs::create_directory(job_id);
       logfile.open(job_id + "/" + save_name + "_" + job_id + ".log");
       logfile << "MPI run with " << mpi_size << " thread(s)" << std::endl;
       std::cout << "MPI run with " << mpi_size << " thread(s)" << std::endl;
@@ -527,16 +540,16 @@ int main(int argc, char* argv[]) {
       // we look recursively for any h5 files in the "propagators" parent directory.
       lattice_2d_f_interp lat_g0_r_tau;
       std::string propr_dirname = "propagators";
-      for (const auto& rdir_entry : std::filesystem::recursive_directory_iterator(propr_dirname)) {
+      for (const auto& dir_entry : fs::recursive_directory_iterator(propr_dirname)) {
         // If this is a subdirectory, continue iterating
-        if (rdir_entry.is_directory()) {
+        if (fs::is_directory(dir_entry)) {
           continue;
         }
         if (debug) {
-          std::cout << rdir_entry << std::endl;
+          std::cout << dir_entry << std::endl;
         }
         // Get the path string for this directory entry (a file)
-        const std::string& path_string = rdir_entry.path().string();
+        const std::string& path_string = dir_entry.path().string();
         // If this is a Green's function HDF5 file with consistent parameters, load it
         // if (H5::H5File::isHdf5(path_string.c_str()) && (path_string.find("g0") !=
         // std::string::npos) &&
@@ -665,7 +678,7 @@ int main(int argc, char* argv[]) {
       // // Integration dry run (results summarized but unsaved)
       // mcmc_integrator.integrate();
 
-#ifdef _MPI
+#ifdef HAVE_MPI
       if (mpi_size == 1) {
         // We cannot compute error bars for an MPI run with one thread (serial)
         mcmc_integrator.save(job_id, save_name);
@@ -691,7 +704,7 @@ int main(int argc, char* argv[]) {
     }
   }
 
-#ifdef _MPI
+#ifdef HAVE_MPI
   MPI_Finalize();
 #endif
   return 0;
