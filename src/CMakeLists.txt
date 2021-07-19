@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 17)
 # Output executables to parent directory
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/..)
 
-# Use -Ofast optimizations in release mode
+# Use -Ofast instead of -O3 optimizations in release mode
 add_compile_options($<$<CONFIG:RELEASE>:-Ofast>)
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
