@@ -492,15 +492,6 @@ int main(int argc, char* argv[]) {
   save_serial = false;
 #endif
 
-  // Parse the config file (JSON with Comments) as JSON
-  std::ifstream config_file("config.json");
-  json config;
-  config_file >> config;
-
-  // Write parsed JSON to file for debugging
-  std::ofstream jout_file(".parsed_config.json");
-  jout_file << std::setw(4) << config << std::endl;
-
   std::vector<double> U_list;
   if (batch_U) {
     U_list = {U_batch};
