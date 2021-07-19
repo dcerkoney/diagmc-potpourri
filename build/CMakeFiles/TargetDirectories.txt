@@ -1,0 +1,4 @@
+/home/daniel/diagmc-hubbard-2dsqlat/build/CMakeFiles/rebuild_cache.dir
+/home/daniel/diagmc-hubbard-2dsqlat/build/CMakeFiles/self_en_example.dir
+/home/daniel/diagmc-hubbard-2dsqlat/build/CMakeFiles/edit_cache.dir
+/home/daniel/diagmc-hubbard-2dsqlat/build/CMakeFiles/chi_ch_example.dir

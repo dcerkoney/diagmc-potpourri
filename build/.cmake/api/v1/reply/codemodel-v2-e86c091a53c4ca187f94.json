@@ -1,0 +1,68 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.10"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1
+					]
+				}
+			],
+			"name" : "Release",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "diagmc-hubbard-2dsqlat",
+					"targetIndexes" : 
+					[
+						0,
+						1
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "chi_ch_example::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-chi_ch_example-Release-17159455b3705cf90813.json",
+					"name" : "chi_ch_example",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "self_en_example::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-self_en_example-Release-bbcf418cc9f0306ed108.json",
+					"name" : "self_en_example",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/daniel/diagmc-hubbard-2dsqlat/build",
+		"source" : "/home/daniel/diagmc-hubbard-2dsqlat/src"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 0
+	}
+}
