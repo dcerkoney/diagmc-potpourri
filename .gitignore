@@ -1,7 +1,7 @@
-# Debug results
-run_*/
+# profiling/debug results
+profiling/
 
-# CMake
+# cmake
 build/
 
 # vscode

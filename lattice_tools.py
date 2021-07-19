@@ -491,7 +491,8 @@ def lheg_mu_from_n0(dim, num_elec, n_site_pd, lat_const, beta):
 class LatticeDensity:
     def __init__(self, dim, beta, t_hop, n_site_pd, lat_const,
                  target_mu=None, target_rho=None, sigma=None,
-                 qp_rescale=1.0):
+                 verbose=False, qp_rescale=1.0):
+        self.verbose = verbose
         self.dim = dim
         self.beta = beta
         self.t_hop = t_hop
@@ -517,7 +518,7 @@ class LatticeDensity:
             # If the rounding process gives zero electrons in the system, choose N_e = 1 instead
             if num_elec == 0:
                 num_elec = 1
-                print('Warning: using minimal non-zero electron density for N = ' +
+                print('\nWarning: using minimal non-zero electron density for N = ' +
                       str(n_site_pd)+', L = '+str(self.lat_length) +
                       ': target_rho = '+str(target_rho)+'.')
             self.mu = self.mu_from_num_elec(num_elec)
@@ -538,11 +539,17 @@ class LatticeDensity:
             ferm_meshgrid = ferm(self.beta * (self.epsilon_k_mesh - target_mu +
                                               self.sigma(self.k_mesh, num_elec / self.vol_lat)))
             num_elec_trial = int(round(2 * np.sum(ferm_meshgrid)))
-            print('N_e(mu = '+str(target_mu)+') = '+str(num_elec_trial))
+            if self.verbose:
+                print('    N_e(mu = '+str(target_mu)+') = '+str(num_elec_trial))
             return np.floor(num_elec - num_elec_trial)
         # Numerically invert the implicit equation for N_e(mu) to get mu(N_e)
         n_site = int(self.n_site_pd ** self.dim)
-        return int(optimize.brentq(mu_implicit, a=0, b=2*n_site, maxiter=1000))
+        if self.verbose:
+            print(f'\nInverting: mu(N_e) = {target_mu} (target mu)...')
+        num_elec_opt = int(optimize.brentq(mu_implicit, a=0, b=2*n_site, maxiter=1000))
+        if self.verbose:
+            print(f'Done! Optimized value: N_e = {num_elec_opt}')
+        return num_elec_opt
 
     def mu_from_num_elec(self, target_num_elec):
         '''Find the chemical potential mu for a given number of electrons
@@ -551,12 +558,19 @@ class LatticeDensity:
             ferm_meshgrid = ferm(self.beta * (self.epsilon_k_mesh - mu +
                                               self.sigma(self.k_mesh, target_num_elec / self.vol_lat)))
             num_elec_trial = int(round(2 * np.sum(ferm_meshgrid)))
-            print('N_e(mu = '+str(mu)+' ) = '+str(num_elec_trial))
+            if self.verbose:
+                print('    N_e(mu = '+str(mu)+' ) = '+str(num_elec_trial))
             return target_num_elec - num_elec_trial
         # Numerically invert the implicit equation for N_e(mu) to get mu(N_e)
+        if self.verbose:
+            print(f'\nInverting: N_e(mu) = {target_num_elec} (target num. elec)...')
         # NOTE: to get exactly mu = 0 at half-filling (N_e = N ^ d), it is important
         #       for symmetry reasons that for the endpoints we take a = -b.
-        return optimize.brentq(num_elec_implicit, a=-10, b=10, maxiter=1000)
+        # mu_opt = optimize.brentq(num_elec_implicit, a=-10, b=10, maxiter=1000)
+        mu_opt = optimize.brentq(num_elec_implicit, a=-100, b=100, maxiter=1000)
+        if self.verbose:
+            print(f'Done! Optimized value: mu = {mu_opt}')
+        return mu_opt
 
 
 #################################################################
@@ -742,8 +756,8 @@ def g0_k_tau(k, tau, beta, dim, mu, lat_const, t_hop, qp_rescale=1.0):
 
 
 def get_lat_g0_r_tau(lat_const, n_site_pd, t_hop, taulist, dim, beta,
-                     mu, n0, delta_tau, qp_rescale=1.0, plots=False,
-                     overwrite=True, save_dir="."):
+                     mu, n0, delta_tau, qp_rescale=1.0, save_dir=".",
+                     plots=False, overwrite=True):
     '''Obtain the real space, imaginary time lattice Green's function exactly via IFFT.'''
     kscale = 2.0 * np.pi / float(n_site_pd*lat_const)
     rscale = lat_const
@@ -768,9 +782,8 @@ def get_lat_g0_r_tau(lat_const, n_site_pd, t_hop, taulist, dim, beta,
     k_meshgrid = np.asarray(np.meshgrid(*ki_meshes))
     # Shift endpoints (tau = 0, beta) to delta and beta - delta, if present
     taulist_cont = np.copy(taulist)
-    taulist_cont[taulist_cont == 0] = min(beta * delta_tau, taulist_cont[1])
-    taulist_cont[taulist_cont == beta] = max(
-        beta * (1 - delta_tau), taulist_cont[-2])
+    taulist_cont[taulist_cont == 0] = min(delta_tau, taulist_cont[1])
+    taulist_cont[taulist_cont == beta] = max(beta - delta_tau, taulist_cont[-2])
     # First, get G_0(k, \tau) for each 3D k vector and tau point
     mesh_shape = dim * [len(ki_GX_list)] + [len(taulist)]
     g0_k_tau_mesh = np.zeros(mesh_shape)
@@ -828,7 +841,7 @@ def get_lat_g0_r_tau(lat_const, n_site_pd, t_hop, taulist, dim, beta,
         # little_taulist[0] = taulist[1]
         # little_taulist[-1] = taulist[-2]
         big_taulist = np.sort(np.unique(np.concatenate(
-            ([beta * delta_tau], np.linspace(taulist.min(), taulist.max(), num=1001)))))
+            ([delta_tau], np.linspace(taulist.min(), taulist.max(), num=1001)))))
         mp_taulist = np.unique(np.concatenate(
             (big_taulist - beta, big_taulist, big_taulist + beta)))
         highlight_indices = []
@@ -869,8 +882,8 @@ def get_lat_g0_r_tau(lat_const, n_site_pd, t_hop, taulist, dim, beta,
         fig2, ax2 = plt.subplots(len(small_rx_list[:-1]), sharex=True)
         for irx, this_rx in enumerate(small_rx_list[:-1]):
             adjust_tau = np.copy(mp_taulist)
-            adjust_tau[(adjust_tau % beta) == 0] = beta*delta_tau
-            # adjust_tau[(adjust_tau % beta) == 0] = -beta*delta_tau
+            adjust_tau[(adjust_tau % beta) == 0] = delta_tau
+            # adjust_tau[(adjust_tau % beta) == 0] = -delta_tau
             g0_r_tau_list = antiperiodic_batch(
                 my_vec_fn=lambda tau_ap: g0_r_tau_interp(
                     (this_rx * np.ones(tau_ap.shape),) + (dim - 1) * (np.zeros(tau_ap.shape),) + (tau_ap,)),
@@ -1164,8 +1177,8 @@ def get_pi0_q4_path_from_g0_r_tau_quad(g0_r_tau_ifft_red_mesh, path_q_coords, in
        d-dimensional array of 1d interpolants in Matsubara frequency, $\Pi_0(q_\mathbf{n})(i\nu)$,
        which will only be relevant when inu_list is sparse (does not contain all freqs up to m_max).'''
     tau_list_cont = np.copy(tau_list)
-    tau_list_cont[tau_list_cont < delta_tau] = beta * delta_tau
-    tau_list_cont[tau_list_cont > beta - delta_tau] = beta * (1 - delta_tau)
+    tau_list_cont[tau_list_cont < delta_tau] = delta_tau
+    tau_list_cont[tau_list_cont > beta - delta_tau] = beta - delta_tau
 
     n_q_path = len(path_q_coords)
     n_nu = len(inu_list)
@@ -1242,13 +1255,9 @@ def get_pi0_q4_from_g0_r_tau_fft(g0_r_tau, n_nu, dim, beta, delta_tau, n_site_pd
         # The FFT tau mesh should be consistent with the ifft data for G_0(r, \tau), that is,
         # uniform and corresponding to: inu_mesh = (2 \pi i / \beta) range(n_nu)
         tau_unif_mesh = beta * np.arange(n_nu + 1) / float(n_nu)
-
         tau_unif_cont = np.copy(tau_unif_mesh)
-        tau_unif_cont[tau_unif_cont == 0] = min(
-            beta * delta_tau, tau_unif_cont[1])
-        tau_unif_cont[tau_unif_cont == beta] = max(
-            beta * (1 - delta_tau), tau_unif_cont[-2])
-
+        tau_unif_cont[tau_unif_cont == 0] = min(delta_tau, tau_unif_cont[1])
+        tau_unif_cont[tau_unif_cont == beta] = max((beta - delta_tau), tau_unif_cont[-2])
         # Get G_0 on the uniform mesh via linear interpolation (lossy upsampling)
         g0_r_tau_fft = np.empty(dim * (n_site_pd,) + (n_nu + 1,))
         for idx_ri_tj in np.ndindex(g0_r_tau_fft.shape):
@@ -1258,7 +1267,6 @@ def get_pi0_q4_from_g0_r_tau_fft(g0_r_tau, n_nu, dim, beta, delta_tau, n_site_pd
             # that is, check that G_0(\mathbf{r}_i)(\tau) is sign-definite on the interval [0^{+}, beta^{-}]
             assert np.unique(
                 np.sign(g0_r_tau_fft[idx_ri_tj][g0_r_tau_fft[idx_ri_tj] != 0])).size < 2
-
     # If G_0(r, \tau) is a (dim + 1) array of mesh data, we can work with it
     # directly; it is assumed that the spacing in \tau is uniform in this case
     # TODO: Find a nice way to check it without adding tau_list input if possible!

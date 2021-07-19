@@ -2,12 +2,15 @@
 
 # Package imports
 import sys
+import glob
+import json
 import h5py
-import pathlib
 import optparse
 import numpy as np
 import matplotlib.pyplot as plt
 
+from ruamel.yaml import YAML
+from pathlib import Path, PosixPath
 from datetime import datetime
 from scipy.special import gamma
 
@@ -48,170 +51,191 @@ def main():
     """Get the lattice Green's function and polarization bubble to Hartree level for Hubbard-type theories."""
     usage = """usage: %prog [ options ]"""
     parser = optparse.OptionParser(usage)
-    parser.add_option("--dim", type="int",    default=2,
-                      help="Spatial dimension of the lattice (default is 2); allowed values: {2, 3}.")
-    parser.add_option("--target_n0", type="float",  default=None,
-                      help="Target density in units of the lattice constant; since the number of electrons "
-                      + "is coarse-grained, the actual density may differ slightly. Default (n0 = 1) "
-                      + "corresponds to half-filling (mu0 ~= 0).")
-    parser.add_option("--target_mu0", type="float",  default=None,
-                      help="Target (noninteracting) chemical potential. If supplied, we work at "
-                      + "fixed chemical potential and variable density; otherwise, we use a "
-                      + "fixed density and variable chemical potential.")
-    parser.add_option("--t_hop", type="float", default=1.0,
-                      help="The tight-binding hopping parameter t.")
-    parser.add_option("--U_loc", type="float",  default=1.0,
-                      help="Onsite Hubbard interaction in units of t.")
-    parser.add_option("--beta", type="float",  default=1.0,
-                      help="Inverse temperature in units of 1/t.")
-    parser.add_option("--n_site_pd", type="int",    default=30,
-                      help="Number of sites per direction.")
-    parser.add_option("--lat_const", type="float",    default=1.0,
-                      help="Lattice constant in Bohr radii.")
-    parser.add_option("--lat_length", type="float",    default=None,
-                      help="Lattice length in Bohr radii (for working at "
-                      + "fixed V: calculate 'a' on-the-fly).")
-    parser.add_option("--n_tau",  type="int",   default=2**9,
-                      help="Number of tau points in the nonuniform mesh "
-                      + "used for downsampling (an even number).")
-    parser.add_option("--n_nu",  type="int",   default=2**9,
-                      help="Number of bosonic frequency points (an even number).")
+
+    # Save / plot options
     parser.add_option("--save_dir",   type="string", default="propagators",
                       help="Subdirectory to save results to, if applicable")
-    parser.add_option("--save",   default=False,  action="store_true",
-                      help="Save propagator data to h5?")
-    parser.add_option("--overwrite",   default=False,  action="store_true",
-                      help="Overwrite existing propagator data?")
     parser.add_option("--plot_g0",   default=False,  action="store_true",
                       help="Option for plotting the lattice Green's function.")
     parser.add_option("--plot_pi0",   default=False,  action="store_true",
                       help="Option for plotting the polarization bubble P_0.")
+    parser.add_option("--dry_run",   default=False,  action="store_true",
+                      help="Perform a dry run, i.e., don't save any propagator data/plots.")
+    
+    # Optional flags for overriding config file params
+    parser.add_option("--n_tau",  type="int",   default=None,
+                      help="Number of tau points in the nonuniform mesh "
+                      + "used for downsampling (an even number).")
+    parser.add_option("--n_nu",  type="int",   default=None,
+                      help="Number of bosonic frequency points in "
+                      + "the uniform FFT mesh (an even number).")
+    parser.add_option("--target_mu", type="float",  default=None,
+                      help="Target (noninteracting) chemical potential. If supplied, we work at "
+                      + "fixed chemical potential and variable density; otherwise, we use a "
+                      + "fixed density and variable chemical potential.")
+    parser.add_option("--target_n0", type="float",  default=None,
+                      help="Target density in units of the lattice constant; since the number of electrons "
+                      + "is coarse-grained, the actual density may differ slightly. Default (n0 = 1) "
+                      + "corresponds to half-filling (mu0 ~= 0).")
+    parser.add_option("--dim", type="int",    default=2,
+                      help="Spatial dimension of the lattice (default is 2); allowed values: {2, 3}.")
+    parser.add_option("--t_hop", type="float", default=None,
+                      help="The tight-binding hopping parameter t.")
+    parser.add_option("--U_loc", type="float",  default=None,
+                      help="Onsite Hubbard interaction in Hartrees.")
+    parser.add_option("--beta", type="float",  default=None,
+                      help="Inverse temperature in inverse Hartrees.")
+    parser.add_option("--n_site_pd", type="int",    default=None,
+                      help="Number of sites per direction.")
+    parser.add_option("--lat_const", type="float",    default=None,
+                      help="Lattice constant in Bohr radii.")
+    parser.add_option("--lat_length", type="float",    default=None,
+                      help="Lattice length in Bohr radii (for working at "
+                      + "fixed V: calculate 'a' on-the-fly).")
 
     # Next, parse  the arguments and collect all options into a dictionary
     (options, _) = parser.parse_args()
     optdict = vars(options)
 
+    # Parse YAML config file
+    yaml = YAML(typ='rt')
+    yaml.default_flow_style = False
+    cfg = yaml.load(PosixPath("config.yml"))
+
+    # Update config with user-supplied cmdline args where applicable
+    cfg_override_string = ''
+    for k, v in optdict.items():
+        for group in cfg:
+            try:
+                if (k in cfg[group].keys()) and (v is not None) and (v != cfg[group][k]):
+                    cfg_override_string += "\nNOTE: Overriding config file setting" + \
+                        f" '{k} = {cfg[group][k]}' with cmdline value: {v}"
+                    cfg[group][k] = v
+            except AttributeError:
+                pass
+    if cfg_override_string:
+        cfg_override_string += '\n'
+
+    # Reference param groups directly for brevity (cfg is still modified)
+    p_phys = cfg['phys_params']
+    p_propr = cfg['propr_params']
+
     # Get job start time for purposes of generating a UNIX timestamp ID
     starttime = datetime.utcnow()
-    timestamp = to_timestamp(starttime, rtype=int)
-    propr_dir = pathlib.PosixPath(f'proprs_{timestamp}')
-    print(f'Timestamp: {timestamp} (UTC)\nJob started at: {starttime}\n')
-
-    # Make directory in which to save propagator figs/data, if applicable and necessary
-    if optdict['save']:
-        save_dir = pathlib.PosixPath(optdict['save_dir']) / propr_dir
-        save_dir.mkdir(parents=True, exist_ok=True)
-    else:
-        save_dir = "."
+    job_id = to_timestamp(starttime, rtype=int)
+    p_propr['propr_job_id'] = job_id
+    print(f'\nTimestamp: {job_id} (UTC)\nJob started at: {starttime}')
 
     # Currently, we only implement the 2D and 3D cases
-    dim = optdict['dim']
-    if dim not in [2, 3]:
+    if p_phys['dim'] not in [2, 3]:
         raise ValueError(
-            'd = '+str(optdict['dim'])+' is not a currently supported spatial dimension; d must be 2 or 3!')
+            'd = '+str(p_phys['dim'])+' is not a currently supported spatial dimension; d must be 2 or 3!')
     # The coordination number for hypercubic lattices is 2 * d (two nearest neighbors per Cartesian axis)
-    z_coord = 2 * dim
+    # z_coord = 2 * dim
 
     # Determine the lattice constant and length
-    if (optdict['lat_const'] is None) and (optdict['lat_length'] is None):
+    if (p_phys['lat_const'] is None) and (p_phys['lat_length'] is None):
         raise ValueError(
             'The user must supply either the lattice constant or lattice length.')
-    # Get the lattice length if it was not supplied
-    elif optdict['lat_length'] is None:
-        lat_const = optdict['lat_const']
-        lat_length = optdict['lat_const'] * optdict['n_site_pd']
+    # Derive the lattice length if a lattice constant was supplied
+    elif p_phys['lat_const'] is not None:
+        p_phys['lat_length'] = p_phys['lat_const'] * p_phys['n_site_pd']
     # Get the lattice constant if it was not supplied
     else:
-        lat_length = optdict['lat_length']
-        lat_const = optdict['lat_length'] / float(optdict['n_site_pd'])
+        p_phys['lat_const'] = p_phys['lat_length'] / float(p_phys['n_site_pd'])
         # Ensure that the derived and user-supplied lattice lengths are equal within floating-point precision
         assert approx_eq_float(
-            lat_length, lat_const * optdict['n_site_pd'], abs_tol=4*sys.float_info.epsilon)
+            p_phys['lat_length'], p_phys['lat_const'] * p_phys['n_site_pd'], abs_tol=4*sys.float_info.epsilon)
     # Make sure there is no roundoff error in the nearest-neighbor distance calculations
-    test_distance_roundoff(n_site_pd=optdict['n_site_pd'], lat_const=lat_const)
+    test_distance_roundoff(
+        n_site_pd=p_phys['n_site_pd'], lat_const=p_phys['lat_const'])
 
-    # Convert to Hartrees from energy units of t
-    U_loc = optdict['U_loc'] / optdict['t_hop']
-    beta = optdict['beta'] * optdict['t_hop']
-    n_site_pd = optdict['n_site_pd']
+    print(p_phys['lat_length'], p_phys['n_site_pd'], p_phys['lat_const'])
 
     # Sigma[k, rho] = Sigma_H[rho] |_{U_loc}
     # (must be parametrized in terms of k, rho for general density getter)
     def sigma_hartree(k, rho):
-        return (U_loc * rho / 2.0)
+        return (p_phys['U_loc'] * rho / 2.0)
 
     # Determine the density and reduced chemical potential
-    lat_dens_getter = LatticeDensity(dim=dim,
-                                     beta=beta,
-                                     t_hop=optdict['t_hop'],
-                                     n_site_pd=n_site_pd,
-                                     lat_const=lat_const,
-                                     target_mu=optdict['target_mu0'],
-                                     target_rho=optdict['target_n0'],
-                                     sigma=sigma_hartree)
-    mu = lat_dens_getter.mu
-    n0 = lat_dens_getter.rho
-    num_elec = lat_dens_getter.num_elec
+    lat_dens_getter = LatticeDensity(dim=p_phys['dim'],
+                                     beta=p_phys['beta'],
+                                     t_hop=p_phys['t_hop'],
+                                     n_site_pd=p_phys['n_site_pd'],
+                                     lat_const=p_phys['lat_const'],
+                                     target_mu=p_phys['target_mu'],
+                                     target_rho=p_phys['target_n0'],
+                                     sigma=sigma_hartree, verbose=True)
+
+    # Update physical params   
+    p_phys['vol_lat'] = p_phys['lat_length'] ** p_phys['dim']
+    p_phys['n_site'] = p_phys['n_site_pd'] ** p_phys['dim']
+    p_phys['num_elec'] = lat_dens_getter.num_elec
+    p_phys['n0'] = lat_dens_getter.rho
+    p_phys['mu'] = lat_dens_getter.mu
 
     # (Hartree) reduced chemical potential with which we parametrize G_H
-    mu_tilde = mu - sigma_hartree(_, n0)
+    p_phys['mu_tilde'] = p_phys['mu'] - sigma_hartree(_, p_phys['n0'])
 
-    print('N_e: ', num_elec, '\nn_H: ', n0,
-          '\nmu_H: ', mu, '\nmu_tilde_H: ', mu_tilde)
+    print('\nN_e: ', p_phys['num_elec'], '\nn_H: ', p_phys['n0'], '\nV: ', p_phys['vol_lat'],
+          '\nmu_H: ', p_phys['mu'], '\nmu_tilde_H: ', p_phys['mu_tilde'])
 
     # Volume of a 'dim'-dimensional ball
-    def rad_d_ball(vol): return (vol * gamma(1.0 + dim / 2.0)
-                                 )**(1.0 / float(dim)) / np.sqrt(np.pi)
+    def rad_d_ball(vol): return (vol * gamma(1.0 + p_phys['dim'] / 2.0)
+                                 )**(1.0 / float(p_phys['dim'])) / np.sqrt(np.pi)
     # Get the Wigner-Seitz radius
-    rs = rad_d_ball(1.0 / n0)
-    print('r_s(n_H): '+str(rs))
+    p_phys['rs'] = float(rad_d_ball(1.0 / p_phys['n0']))
+    print('r_s(n_H): '+str(p_phys['rs']))
+
     # Get the Fermi momentum and one corresponding k-point by explicitly filling the band
-    k_scale = 2.0 * np.pi / float(lat_length)
+    k_scale = 2.0 * np.pi / float(p_phys['lat_length'])
     # r_scale = lat_const
     ef, kf_vecs = fill_band(
-        dim=dim,
-        num_elec=num_elec,
-        n_site_pd=n_site_pd,
-        lat_const=lat_const,
-        t_hop=optdict['t_hop'],
+        dim=p_phys['dim'],
+        num_elec=p_phys['num_elec'],
+        n_site_pd=p_phys['n_site_pd'],
+        lat_const=p_phys['lat_const'],
+        t_hop=p_phys['t_hop'],
     )
-    # print(ef, '\n', kf_vecs)
+    p_phys['ef'] = float(ef)
+    print(p_phys['ef'], '\n', kf_vecs)
+
     # Numerical roundoff issues occur at half-filling, so manually round the Fermi energy to zero
-    if optdict['target_n0'] == 1:
+    if p_phys['target_n0'] == 1:
         # Double-check that we actually obtained a near-zero answer for ef
-        assert np.allclose(ef, 0)
+        assert np.allclose(p_phys['ef'], 0)
+        print(p_phys['ef'])
         # Then, shift it to the exact value at half-filling
-        ef = 0.0
+        p_phys['ef'] = 0.0
 
     # NOTE: the quasiparticle dispersion relation only shows up in G_0,
     #       so there is no qp rescale factor implemented here!
-    kf_docstring = "{k_F} in the first quadrant: \n["
+    kf_docstring = "\n{k_F} in the first quadrant: \n["
     for i, kf_vec in enumerate(kf_vecs):
         this_ek = lat_epsilon_k(
             k=kf_vec,
-            lat_const=lat_const,
-            t_hop=optdict['t_hop'],
+            lat_const=p_phys['lat_const'],
+            t_hop=p_phys['t_hop'],
             meshgrid=False,
         )
-        assert np.allclose(ef, this_ek, rtol=1e-13)
+        assert np.allclose(p_phys['ef'], this_ek, rtol=1e-13)
         kf_docstring += "k"+str(np.round(kf_vec / k_scale).astype(int))
         if i < len(kf_vecs) - 1:
-            kf_docstring += ",\t"
+            kf_docstring += ",  "
             if (i+1) % 4 == 0:
                 kf_docstring += "\n "
         else:
             kf_docstring += "]"
-    # kf_docstring += str(kf_vecs)
-    print('{k_F} in the first quadrant: \n', kf_vecs,
-          '\n', 'e_F =', ef, '\n', 'mu_n_{HF} = ', mu)
+    print(kf_docstring)
+    # print(f"\n{{k_F}} in the first quadrant: \n{kf_vecs}\ne_F = {p_phys['ef']}\nmu_n_{{HF}} = {p_phys['mu']}")
 
     # UV cutoff defined by the lattice (longest scattering length in the BZ)
-    llambda_lat = dim * (np.pi / lat_const)**2 / 2.0
+    # llambda_lat = p_phys['dim'] * (np.pi / p_phys['lat_const'])**2 / 2.0
 
     # Build an ordered path of k-points in the Brillouin zone; we choose the high-symmetry
     # path for the simple square lattice (\Gamma - X - M - \Gamma), discarding duplicate
     # coordinates at the path vertices (accounted for in plotting step).
-    N_edge = int(np.floor(n_site_pd / 2.0))
+    N_edge = int(np.floor(p_phys['n_site_pd'] / 2.0))
     nk_coords_Gamma_X = [[x, 0] for x in range(0, N_edge + 1)]
     nk_coords_X_M = [[N_edge, y] for y in range(1, N_edge + 1)]
     nk_coords_M_Gamma = [[xy, xy] for xy in range(1, N_edge)[::-1]]
@@ -236,7 +260,7 @@ def main():
                 i_path_kf_locs.append(i)
     i_path_kf_locs = np.asarray(i_path_kf_locs)
 
-    print(r'High-symmetry path: \Gamma - X - M - \Gamma')
+    print('\nHigh-symmetry path: G-X-M-G')
     print('Number of k-points in the path: ', n_k_pts)
     if len(i_path_kf_locs) > 0:
         print('Fermi momentum indices along path:\n', i_path_kf_locs)
@@ -246,57 +270,85 @@ def main():
           ': '+str(path_k_coords[len(i_path) // 3]))
     assert len(np.unique(path_k_coords, axis=0)) == len(path_k_coords)
 
-    # Cubic taulist; smallest time mesh point in G_0 calculation is \beta * \delta_\tau = 1e-10
-    delta_tau = 1e-10 / beta
-    tau_powlist_left = (np.linspace(delta_tau ** (1.0 / 3.0), 0.5 ** (1.0 / 3.0),
-                                    num=optdict['n_tau'] // 2) ** 3)
-    tau_powlist_right = (1.0 - tau_powlist_left[::-1])
-    # tau_powlist = beta * \
-    tau_list = beta * np.concatenate(
-        ([0.0, delta_tau], tau_powlist_left[1:-1], [0.5], tau_powlist_right[1:-1], [1.0 - delta_tau, 1.0]))
+    # Defines the maximum possible index value in the reduced
+    # difference vector mesh, max(nr_1 - nr_2) = (N // 2) + 1
+    p_phys['n_site_irred'] = (p_phys['n_site_pd'] // 2) + 1
 
-    if optdict['save']:
-        log_savename = safe_filename(
-            dir=save_dir,
-            savename=propr_dir,
-            file_extension='log',
-            overwrite=optdict['overwrite'],
-        )
-        param_file = open(log_savename, 'w+')
-        param_printout = (
-            '-----------------------------'+'\n'
-            'Lattice G_0(r, tau) from FFT'+'\n'
-            '-----------------------------'+'\n'
-            f'Job ID# (POSIX integer timestamp): {timestamp}'
-            '\n'
-            f'Spatial dimension: d = {dim}\n'
-            f"t (hopping parameter): {optdict['t_hop']}\n"
-            f"beta / t (inverse temperature): {optdict['beta']}\n"
-            f"U / t (onsite (Hubbard) interaction): {optdict['U_loc']}\n"
-            f"Magnetization ((n_up - n_down) / n_tot): 0.0\n" +
-            f'Lattice coordination number: z = {z_coord}\n'
-            f"Bandwidth: w = 2zt = {2 * z_coord * optdict['t_hop']}\n"
-            '\n'
-            f'Number of sites per direction: N = {n_site_pd}\n'
-            f'Total number of electrons: N_e = {num_elec}\n'
-            f'Lattice constant: a = {lat_const}\n'
-            f'Lattice length: L = {lat_length}\n'
-            f'Lattice UV cutoff: Lambda_{{lat}} = {llambda_lat}\n'
-            f'Imaginary-time infinitesimal (for G_0 hard cutoff and limits): {delta_tau * beta}\n'
-            '\n'
-            f'mu_tilde_H: {mu_tilde}\n'
-            f'mu_H: {mu}\n'
-            f'n_0 = n = {n0}\n'
-            f'r_s: {rs}\n'
-            f'e_F: {ef}\n'
-            f'{kf_docstring}\n'
-            '\n'
-            f"Number of nonuniform tau mesh points: {optdict['n_tau']}\n" +
-            f"Number of frequency mesh points: {optdict['n_nu']}\n" +
-            '\n'
-        )
-        param_file.write(param_printout)
-        param_file.close()
+    # Use a cubic tau mesh; the smallest time mesh point is delta_tau (in units of beta)
+    tau_powlist_left = p_phys['beta'] * (np.linspace(p_propr['delta_tau'] / p_phys['beta'] ** (1.0 / 3.0),
+                                                     0.5 ** (1.0 / 3.0), num=p_propr['n_tau'] // 2) ** 3)
+    tau_powlist_right = p_phys['beta'] - tau_powlist_left[::-1]
+    tau_list = np.concatenate(([0.0, p_propr['delta_tau']], tau_powlist_left[1:-1], [0.5 * p_phys['beta']],
+                               tau_powlist_right[1:-1], [p_phys['beta'] - p_propr['delta_tau'], p_phys['beta']]))
+    assert(len(tau_list[:-1]) == p_propr['n_tau'])
+
+    # Check for any existing propagator data in save_dir matching
+    # the current parameters; if none exists, generate them
+    consistent_proprs_exist = False
+    consistent_propr_path = None
+    propr_paths = glob.glob(f"./{optdict['save_dir']}/*/lat_g0_rt.h5")
+    for propr_path in propr_paths:
+        g0_path = PosixPath(propr_path)
+        g0_data = h5py.File(g0_path, 'r')
+        # Check for consistency of relevant attributes
+        try:
+            params_consistent = (p_phys['n0'] == g0_data.attrs['n0']
+                                 and p_phys['mu'] == g0_data.attrs['mu']
+                                 and p_phys['mu_tilde'] == g0_data.attrs['mu_tilde']
+                                 and p_phys['lat_const'] == g0_data.attrs['lat_const']
+                                 and p_phys['n_site_pd'] == g0_data.attrs['n_site_pd']
+                                 and p_phys['dim'] == g0_data.attrs['dim']
+                                 and p_phys['beta'] == g0_data.attrs['beta']
+                                 and p_phys['t_hop'] == g0_data.attrs['t_hop']
+                                 and p_phys['U_loc'] == g0_data.attrs['U_loc']
+                                 and p_propr['n_tau'] == g0_data.attrs['n_tau'])
+        except AttributeError:
+            continue
+        if params_consistent:
+            consistent_propr_path = g0_path
+            consistent_proprs_exist = True
+            break
+    if consistent_proprs_exist:
+        print(f'\nFound consistent propagator data in subdirectory {consistent_propr_path},'
+              + ' updating paths in cfg...', end='')
+        consistent_save_dir = consistent_propr_path.parent
+        consistent_job_id = consistent_save_dir.name.split('proprs_')[-1]
+        p_propr['propr_save_dir'] = str(consistent_save_dir)
+        p_propr['propr_job_id'] = str(consistent_job_id)
+        print('done!')
+    else:
+        print('\nNo consistent propagator data found for the supplied config, generating it now...')
+
+    if not consistent_proprs_exist:
+        # Make directory in which to save new propagator figs/data (if applicable and necessary)
+        if not optdict['dry_run']:
+            propr_dir = PosixPath(f'proprs_{job_id}')
+            save_dir = PosixPath(optdict['save_dir']) / propr_dir
+            save_dir.mkdir(parents=True, exist_ok=True)
+            p_propr['propr_save_dir'] = save_dir
+        else:
+            save_dir = "."
+            p_propr['propr_save_dir'] = "N/A"
+
+    # Summarize any config settings overriden by cmdline flags, and print the updated config
+    cfg_update_string = ('Proposed config settings' if optdict['dry_run']
+                         else 'Updated config settings')
+    print(f'{cfg_override_string}\n{cfg_update_string}:')
+    json.dump(cfg, sys.stdout, indent=4, sort_keys=True)
+    print('\n')
+
+    if not optdict['dry_run']:
+        # Save updated config back to file
+        yaml.dump(cfg, PosixPath("config.yml"))
+
+        # Dump YAML config to JSON for use with the C++ MCMC driver
+        with open("config.json", 'w') as f:
+            json.dump(cfg, f, indent=4, sort_keys=True)
+
+
+    # Nothing more to do after updating configs in this case
+    if consistent_proprs_exist: 
+        return
 
     #########################################################
     # First, get the (Hartree) lattice Green's function G_0 #
@@ -304,83 +356,66 @@ def main():
 
     # Get G_0(r, tau) from 3D IFFT of G_0(k, tau)
     g0_r_tau_interp_mtx, g0_r_tau_ifft_mesh = get_lat_g0_r_tau(
-        lat_const=lat_const,
-        n_site_pd=n_site_pd,
-        t_hop=optdict['t_hop'],
+        lat_const=p_phys['lat_const'],
+        n_site_pd=p_phys['n_site_pd'],
+        t_hop=p_phys['t_hop'],
         taulist=tau_list,
-        dim=dim,
-        beta=beta,
-        mu=mu_tilde,
-        n0=n0,
-        delta_tau=delta_tau,
-        plots=optdict['plot_g0'],
-        overwrite=optdict['overwrite'],
+        dim=p_phys['dim'],
+        beta=p_phys['beta'],
+        mu=p_phys['mu_tilde'],
+        n0=p_phys['n0'],
+        delta_tau=p_propr['delta_tau'],
         save_dir=save_dir,
+        plots=optdict['plot_g0'],
     )
 
-    tau_dense_unif = beta * \
-        np.arange(optdict['n_nu'] + 1) / float(optdict['n_nu'])
-    n_tau_unif = len(tau_dense_unif[:-1])
+    tau_dense_unif = p_phys['beta'] * np.arange(p_propr['n_nu'] + 1) / float(p_propr['n_nu'])
+    assert(len(tau_dense_unif[:-1]) == p_propr['n_nu'])
 
     # Get G_0 on the uniform dense tau mesh for FFT without
     # upsampling, which we will use to obtain \Pi_0 and W_0
     _, g0_r_tau_ifft_dense_mesh = get_lat_g0_r_tau(
-        lat_const=lat_const,
-        n_site_pd=n_site_pd,
-        t_hop=optdict['t_hop'],
+        lat_const=p_phys['lat_const'],
+        n_site_pd=p_phys['n_site_pd'],
+        t_hop=p_phys['t_hop'],
         taulist=tau_dense_unif,
-        dim=dim,
-        beta=beta,
-        mu=mu_tilde,
-        n0=n0,
-        delta_tau=delta_tau,
-        # plots=optdict['plot_g0'],
-        plots=False,
-        overwrite=optdict['overwrite'],
+        dim=p_phys['dim'],
+        beta=p_phys['beta'],
+        mu=p_phys['mu_tilde'],
+        n0=p_phys['n0'],
+        delta_tau=p_propr['delta_tau'],
         save_dir=save_dir,
+        plots=False,
     )
 
-    # Defines the maximum possible index value in the reduced
-    # difference vector mesh, max(nr_1 - nr_2) = (N // 2) + 1
-    r_red_cut = (n_site_pd // 2) + 1
-    # Get G_0 over the irreducible set of lattice
-    # distance vectors, i.e., the first orthant of L;
-    # also, remove the tau = beta point used for plotting
-    r_red_slice = dim * (slice(r_red_cut),) + (slice(-1),)
-
-    if optdict['save']:
+    if not optdict['dry_run']:
         # Save the lattice G_0(r, tau) data to h5
-        g0_h5file = save_dir / 'lat_g0_rt.h5'
-        # Optionally avoid overwriting duplicate filenames
-        if not optdict['overwrite']:
-            dup_count = 1
-            while g0_h5file.is_file():
-                g0_h5file = save_dir / f'lat_g0_rt({dup_count}).h5'
-                dup_count += 1
+        g0_h5file = save_dir / f'lat_g0_rt_{job_id}.h5'
         # Open H5 file and write attributes/data to it
         h5file = h5py.File(g0_h5file, 'w')
-        h5file.attrs['n0'] = n0
-        h5file.attrs['mu'] = mu
-        h5file.attrs['mu_tilde'] = mu_tilde
-        h5file.attrs['lat_const'] = lat_const
-        h5file.attrs['n_site_pd'] = n_site_pd
-        h5file.attrs['dim'] = optdict['dim']
-        h5file.attrs['beta'] = optdict['beta']
-        h5file.attrs['t_hop'] = optdict['t_hop']
-        h5file.attrs['U_loc'] = optdict['U_loc']
-        h5file.attrs['n_tau'] = optdict['n_tau']
+        h5file.attrs['n0'] = p_phys['n0']
+        h5file.attrs['mu'] = p_phys['mu']
+        h5file.attrs['mu_tilde'] = p_phys['mu_tilde']
+        h5file.attrs['lat_const'] = p_phys['lat_const']
+        h5file.attrs['n_site_pd'] = p_phys['n_site_pd']
+        h5file.attrs['dim'] = p_phys['dim']
+        h5file.attrs['beta'] = p_phys['beta']
+        h5file.attrs['t_hop'] = p_phys['t_hop']
+        h5file.attrs['U_loc'] = p_phys['U_loc']
+        h5file.attrs['n_tau'] = p_propr['n_tau']
 
+        # Get G_0 over the irreducible set of lattice
+        # distance vectors, i.e., the first orthant of L;
+        # also, remove the tau = beta point used for plotting
+        r_red_slice = p_phys['dim'] * \
+            (slice(p_phys['n_site_irred']),) + (slice(-1),)
         g0_r_tau_irred_mesh = g0_r_tau_ifft_mesh[r_red_slice]
         g0_irred_1d = g0_r_tau_irred_mesh.flatten(order='C')
-
         dataset_g0 = h5file.create_dataset('lat_g0_rt_data', data=g0_irred_1d)
         dataset_g0.attrs['shape'] = g0_r_tau_ifft_mesh[r_red_slice].shape
-
+        
         # Save tau on [0, beta)
-        assert(len(tau_list[:-1]) == optdict['n_tau'])
-        dataset_tau = h5file.create_dataset('tau_mesh', data=tau_list[:-1])
-        # dataset_tau.attrs['n_tau'] = optdict['n_tau']
-
+        h5file.create_dataset('tau_mesh', data=tau_list[:-1])
         # Write to disk
         h5file.close()
 
@@ -391,41 +426,41 @@ def main():
     # Now, get \Pi_0 on the full dense tau mesh
     pi0_q4_dense, _ = get_pi0_q4_from_g0_r_tau_fft(
         g0_r_tau=g0_r_tau_ifft_dense_mesh,
-        n_nu=optdict['n_nu'],
-        dim=dim,
-        beta=beta,
-        delta_tau=delta_tau,
-        n_site_pd=n_site_pd,
-        lat_const=lat_const,
+        n_nu=p_propr['n_nu'],
+        dim=p_phys['dim'],
+        beta=p_phys['beta'],
+        delta_tau=p_propr['delta_tau'],
+        n_site_pd=p_phys['n_site_pd'],
+        lat_const=p_phys['lat_const'],
     )
 
     if optdict['plot_pi0']:
         # Get \Pi_0 via upsampling from the non-uniform tau mesh
         pi0_q4_upsampled, _ = get_pi0_q4_from_g0_r_tau_fft(
             g0_r_tau=g0_r_tau_interp_mtx,
-            n_nu=optdict['n_nu'],
-            dim=dim,
-            beta=beta,
-            delta_tau=delta_tau,
-            n_site_pd=n_site_pd,
-            lat_const=lat_const,
+            n_nu=p_propr['n_nu'],
+            dim=p_phys['dim'],
+            beta=p_phys['beta'],
+            delta_tau=p_propr['delta_tau'],
+            n_site_pd=p_phys['n_site_pd'],
+            lat_const=p_phys['lat_const'],
         )
         mlist_plot = np.arange(2)
         # Inclusive endpoints for integration (and to ensure odd number of time points)
-        r_red_slice_incl = dim * (slice(r_red_cut),) + (slice(None),)
+        r_red_slice_incl = p_phys['dim'] * (slice(p_phys['n_site_irred']),) + (slice(None),)
         # Get the polarization bubble along the k-path via quadrature integration in \tau; while
         # this approach would be very inefficient to calculate \Pi_0 on the entire Brillouin
         # zone, we use it as a benchmark for the FFT methods along the high-symmetry path
         pi0_sigma_quad_path, _ = get_pi0_q4_path_from_g0_r_tau_quad(
             g0_r_tau_ifft_red_mesh=g0_r_tau_ifft_mesh[r_red_slice_incl],
             path_q_coords=path_k_coords,
-            inu_list=(2j * np.pi / beta) * mlist_plot.astype(float),
+            inu_list=(2j * np.pi / p_phys['beta']) * mlist_plot.astype(float),
             tau_list=tau_list,
-            beta=beta,
-            delta_tau=delta_tau,
-            dim=dim,
-            n_site_pd=n_site_pd,
-            lat_const=lat_const,
+            beta=p_phys['beta'],
+            delta_tau=p_propr['delta_tau'],
+            dim=p_phys['dim'],
+            n_site_pd=p_phys['n_site_pd'],
+            lat_const=p_phys['lat_const'],
             # verbose=True,
         )
         for this_m in mlist_plot:
@@ -454,7 +489,6 @@ def main():
                 #     dir=save_dir,
                 #     savename=f'abs_err_quad_upsampled_m={this_m}',
                 #     file_extension='pdf',
-                #     overwrite=optdict['overwrite'],
                 # )
                 # ax.set_ylabel('Absolute error')
                 # ax.grid(True)
@@ -490,7 +524,7 @@ def main():
             ax.set_xticklabels((r'$\Gamma$', r'$X$', r'$M$', r'$\Gamma$'))
             ax.set_ylabel(r'$\Pi_0(\mathbf{{q}}, i\nu_m)$')
             ax.set_title(r'$\Pi_0(\mathbf{{q}}, i\nu_m), n_{\tau} = $' + str(
-                optdict['n_tau']) + r', $n_{\nu} = $'+str(optdict['n_nu']))
+                p_propr['n_tau']) + r', $n_{\nu} = $'+str(p_propr['n_nu']))
             # Set the same plot range and ticks as the Kozik paper for easy visual correspondence
             ax.set_xlim(left=i_path[0], right=i_path[-1])
             # ax.set_ylim(bottom=-.65, top=-.35)
@@ -499,55 +533,42 @@ def main():
             fig.tight_layout()
             savename = safe_filename(
                 dir=save_dir,
-                savename=(f"lat_pi0_q_inu{this_m}_N={n_site_pd}_beta={beta:g}" +
-                          f"_n_tau={optdict['n_tau']}_n_nu={optdict['n_nu']}" +
+                savename=(f"lat_pi0_q_inu{this_m}_N={p_phys['n_site_pd']}_beta={p_phys['beta']:g}" +
+                          f"_n_tau={p_propr['n_tau']}_n_nu={p_propr['n_nu']}" +
                           f"_fft_upsampled"),
                 file_extension='pdf',
-                overwrite=optdict['overwrite'],
+                overwrite=True,
             )
             fig.savefig(savename)
 
-    if optdict['save']:
+    if not optdict['dry_run']:
         # Save the lattice Pi_0(q, i nu) data to h5
-        pi0_h5file = save_dir / 'lat_pi0_q4.h5'
-        # Optionally avoid overwriting duplicate filenames
-        if not optdict['overwrite']:
-            dup_count = 1
-            while pi0_h5file.is_file():
-                pi0_h5file = save_dir / f'lat_pi0_q4({dup_count}).h5'
-                dup_count += 1
+        pi0_h5file = save_dir / f'lat_pi0_q4_{job_id}.h5'
         # Open H5 file and write attributes/data to it
         h5file = h5py.File(pi0_h5file, 'w')
-        h5file.attrs['n0'] = n0
-        h5file.attrs['mu'] = mu
-        h5file.attrs['mu_tilde'] = mu_tilde
-        h5file.attrs['lat_const'] = lat_const
-        h5file.attrs['n_site_pd'] = n_site_pd
-        h5file.attrs['n_tau_unif'] = n_tau_unif
-        h5file.attrs['n_nu'] = optdict['n_nu']
-        h5file.attrs['dim'] = optdict['dim']
-        h5file.attrs['beta'] = optdict['beta']
-        h5file.attrs['t_hop'] = optdict['t_hop']
-        h5file.attrs['U_loc'] = optdict['U_loc']
+        h5file.attrs['n0'] = p_phys['n0']
+        h5file.attrs['mu'] = p_phys['mu']
+        h5file.attrs['mu_tilde'] = p_phys['mu_tilde']
+        h5file.attrs['lat_const'] = p_phys['lat_const']
+        h5file.attrs['n_site_pd'] = p_phys['n_site_pd']
+        h5file.attrs['n_nu'] = p_propr['n_nu']
+        h5file.attrs['dim'] = p_phys['dim']
+        h5file.attrs['beta'] = p_phys['beta']
+        h5file.attrs['t_hop'] = p_phys['t_hop']
+        h5file.attrs['U_loc'] = p_phys['U_loc']
+        h5file.attrs['n_tau_unif'] = p_propr['n_nu']
 
-        k_red_cut = (n_site_pd // 2) + 1
-        k_red_slice = dim * (slice(k_red_cut),) + (slice(optdict['n_nu']),)
-
+        k_red_slice = p_phys['dim'] * \
+            (slice(p_phys['n_site_irred']),) + (slice(p_propr['n_nu']),)
         pi0_q4_irred_mesh = pi0_q4_dense[k_red_slice]
         pi0_irred_1d = pi0_q4_irred_mesh.flatten(order='C')
-
         dataset_pi0 = h5file.create_dataset(
             'lat_pi0_q4_data', data=pi0_irred_1d)
         dataset_pi0.attrs['shape'] = pi0_q4_dense[k_red_slice].shape
+        nu_mesh_unif = list(range(p_propr['n_nu']))
 
-        dataset_tau = h5file.create_dataset(
-            'tau_unif_mesh', data=tau_dense_unif[:-1])
-        # dataset_tau.attrs['n_tau_unif'] = n_tau_unif
-
-        dataset_nu = h5file.create_dataset(
-            'nu_unif_mesh', data=list(range(optdict['n_nu'])))
-        # dataset_nu.attrs['n_nu'] = optdict['n_nu']
-
+        h5file.create_dataset('nu_unif_mesh', data=nu_mesh_unif)
+        h5file.create_dataset('tau_unif_mesh', data=tau_dense_unif[:-1])
         # Write to disk
         h5file.close()
 

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 project(diagmc-hubbard-2dsqlat VERSION 0.1.0)
 
 # Request compilation with C++17 features
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 # set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Output executables to parent directory
