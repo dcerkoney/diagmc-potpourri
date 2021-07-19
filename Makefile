@@ -1,4 +1,3 @@
-
 all:
 	make chi_ch_example
 	make self_en_example
