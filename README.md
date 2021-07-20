@@ -119,7 +119,7 @@ Options:
    ```
 Then, rebuild the project
    ```sh
-   (cd build && cmake ../src -DCMAKE_BUILD_TYPE=Release && make -j NTHREAD)
+   (cd build && cmake ../src -DCMAKE_BUILD_TYPE=Release && make -j <NTHREAD>)
    ```
 and run the executable of interest, e.g.:
    ```sh
