@@ -28,9 +28,9 @@ To use the pre- and post-processing scripts, the [Python HDF5 library](https://d
    ```sh
     pip install h5py
    ```
-### 2. Boost [Math](https://www.boost.org/doc/libs/1_76_0/libs/math/doc/html/index.html) and [Random](https://www.boost.org/doc/libs/1_76_0/doc/html/boost_random.html) Libraries
+### 2. Boost [math](https://www.boost.org/doc/libs/1_76_0/libs/math/doc/html/index.html), [random](https://www.boost.org/doc/libs/1_76_0/doc/html/boost_random.html), and (optional requirement) [filesystem](https://www.boost.org/doc/libs/1_75_0/libs/filesystem/doc/index.htm) Libraries
 
-Either install the libraries individually via0
+Either install the libraries individually via
    ```sh
     sudo apt-get install libboost-math-dev libboost-random-dev
    ```
@@ -38,6 +38,11 @@ or install Boost in its entirety,
    ```sh
     sudo apt-get install libboost-all-dev
    ```
+For backwards compatibility with some very old compilers (e.g., GCC < 5.3), the boost filesystem libraries are an additional requirement,
+   ```sh
+    sudo apt-get install libboost-system-dev libboost-filesystem-dev
+   ```
+  
 ### 3. (Optional) Open MPI or equivalent
 Open MPI is packaged with most Linux distros nowadays; you can check that it is installed via, e.g., the following:
    ```sh
