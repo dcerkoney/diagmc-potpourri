@@ -45,8 +45,6 @@ Open MPI is packaged with most Linux distros nowadays; you can check that it is 
    ```
 To link `h5c++` against an alternative MPI compiler (e.g., Intel or MPICH2), you will need to modify the [CXX](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/e00ea5a7d17f2076fe5889a23ca7152f3c5846d3/build/Makefile#L9) and [linker](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/e00ea5a7d17f2076fe5889a23ca7152f3c5846d3/build/Makefile#L10) flags in the Makefile accordingly.
 
-For serial usage, remove the [`D_MPI`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/a8ae6ea8c15e2142e7d554ae6f5582f5bfd03832/build/makefile.chi_ch#L2) preprocessor macro from each makefile.
-
 ### 4. (Optional) [TRIQS TPRF](https://triqs.github.io/tprf/latest/)
 
 The TRIQS TPRF package is optionally used for benchmarking purposes in the post-processing script 'plot.py' if [`plot_rpa = True`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/d8035967acc7e31e4fbbbb16093cc0b762f5004a/plot.py#L888). It may be installed (along with [TRIQS](https://triqs.github.io/triqs/latest/) itself) via
@@ -63,52 +61,58 @@ For detailed installation instructions, see [here](https://triqs.github.io/tprf/
    ```sh
    git clone https://github.com/dcerkoney/diagmc-hubbard-2dsqlat.git
    ```
-### 2. Navigate to your local project directory, then build the executable:
+### 2. Navigate to your local project directory and build the executable:
    ```sh
-   cd diagmc-hubbard-2dsqlat && make
+   cd diagmc-hubbard-2dsqlat
+   mkdir build && cd build
+   cmake ../src -DCMAKE_BUILD_TYPE=Release
    ```
-   
+
 
 <!-- USAGE -->
 ## Usage
 
-To use the code, first edit the test input parameters in [hub_2dsqlat_rt_mcmc_chi_ch_example.cpp](src/hub_2dsqlat_rt_mcmc_chi_ch_example.cpp) and [hub_2dsqlat_rt_mcmc_self_en_example.cpp](src/hub_2dsqlat_rt_mcmc_self_en_example.cpp) as desired. The MCMC integrator is compatible with free energy, self energy, and charge/longitudinal spin susceptibility measurements. The provided examples calculate the charge susceptibility and self energy up to 2nd order in U. The charge susceptibility may optionally be compared with the RPA result obtained via the TRIQS TPRF package. Several example sets of propagators/results are provided, but in order to run the code for a different set of test parameters, one may need to generate new propagators (i.e., if the code complains that a compatible lattice Green's function was not found). To this end, use the script [generate_propagators.py](generate_propagators.py). The usage details are accessible as follows:
+To use the code, first edit the test input parameters in [hub_2dsqlat_rt_mcmc_chi_ch_example.cpp](src/hub_2dsqlat_rt_mcmc_chi_ch_example.cpp) and [hub_2dsqlat_rt_mcmc_self_en_example.cpp](src/hub_2dsqlat_rt_mcmc_self_en_example.cpp) as desired. The MCMC integrator is compatible with free energy, self energy, and charge/longitudinal spin susceptibility measurements. The provided examples calculate the charge susceptibility and self energy up to 2nd order in U. The charge susceptibility may optionally be compared with the RPA result obtained via the TRIQS TPRF package. Several example sets of propagators/results are provided, but in order to run the code for a different set of test parameters, one may need to generate new propagators (i.e., if the code complains that a compatible lattice Green's function was not found). To this end, edit the []() file as desired, and then run the script [generate_propagators.py](generate_propagators.py). The usage details are accessible as follows:
    ```
 python3 generate_propagators.py -h
 Usage: generate_propagators.py [ options ]
 
 Options:
   -h, --help            show this help message and exit
-  --dim=DIM             Spatial dimension of the lattice (default is 2);
-                         allowed values: {2, 3}.
+  --target_mu=TARGET_MU
+                        Target (noninteracting) chemical potential. If
+                        supplied, we work at fixed chemical potential and
+                        variable density; otherwise, we use a fixed density
+                        and variable chemical potential.
   --target_n0=TARGET_N0
-                         Target density in units of the lattice constant; since
-                         the number of electrons is coarse-grained, the actual
-                         density may differ slightly. Default (n0 = 1)
-                         corresponds to half-filling (mu0 ~= 0).
-  --target_mu0=TARGET_MU0
-                         Target (noninteracting) chemical potential. If
-                         supplied, we work at fixed chemical potential and
-                         variable density; otherwise, we use a fixed density
-                         and variable chemical potential.
-  --t_hop=T_HOP         The tight-binding hopping parameter t.
-  --U_loc=U_LOC         Onsite Hubbard interaction in units of t.
-  --beta=BETA           Inverse temperature in units of 1/t.
-  --n_site_pd=N_SITE_PD
-                         Number of sites per direction.
-  --lat_const=LAT_CONST
-                         Lattice constant in Bohr radii.
+                        Target density in units of the lattice constant; since
+                        the number of electrons is coarse-grained, the actual
+                        density may differ slightly. Default (n0 = 1)
+                        corresponds to half-filling (mu0 ~= 0).
   --lat_length=LAT_LENGTH
-                         Lattice length in Bohr radii (for working at fixed V:
-                         calculate 'a' on-the-fly).
-  --n_tau=N_TAU         Number of tau points in the nonuniform mesh used for
-                         downsampling (an even number).
-  --n_nu=N_NU           Number of bosonic frequency points (an even number).
-  --save_dir=SAVE_DIR   Subdirectory to save results to, if applicable
-  --save                Save propagator data to h5?
-  --overwrite           Overwrite existing propagator data?
-  --plot_g0             Option for plotting the lattice Green's functions.
-  --plot_pi0            Option for plotting the polarization bubble P_0.
+                        Lattice length in Bohr radii for working at fixed V.
+                        If supplied, the lattice constant is deduced from the
+                        lattice volume and number of sites per direction.
+  --lat_const=LAT_CONST
+                        lattice constant in Bohr radii
+  --n_site_pd=N_SITE_PD
+                        number of lattice sites per direction
+  --n_tau=N_TAU         number of tau points in the nonuniform mesh used for
+                        downsampling (an even number)
+  --n_nu=N_NU           number of bosonic frequency points in the uniform FFT
+                        mesh (an even number)
+  --dim=DIM             spatial dimension of the lattice (default is 2);
+                        allowed values: {2, 3}
+  --beta=BETA           inverse temperature in inverse Hartrees
+  --t_hop=T_HOP         tight-binding hopping parameter t
+  --U_loc=U_LOC         onsite Hubbard interaction in Hartrees
+  --config=CONFIG       relative path of the config file to be used (default:
+                        'config.yml')
+  --save_dir=SAVE_DIR   subdirectory to save results to, if applicable
+  --plot_g0             generate plots for the lattice Green's function
+  --plot_pi0            generate plots for the polarization bubble
+  --dry_run             perform a dry run (don't update config file or save
+                        propagator data)
    ```
 Then, rebuild the executables and run either of them:
    ```sh
