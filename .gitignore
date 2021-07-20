@@ -1,5 +1,6 @@
 # profiling/debug results
 profiling/
+run_*/
 
 # cmake
 build/

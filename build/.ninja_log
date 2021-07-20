@@ -67,3 +67,7 @@
 7198	7288	1626661956067667658	/home/daniel/diagmc-hubbard-2dsqlat/chi_ch_example	b682a020a1214e18
 2	6715	1626728122401468538	CMakeFiles/chi_ch_example.dir/hub_2dsqlat_rt_mcmc_chi_ch_example.cpp.o	34f2811fd3d509ac
 6715	6800	1626728122485468752	/home/daniel/diagmc-hubbard-2dsqlat/chi_ch_example	b682a020a1214e18
+3	4941	1626744172717684137	CMakeFiles/chi_ch_example.dir/hub_2dsqlat_rt_mcmc_chi_ch_example.cpp.o	1e6008c1646e5bcc
+4941	5021	1626744172797684823	/home/daniel/diagmc-hubbard-2dsqlat/chi_ch_example	b682a020a1214e18
+2	4839	1626744184409784105	CMakeFiles/self_en_example.dir/hub_2dsqlat_rt_mcmc_self_en_example.cpp.o	d947b069d81ed78e
+4839	4909	1626744184481784719	/home/daniel/diagmc-hubbard-2dsqlat/self_en_example	688e7b989712ea4f

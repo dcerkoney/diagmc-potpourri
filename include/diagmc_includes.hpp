@@ -43,6 +43,3 @@
 
 /* HDF5 header */
 #include "H5Cpp.h"
-
-/* JSON header */
-#include "json.hpp"

@@ -675,7 +675,8 @@ def plot_self_en(params, run_subdir, job_name, logfile):
 
     # Estimate the local self-energy by averaging over k-points
     local_self_en_means = np.mean(self_en_means, axis=-1)
-    local_self_en_errs = np.mean(self_en_errs, axis=-1)
+    if n_threads > 1:
+        local_self_en_errs = np.mean(self_en_errs, axis=-1)
 
     print('\nPlotting self energy corrections...', end='', flush=True)
 

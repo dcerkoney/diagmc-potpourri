@@ -16,9 +16,6 @@ namespace fs = std::experimental::filesystem;
 namespace fs = boost::filesystem;
 #endif
 
-// Simplify json class alias for convenience
-using json = nlohmann::json;
-
 // Defines the measurement type: a Matsubara (4-momentum) correlation function
 //                               for the Hubbard model on a 2D square lattice
 using meas_t = mcmc_cfg_2d_sq_hub_mf_meas::meas_t;

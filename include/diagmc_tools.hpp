@@ -1137,13 +1137,6 @@ hc_lat_mf_coord first_brillouin_zone(const hc_lat_mf_coord &coord) {
 
 namespace develop {
 
-// Convenience function for parsing JSONC (JSON with Comments) files
-template <typename InputType>
-nlohmann::json jsonc_parse(InputType &&i) {
-  bool ignore_comments = true;
-  return nlohmann::json::parse(std::forward<InputType>(i), nullptr, true, ignore_comments);
-}
-
 #if BOOST_VERSION >= 106500
 typedef boost::math::arcsine_distribution<double> Arcsin_dist;
 Arcsin_dist arcsin_dist(0.0, 1.0);

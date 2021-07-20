@@ -3,7 +3,6 @@ project(diagmc-hubbard-2dsqlat VERSION 0.1.0)
 
 # Request compilation with C++17 features
 set(CMAKE_CXX_STANDARD 17)
-# set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Output executables to parent directory
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/..)
@@ -37,6 +36,7 @@ if(MPI_CXX_FOUND)
 else()
     message(SEND_ERROR "No MPI C++ library found!")
 endif()
+# Link MPI C++ libraries
 target_link_libraries(chi_ch_example PRIVATE MPI::MPI_CXX)
 target_link_libraries(self_en_example PRIVATE MPI::MPI_CXX)
 
@@ -50,6 +50,7 @@ if(HAVE_STD_FS)
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9.0.0")
             message(STATUS "Linking to filesystem library explicitly (GCC < 9)")
+            # Link filesystem libraries
             target_link_libraries(chi_ch_example PRIVATE stdc++fs)
             target_link_libraries(self_en_example PRIVATE stdc++fs)
         endif()
@@ -61,6 +62,7 @@ else()
         message(STATUS "Compiler supports experimental filesystem library, linking to it")
         target_compile_definitions(chi_ch_example PUBLIC -DHAVE_EXPTL_FS)
         target_compile_definitions(self_en_example PUBLIC -DHAVE_EXPTL_FS)
+        # Link experimental filesystem libraries
         target_link_libraries(chi_ch_example PRIVATE stdc++fs)
         target_link_libraries(self_en_example PRIVATE stdc++fs)
     else()
@@ -71,6 +73,7 @@ else()
             message(STATUS "Compiler lacks filesystem support, linking to boost filesystem library")
             target_compile_definitions(chi_ch_example PUBLIC -DHAVE_BOOST_FS)
             target_compile_definitions(self_en_example PUBLIC -DHAVE_BOOST_FS)
+            # Link boost filesystem libraries
             target_link_libraries(chi_ch_example PRIVATE Boost::filesystem)
             target_link_libraries(self_en_example PRIVATE Boost::filesystem)
         else()
