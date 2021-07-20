@@ -43,7 +43,7 @@ Open MPI is packaged with most Linux distros nowadays; you can check that it is 
    ```sh
     sudo apt-get install openmpi-bin openmpi-common libopenmpi-dev
    ```
-To link `h5c++` against an alternative MPI compiler (e.g., Intel or MPICH2), you will need to modify the [CXX](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/e00ea5a7d17f2076fe5889a23ca7152f3c5846d3/build/Makefile#L9) and [linker](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/e00ea5a7d17f2076fe5889a23ca7152f3c5846d3/build/Makefile#L10) flags in the Makefile accordingly.
+To link against a specific MPI implementation (e.g., Intel or MPICH2), you may need to set your `PATH` and `LD_LIBRARY_PATH` environment variables accordingly and/or set the appropriate include directories explicitly in [CMakeLists.txt](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/faeb4d796a64d23e2b2df93ce9a36d863556b61e/src/CMakeLists.txt) such that CMake chooses the correct libraries. For more details, see CMake's implementation of [FindMPI](https://github.com/Kitware/CMake/blob/master/Modules/FindMPI.cmake).
 
 ### 4. (Optional) [TRIQS TPRF](https://triqs.github.io/tprf/latest/)
 
@@ -63,16 +63,15 @@ For detailed installation instructions, see [here](https://triqs.github.io/tprf/
    ```
 ### 2. Navigate to your local project directory and build the executable:
    ```sh
-   cd diagmc-hubbard-2dsqlat
-   mkdir build && cd build
-   cmake ../src -DCMAKE_BUILD_TYPE=Release
+   cd diagmc-hubbard-2dsqlat && mkdir build
+   (cd build && cmake ../src -DCMAKE_BUILD_TYPE=Release)
    ```
 
 
 <!-- USAGE -->
 ## Usage
 
-To use the code, first edit the test input parameters in [hub_2dsqlat_rt_mcmc_chi_ch_example.cpp](src/hub_2dsqlat_rt_mcmc_chi_ch_example.cpp) and [hub_2dsqlat_rt_mcmc_self_en_example.cpp](src/hub_2dsqlat_rt_mcmc_self_en_example.cpp) as desired. The MCMC integrator is compatible with free energy, self energy, and charge/longitudinal spin susceptibility measurements. The provided examples calculate the charge susceptibility and self energy up to 2nd order in U. The charge susceptibility may optionally be compared with the RPA result obtained via the TRIQS TPRF package. Several example sets of propagators/results are provided, but in order to run the code for a different set of test parameters, one may need to generate new propagators (i.e., if the code complains that a compatible lattice Green's function was not found). To this end, edit the []() file as desired, and then run the script [generate_propagators.py](generate_propagators.py). The usage details are accessible as follows:
+To use the code, first edit the test input parameters in [hub_2dsqlat_rt_mcmc_chi_ch_example.cpp](src/hub_2dsqlat_rt_mcmc_chi_ch_example.cpp) and/or [hub_2dsqlat_rt_mcmc_self_en_example.cpp](src/hub_2dsqlat_rt_mcmc_self_en_example.cpp) as desired. The MCMC integrator is compatible with free energy, self energy, and charge/longitudinal spin susceptibility measurements. The provided examples calculate the charge susceptibility and self energy up to 2nd order in U. The charge susceptibility may optionally be compared with the RPA result obtained via the TRIQS TPRF package. Several example sets of propagators/results are provided, but in order to run the code for a different set of test parameters, one may need to generate new propagators (i.e., if the code complains that a compatible lattice Green's function was not found). To this end, edit the [config.yml](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/faeb4d796a64d23e2b2df93ce9a36d863556b61e/config.yml) file as desired, and then run the script [generate_propagators.py](generate_propagators.py). Note that several config parameters are (re)calculated by the script, and need not be specified initially; namely, those with `null` value in the provided  [example config templates](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/tree/main/config_templates). Additionally, several config parameters may optionally be overriden by command line options for convenience; the usage details are accessible as follows:
    ```
 python3 generate_propagators.py -h
 Usage: generate_propagators.py [ options ]
@@ -114,20 +113,21 @@ Options:
   --dry_run             perform a dry run (don't update config file or save
                         propagator data)
    ```
-Then, rebuild the executables and run either of them:
+Then, rebuild the project
    ```sh
-    make && ./hub_2dsqlat_rt_mcmc_chi_ch_example.exe
+   (cd build && cmake ../src -DCMAKE_BUILD_TYPE=Release)
+   ```
+and run the executable of interest, e.g.:
+   ```sh
+    ${MPI_PREFIX} ./chi_ch_example
    ```
 or
    ```sh
-    make && ./hub_2dsqlat_rt_mcmc_self_en_example.exe
+    ${MPI_PREFIX} ./self_en_example
    ```
-For a parallel run with, say, 8 threads,
-   ```sh
-    make && mpirun -n 8 ./hub_2dsqlat_rt_mcmc_chi_ch_example.exe
-   ```
+where `${MPI_PREFIX}` would be unset for a serial run or, say, `mpirun -n 8` for a parallel run with 8 threads.
 
-Runing the examples at the default settings should take no more than a few minutes.
+Running both example measurements at the default settings should take no more than a minute or two.
 However, reproducing all the figures provided (e.g., for the susceptibilities, by increasing to [`n_meas = 50000000`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/d8035967acc7e31e4fbbbb16093cc0b762f5004a/src/hub_2dsqlat_rt_mcmc_chi_ch_example.cpp#L21), [`n_nu_meas = 5`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/d8035967acc7e31e4fbbbb16093cc0b762f5004a/src/hub_2dsqlat_rt_mcmc_chi_ch_example.cpp#L23), and setting [`batch_U = true`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/d8035967acc7e31e4fbbbb16093cc0b762f5004a/src/hub_2dsqlat_rt_mcmc_chi_ch_example.cpp#L19)) will take more time—around half an hour on a typical machine.
 
 Finally, use the [plot.py](plot.py) script for postprocessing:
