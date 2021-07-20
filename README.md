@@ -43,7 +43,7 @@ Open MPI is packaged with most Linux distros nowadays; you can check that it is 
    ```sh
     sudo apt-get install openmpi-bin openmpi-common libopenmpi-dev
    ```
-To link against a specific MPI implementation (e.g., Intel or MPICH2), you may need to update your `PATH` and `LD_LIBRARY_PATH` environment variables accordingly and/or set the appropriate include directories explicitly in [CMakeLists.txt](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/faeb4d796a64d23e2b2df93ce9a36d863556b61e/src/CMakeLists.txt) such that CMake chooses the correct libraries. For more details, see CMake's implementation of [FindMPI](https://github.com/Kitware/CMake/blob/master/Modules/FindMPI.cmake).
+To link against a specific MPI implementation (e.g., Intel or MPICH2), you may need to update your `PATH` and `LD_LIBRARY_PATH` environment variables accordingly and/or set the appropriate include directories explicitly in [CMakeLists.txt](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/main/src/CMakeLists.txt) such that CMake chooses the correct libraries. For more details, see CMake's implementation of [FindMPI](https://github.com/Kitware/CMake/blob/master/Modules/FindMPI.cmake).
 
 ### 4. (Optional) [TRIQS TPRF](https://triqs.github.io/tprf/latest/)
 
