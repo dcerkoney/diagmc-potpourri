@@ -221,8 +221,9 @@ def plot_chi_n_ch(params, run_subdir, job_name, logfile):
                 i_path_kf_locs.append(i)
     i_path_kf_locs = np.asarray(i_path_kf_locs)
     # If we missed the Fermi surface along the M-\Gamma path
-    # due to coarse-graining, set the locations manually
-    if (len(i_path_kf_locs) == 1):
+    # due to coarse-graining, set the locations manually 
+    # when at half-filling
+    if (len(i_path_kf_locs) < 2) and (params['n0'] == 1):
         i_path_kf_locs = [params['n_k_meas'] /
                           3.0, params['n_k_meas'] * 5 / 6.0]
 
@@ -451,9 +452,9 @@ def plot_static_chi_ch_together(params, run_subdir, job_name, logfile, plot_rpa=
                 i_path_kf_locs.append(i)
     i_path_kf_locs = np.asarray(i_path_kf_locs)
     # If we missed the Fermi surface along the M-\Gamma path
-    # due to coarse-graining, set the locations manually
-    if len(i_path_kf_locs) == 1:
-        # print(i_path_kf_locs)
+    # due to coarse-graining, set the locations manually 
+    # when at half-filling
+    if (len(i_path_kf_locs) < 2) and (params['n0'] == 1):
         i_path_kf_locs = [params['n_k_meas'] /
                           3.0, params['n_k_meas'] * 5 / 6.0]
 
@@ -659,8 +660,9 @@ def plot_self_en(params, run_subdir, job_name, logfile):
                 i_path_kf_locs.append(i)
     i_path_kf_locs = np.asarray(i_path_kf_locs)
     # If we missed the Fermi surface along the M-\Gamma path
-    # due to coarse-graining, set the locations manually
-    if (len(i_path_kf_locs) == 1):
+    # due to coarse-graining, set the locations manually 
+    # when at half-filling
+    if (len(i_path_kf_locs) < 2) and (params['n0'] == 1):
         i_path_kf_locs = [params['n_k_meas'] /
                           3.0, params['n_k_meas'] * 5 / 6.0]
 
