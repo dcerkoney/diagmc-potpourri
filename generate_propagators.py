@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from ruamel.yaml import YAML
-from pathlib import Path, PosixPath
+from pathlib import PosixPath
 from datetime import datetime
 from scipy.special import gamma
 
@@ -52,23 +52,7 @@ def main():
     usage = """usage: %prog [ options ]"""
     parser = optparse.OptionParser(usage)
 
-    # Save / plot options
-    parser.add_option("--save_dir",   type="string", default="propagators",
-                      help="Subdirectory to save results to, if applicable")
-    parser.add_option("--plot_g0",   default=False,  action="store_true",
-                      help="Option for plotting the lattice Green's function.")
-    parser.add_option("--plot_pi0",   default=False,  action="store_true",
-                      help="Option for plotting the polarization bubble P_0.")
-    parser.add_option("--dry_run",   default=False,  action="store_true",
-                      help="Perform a dry run, i.e., don't save any propagator data/plots.")
-    
     # Optional flags for overriding config file params
-    parser.add_option("--n_tau",  type="int",   default=None,
-                      help="Number of tau points in the nonuniform mesh "
-                      + "used for downsampling (an even number).")
-    parser.add_option("--n_nu",  type="int",   default=None,
-                      help="Number of bosonic frequency points in "
-                      + "the uniform FFT mesh (an even number).")
     parser.add_option("--target_mu", type="float",  default=None,
                       help="Target (noninteracting) chemical potential. If supplied, we work at "
                       + "fixed chemical potential and variable density; otherwise, we use a "
@@ -77,21 +61,40 @@ def main():
                       help="Target density in units of the lattice constant; since the number of electrons "
                       + "is coarse-grained, the actual density may differ slightly. Default (n0 = 1) "
                       + "corresponds to half-filling (mu0 ~= 0).")
-    parser.add_option("--dim", type="int",    default=2,
-                      help="Spatial dimension of the lattice (default is 2); allowed values: {2, 3}.")
-    parser.add_option("--t_hop", type="float", default=None,
-                      help="The tight-binding hopping parameter t.")
-    parser.add_option("--U_loc", type="float",  default=None,
-                      help="Onsite Hubbard interaction in Hartrees.")
-    parser.add_option("--beta", type="float",  default=None,
-                      help="Inverse temperature in inverse Hartrees.")
-    parser.add_option("--n_site_pd", type="int",    default=None,
-                      help="Number of sites per direction.")
-    parser.add_option("--lat_const", type="float",    default=None,
-                      help="Lattice constant in Bohr radii.")
     parser.add_option("--lat_length", type="float",    default=None,
-                      help="Lattice length in Bohr radii (for working at "
-                      + "fixed V: calculate 'a' on-the-fly).")
+                      help="Lattice length in Bohr radii for working at fixed V. "
+                      + "If supplied, the lattice constant is deduced from the "
+                      + "lattice volume and number of sites per direction.")
+    parser.add_option("--lat_const", type="float",    default=None,
+                      help="lattice constant in Bohr radii")
+    parser.add_option("--n_site_pd", type="int",    default=None,
+                      help="number of lattice sites per direction")
+    parser.add_option("--n_tau", type="int",   default=None,
+                      help="number of tau points in the nonuniform mesh "
+                      + "used for downsampling (an even number)")
+    parser.add_option("--n_nu", type="int",   default=None,
+                      help="number of bosonic frequency points in "
+                      + "the uniform FFT mesh (an even number)")
+    parser.add_option("--dim", type="int",    default=2,
+                      help="spatial dimension of the lattice (default is 2); allowed values: {2, 3}")
+    parser.add_option("--beta", type="float",  default=None,
+                      help="inverse temperature in inverse Hartrees")
+    parser.add_option("--t_hop", type="float", default=None,
+                      help="tight-binding hopping parameter t")
+    parser.add_option("--U_loc", type="float",  default=None,
+                      help="onsite Hubbard interaction in Hartrees")
+
+    # Save / plot options
+    parser.add_option("--config", type="string", default="config.yml",
+                      help="relative path of the config file to be used (default: 'config.yml')")
+    parser.add_option("--save_dir", type="string", default="propagators",
+                      help="subdirectory to save results to, if applicable")
+    parser.add_option("--plot_g0", default=False,  action="store_true",
+                      help="generate plots for the lattice Green's function")
+    parser.add_option("--plot_pi0", default=False,  action="store_true",
+                      help="generate plots for the polarization bubble")
+    parser.add_option("--dry_run", default=False,  action="store_true",
+                      help="perform a dry run (don't update config file or save propagator data)")
 
     # Next, parse  the arguments and collect all options into a dictionary
     (options, _) = parser.parse_args()
@@ -100,7 +103,15 @@ def main():
     # Parse YAML config file
     yaml = YAML(typ='rt')
     yaml.default_flow_style = False
-    cfg = yaml.load(PosixPath("config.yml"))
+    config_file = PosixPath(optdict['config'])
+    try:
+        cfg = yaml.load(config_file)
+    except FileNotFoundError:
+        raise FileNotFoundError(
+            f"The specified config file '{config_file}' was not found!")
+    except Exception:
+        raise OSError(
+            f"The specified config file '{config_file}' is invalid YAML!")
 
     # Update config with user-supplied cmdline args where applicable
     cfg_override_string = ''
@@ -167,7 +178,7 @@ def main():
                                      target_rho=p_phys['target_n0'],
                                      sigma=sigma_hartree, verbose=True)
 
-    # Update physical params   
+    # Update physical params
     p_phys['vol_lat'] = p_phys['lat_length'] ** p_phys['dim']
     p_phys['n_site'] = p_phys['n_site_pd'] ** p_phys['dim']
     p_phys['num_elec'] = lat_dens_getter.num_elec
@@ -204,7 +215,6 @@ def main():
     if p_phys['target_n0'] == 1:
         # Double-check that we actually obtained a near-zero answer for ef
         assert np.allclose(p_phys['ef'], 0)
-        print(p_phys['ef'])
         # Then, shift it to the exact value at half-filling
         p_phys['ef'] = 0.0
 
@@ -325,7 +335,7 @@ def main():
             propr_dir = PosixPath(f'proprs_{job_id}')
             save_dir = PosixPath(optdict['save_dir']) / propr_dir
             save_dir.mkdir(parents=True, exist_ok=True)
-            p_propr['propr_save_dir'] = save_dir
+            p_propr['propr_save_dir'] = str(save_dir)
         else:
             save_dir = "."
             p_propr['propr_save_dir'] = "N/A"
@@ -339,15 +349,14 @@ def main():
 
     if not optdict['dry_run']:
         # Save updated config back to file
-        yaml.dump(cfg, PosixPath("config.yml"))
+        yaml.dump(cfg, config_file)
 
         # Dump YAML config to JSON for use with the C++ MCMC driver
-        with open("config.json", 'w') as f:
+        with open(config_file.with_suffix('.json'), 'w') as f:
             json.dump(cfg, f, indent=4, sort_keys=True)
 
-
     # Nothing more to do after updating configs in this case
-    if consistent_proprs_exist: 
+    if consistent_proprs_exist:
         return
 
     #########################################################
@@ -369,7 +378,8 @@ def main():
         plots=optdict['plot_g0'],
     )
 
-    tau_dense_unif = p_phys['beta'] * np.arange(p_propr['n_nu'] + 1) / float(p_propr['n_nu'])
+    tau_dense_unif = p_phys['beta'] * \
+        np.arange(p_propr['n_nu'] + 1) / float(p_propr['n_nu'])
     assert(len(tau_dense_unif[:-1]) == p_propr['n_nu'])
 
     # Get G_0 on the uniform dense tau mesh for FFT without
@@ -413,7 +423,7 @@ def main():
         g0_irred_1d = g0_r_tau_irred_mesh.flatten(order='C')
         dataset_g0 = h5file.create_dataset('lat_g0_rt_data', data=g0_irred_1d)
         dataset_g0.attrs['shape'] = g0_r_tau_ifft_mesh[r_red_slice].shape
-        
+
         # Save tau on [0, beta)
         h5file.create_dataset('tau_mesh', data=tau_list[:-1])
         # Write to disk
@@ -447,7 +457,8 @@ def main():
         )
         mlist_plot = np.arange(2)
         # Inclusive endpoints for integration (and to ensure odd number of time points)
-        r_red_slice_incl = p_phys['dim'] * (slice(p_phys['n_site_irred']),) + (slice(None),)
+        r_red_slice_incl = p_phys['dim'] * \
+            (slice(p_phys['n_site_irred']),) + (slice(None),)
         # Get the polarization bubble along the k-path via quadrature integration in \tau; while
         # this approach would be very inefficient to calculate \Pi_0 on the entire Brillouin
         # zone, we use it as a benchmark for the FFT methods along the high-symmetry path

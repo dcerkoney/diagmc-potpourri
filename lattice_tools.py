@@ -566,8 +566,7 @@ class LatticeDensity:
             print(f'\nInverting: N_e(mu) = {target_num_elec} (target num. elec)...')
         # NOTE: to get exactly mu = 0 at half-filling (N_e = N ^ d), it is important
         #       for symmetry reasons that for the endpoints we take a = -b.
-        # mu_opt = optimize.brentq(num_elec_implicit, a=-10, b=10, maxiter=1000)
-        mu_opt = optimize.brentq(num_elec_implicit, a=-100, b=100, maxiter=1000)
+        mu_opt = optimize.brentq(num_elec_implicit, a=-10, b=10, maxiter=1000)
         if self.verbose:
             print(f'Done! Optimized value: mu = {mu_opt}')
         return mu_opt

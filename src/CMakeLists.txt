@@ -28,17 +28,17 @@ find_package(HDF5 REQUIRED COMPONENTS C CXX)
 target_link_libraries(chi_ch_example PUBLIC ${HDF5_C_LIBRARIES} ${HDF5_CXX_LIBRARIES})
 target_link_libraries(self_en_example PUBLIC ${HDF5_C_LIBRARIES} ${HDF5_CXX_LIBRARIES})
 
-# Require MPI and get its C++ bindings
-find_package(MPI REQUIRED)
+# Find MPI libraries and C++ bindings
+find_package(MPI)
 if(MPI_CXX_FOUND)
     target_compile_definitions(chi_ch_example PUBLIC -DHAVE_MPI)
     target_compile_definitions(self_en_example PUBLIC -DHAVE_MPI)
+    # Link MPI C++ libraries
+    target_link_libraries(chi_ch_example PRIVATE MPI::MPI_CXX)
+    target_link_libraries(self_en_example PRIVATE MPI::MPI_CXX)
 else()
-    message(SEND_ERROR "No MPI C++ library found!")
+    message(STATUS "No MPI C++ library found, compiling in serial mode")
 endif()
-# Link MPI C++ libraries
-target_link_libraries(chi_ch_example PRIVATE MPI::MPI_CXX)
-target_link_libraries(self_en_example PRIVATE MPI::MPI_CXX)
 
 # Check for filesystem capabilities and link to required libraries if necessary
 try_compile(HAVE_STD_FS ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}/build_tests/test_filesystem.cpp)
