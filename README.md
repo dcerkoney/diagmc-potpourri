@@ -64,9 +64,9 @@ For detailed installation instructions, see [here](https://triqs.github.io/tprf/
 ### 2. Navigate to your local project directory and build the executable:
    ```sh
    cd diagmc-hubbard-2dsqlat && mkdir build
-   (cd build && cmake ../src -DCMAKE_BUILD_TYPE=Release)
+   (cd build && cmake ../src -DCMAKE_BUILD_TYPE=Release && make -j <NTHREAD>)
    ```
-
+where `<NTHREAD>` is the number of threads to be used for the build step.
 
 <!-- USAGE -->
 ## Usage
@@ -119,17 +119,17 @@ Options:
    ```
 Then, rebuild the project
    ```sh
-   (cd build && cmake ../src -DCMAKE_BUILD_TYPE=Release)
+   (cd build && cmake ../src -DCMAKE_BUILD_TYPE=Release && make -j NTHREAD)
    ```
 and run the executable of interest, e.g.:
    ```sh
-    ${MPI_PREFIX} ./chi_ch_example
+    <MPI_PREFIX> ./chi_ch_example
    ```
 or
    ```sh
-    ${MPI_PREFIX} ./self_en_example
+    <MPI_PREFIX> ./self_en_example
    ```
-where `${MPI_PREFIX}` would be unset for a serial run or, say, `mpirun -n 8` for a parallel run with 8 threads.
+where the (optional) MPI prefix could be, e.g., `mpirun -n 8` for a parallel run with 8 threads.
 
 Running both example measurements at the default settings should take no more than a minute or two.
 However, reproducing all the figures provided (e.g., for the susceptibilities, by increasing to [`n_meas = 50000000`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/d8035967acc7e31e4fbbbb16093cc0b762f5004a/src/hub_2dsqlat_rt_mcmc_chi_ch_example.cpp#L21), [`n_nu_meas = 5`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/d8035967acc7e31e4fbbbb16093cc0b762f5004a/src/hub_2dsqlat_rt_mcmc_chi_ch_example.cpp#L23), and setting [`batch_U = true`](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/d8035967acc7e31e4fbbbb16093cc0b762f5004a/src/hub_2dsqlat_rt_mcmc_chi_ch_example.cpp#L19)) will take more time—around half an hour on a typical machine.
