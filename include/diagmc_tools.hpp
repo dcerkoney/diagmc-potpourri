@@ -148,7 +148,7 @@ constexpr bool is_pinned(int i_constr, int i_vert, int n_legs, int i_first_bos, 
 // Perform some simple checks on H5 data/pred types (to avoid unexpected casting)
 template <typename Tstd, typename Th5 = H5::PredType>
 void check_h5type(std::string name, H5::DataType datatype, Th5 predtype) {
-  if (datatype != predtype) {
+  if (datatype.getClass() != predtype.getClass()) {
     throw std::runtime_error("Unable to read " + name + ", incorrect data-type");
   }
   if (datatype.getSize() != sizeof(Tstd)) {
