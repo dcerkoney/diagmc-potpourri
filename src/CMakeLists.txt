@@ -23,10 +23,12 @@ target_compile_features(self_en_example PUBLIC cxx_std_14)
 target_include_directories(chi_ch_example PRIVATE ${CMAKE_SOURCE_DIR}/../include)
 target_include_directories(self_en_example PRIVATE ${CMAKE_SOURCE_DIR}/../include)
 
-# Require HDF5 and get its C++ bindings
+# Require HDF5 and get its main (low-level API) C/C++ bindings
 find_package(HDF5 REQUIRED COMPONENTS C CXX)
-target_link_libraries(chi_ch_example PUBLIC ${HDF5_C_LIBRARIES} ${HDF5_CXX_LIBRARIES})
-target_link_libraries(self_en_example PUBLIC ${HDF5_C_LIBRARIES} ${HDF5_CXX_LIBRARIES})
+target_link_libraries(chi_ch_example PUBLIC ${HDF5_LIBRARIES})
+target_link_libraries(self_en_example PUBLIC ${HDF5_LIBRARIES})
+target_include_directories(chi_ch_example PUBLIC ${HDF5_INCLUDE_DIRS})
+target_include_directories(self_en_example PUBLIC ${HDF5_INCLUDE_DIRS})
 
 # Find MPI libraries and C++ bindings
 find_package(MPI)
@@ -36,8 +38,10 @@ if(MPI_CXX_FOUND)
     # Link MPI C++ libraries
     target_link_libraries(chi_ch_example PRIVATE MPI::MPI_CXX)
     target_link_libraries(self_en_example PRIVATE MPI::MPI_CXX)
+elseif(HDF5_IS_PARALLEL)
+    message(SEND_ERROR "Parallel HDF5 requires linkage to MPI, but no MPI C++ library was found!")
 else()
-    message(STATUS "No MPI C++ library found, compiling in serial mode")
+    message(STATUS "No MPI C++ library was found, compiling in serial mode")
 endif()
 
 # Check for filesystem capabilities and link to required libraries if necessary
