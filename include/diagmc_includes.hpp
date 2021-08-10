@@ -17,7 +17,6 @@
 /* Standard data structures */
 #include <array>
 #include <bitset>
-#include <cmath>
 #include <complex>
 #include <map>
 #include <string>

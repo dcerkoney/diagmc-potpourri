@@ -41,7 +41,7 @@ int n_site_pd = 30;  // Number of lattice sites along a single direction (i.e., 
 int n_site = static_cast<int>(std::pow(n_site_pd, dim));  // Total number of lattice sites
 // Cutoff for (BC) 'irreducible' lattice distances
 int n_site_irred = static_cast<int>(std::floor(n_site_pd / 2) + 1);
-int n_tau = (1 << 10);  // (= 2^10) Number of points in the imaginary-time mesh [0, beta)
+int n_tau = (1 << 10);     // (= 2^10) Number of points in the imaginary-time mesh [0, beta)
 double ef = 0.0;           // Fermi energy
 double beta = 10.0;        // Inverse temperature
 double t_hop = 1.0;        // Nearest-neighbor hopping parameter t

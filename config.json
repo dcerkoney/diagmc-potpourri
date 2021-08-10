@@ -1,0 +1,65 @@
+{
+    "diag_params": {
+        "D_0": 1.0,
+        "diag_type": "charge_poln",
+        "n_intn": 2,
+        "n_legs": 2,
+        "n_posns": 3,
+        "n_times": 3,
+        "order": 3,
+        "subspaces": [
+            0,
+            3
+        ]
+    },
+    "mcmc_params": {
+        "batch_U": false,
+        "debug": false,
+        "max_posn_shift": 3,
+        "mcmc_job_id": null,
+        "n_meas": 5000000,
+        "n_nu_meas": 1,
+        "n_skip": 1,
+        "n_threads": 1,
+        "n_warm": 100000,
+        "normalize": true,
+        "save_name": "chi_ch_hub_2dsqlat",
+        "save_serial": true,
+        "verbose": true
+    },
+    "phys_params": {
+        "U_batch": [
+            0.1,
+            0.5,
+            1.0,
+            2.0,
+            4.0
+        ],
+        "U_loc": 10.0,
+        "beta": 10.0,
+        "dim": 2,
+        "ef": 0.0,
+        "lat_const": 1.0,
+        "lat_length": 30.0,
+        "mu": 5.0,
+        "mu_tilde": 0.0,
+        "n0": 1.0,
+        "n_site": 900,
+        "n_site_irred": 16,
+        "n_site_pd": 30,
+        "num_elec": 900,
+        "rs": 0.5641895835477563,
+        "s_ferm": 0.5,
+        "t_hop": 1.0,
+        "target_mu": null,
+        "target_n0": 1.0,
+        "vol_lat": 900.0
+    },
+    "propr_params": {
+        "delta_tau": 1e-10,
+        "n_nu": 1024,
+        "n_tau": 1024,
+        "propr_job_id": 1627934849,
+        "propr_save_dir": "propagators/proprs_1627934849"
+    }
+}
