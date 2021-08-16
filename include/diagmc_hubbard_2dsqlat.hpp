@@ -10,9 +10,10 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
   Rand_engine rand_gen;
 
  public:
+  using json = nlohmann::json;
   using meas_t = std::vector<std::vector<std::complex<double>>>;
   // Fields
-  mcmc_lat_ext_hub_params params;
+  hub_2dsqlat_mcmc_config cfg;
   bool work_finished = false;
   bool normalized = false;
   bool debug = false;
@@ -28,8 +29,8 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
   // Indices for accessing the current/proposal subspaces
   int idx_ss_curr = 0;
   int idx_ss_prop = 0;
-  int max_order;  // Maximum diagram order in the run
-  int v_meas_ext;      // Index of the external measurement coordinate (for Fourier transforms)
+  int max_order;   // Maximum diagram order in the run
+  int v_meas_ext;  // Index of the external measurement coordinate (for Fourier transforms)
   int diag_type;
   int n_subspaces;
   // The proposal probability ratio is P(nu | nu') / P(nu' | nu), where
@@ -40,8 +41,8 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
   double weight_prop;
   // Normalization constant for the MCMC integration
   double norm_const = 1;
-  // Scalar weight D_0 for the dummy subspace V_0
-  double d0_weight;
+  // Scalar weight (D_0) for the normalization subspace V_0
+  double norm_space_weight;
   std::vector<int> ss_n_saved;
   std::vector<int> ss_sign_samples;
   // Vector denoting the (diagram) order n of all MCMC subspaces V_n
@@ -53,7 +54,6 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
   diagram_pools_el ss_diags;
   // The name of this mcmc integrator
   std::string name = "";
-  std::time_t timestamp;
   // The diagram type should be one of the following:
   // ['vacuum', 'charge_poln', 'self_en_stat', 'self_en_dyn']
   std::string diag_typestring;
@@ -70,27 +70,23 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
   meas_t meas_sums;   // raw sums
   meas_t meas_means;  // normalized mean data
   // Constructor
-  mcmc_cfg_2d_sq_hub_mf_meas(const mcmc_lat_ext_hub_params &params_,
-                             const lattice_2d_f_interp &lat_g0_r_tau_, const double d0_weight_,
-                             const std::string &diag_typestring_, const diagram_pools_el &ss_diags_,
-                             const std::vector<int> &subspaces_,
-                             const hc_lat_mf_coords &mf_meas_coords_, const meas_t &meas_sums_,
-                             const bool verbose_ = false, const bool debug_ = false,
-                             const std::time_t &timestamp_ = 0)
+  mcmc_cfg_2d_sq_hub_mf_meas(const hub_2dsqlat_mcmc_config &cfg_,
+                             const lattice_2d_f_interp &lat_g0_r_tau_,
+                             const diagram_pools_el &ss_diags_,
+                             const hc_lat_mf_coords &mf_meas_coords_, const meas_t &meas_sums_)
       // Parent constructor
-      : params(params_),
+      : cfg(cfg_),
         lat_g0_r_tau(lat_g0_r_tau_),
-        d0_weight(d0_weight_),
-        diag_typestring(diag_typestring_),
         ss_diags(ss_diags_),
-        subspaces(subspaces_),
         mf_meas_coords(mf_meas_coords_),
         meas_sums(meas_sums_),
-        verbose(verbose_),
-        debug(debug_),
-        timestamp(timestamp_) {
-    max_order = subspaces_.back();
-    n_subspaces = subspaces_.size();
+        subspaces(cfg_.diag.subspaces),
+        n_subspaces(cfg_.diag.subspaces.size()),
+        max_order(cfg_.diag.subspaces.back()),
+        diag_typestring(cfg_.diag.diag_type),
+        norm_space_weight(cfg_.diag.norm_space_weight),
+        verbose(cfg_.mcmc.verbose),
+        debug(cfg_.mcmc.debug) {
     ss_n_saved.assign(n_subspaces, 0);
     ss_sign_samples.assign(n_subspaces, 0);
     // We currently require a constant subspace V_0 for normalization
@@ -103,7 +99,7 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
     using_local_wf = (max_order > 4);
     if (using_local_wf) {
       ss_diag_weights_prop.resize(n_subspaces);
-      ss_diag_weights_prop[0] = {d0_weight};
+      ss_diag_weights_prop[0] = {norm_space_weight};
       for (size_t i = 1; i < n_subspaces; i++) {
         std::vector<double> row;
         for (size_t j = 0; j < ss_diags[i].n_diags; j++) {
@@ -174,19 +170,19 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
     // Set up the lattice binomial generator and distribution; because N_s is
     // even, we bias the distribution so that the mean will end up at the
     // origin, i.e., is at k = N_s / 2
-    // int lat_binom_mean = (params_.n_site_pd - 1) / 2.0; (old mean, mu=-0.5)
-    int lat_binom_mean = params_.n_site_pd / 2;
-    double p_bias = lat_binom_mean / static_cast<double>(params_.n_site_pd - 1);
-    lat_binomial.param(Binom_gen::param_type(params_.n_site_pd - 1, p_bias));
-    lat_binomial_dist = Binom_dist(params_.n_site_pd - 1, p_bias);
+    // int lat_binom_mean = (cfg_.phys.n_site_pd - 1) / 2.0; (old mean, mu=-0.5)
+    int lat_binom_mean = cfg_.phys.n_site_pd / 2;
+    double p_bias = lat_binom_mean / static_cast<double>(cfg_.phys.n_site_pd - 1);
+    lat_binomial.param(Binom_gen::param_type(cfg_.phys.n_site_pd - 1, p_bias));
+    lat_binomial_dist = Binom_dist(cfg_.phys.n_site_pd - 1, p_bias);
     // For variable maximum step-size position shifts
-    double prob_shift = 1.0 / static_cast<double>(2 * params_.max_posn_shift);
-    std::vector<double> weights(2 * params_.max_posn_shift + 1, prob_shift);
+    double prob_shift = 1.0 / static_cast<double>(2 * cfg_.mcmc.max_posn_shift);
+    std::vector<double> weights(2 * cfg_.mcmc.max_posn_shift + 1, prob_shift);
     // Be sure we have an exactly normalized distribution, and
     // hence include an infinitesimal chance for no shift at all
-    weights[params_.max_posn_shift] = 0.0;
+    weights[cfg_.mcmc.max_posn_shift] = 0.0;
     double overflow = 1.0 - std::accumulate(weights.begin(), weights.end(), 0.0);
-    weights[params_.max_posn_shift] = overflow;
+    weights[cfg_.mcmc.max_posn_shift] = overflow;
     assert(std::accumulate(weights.begin(), weights.end(), 0.0) == 1.0);
     posn_shift_gen.param(Discr_gen::param_type(weights));
     // Seed the private random number generator
@@ -208,7 +204,7 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
                      "default normalization constant (1) for debugging purposes!"
                   << std::endl;
       } else {
-        norm_const = d0_weight / static_cast<double>(ss_n_saved[0]);
+        norm_const = norm_space_weight / static_cast<double>(ss_n_saved[0]);
       }
       // Get the reweighted (normalized) mean values in all measurement subspaces
       meas_means = meas_sums;
@@ -226,38 +222,39 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
     }
   }
   // Save measurement results to HDF5
-  void save(std::string job_id = "", std::string filename = "") {
-    if (filename.empty()) {
-      filename = "mcmc_run";
+  void save() {
+    if (cfg.mcmc.save_name.empty()) {
+      throw std::runtime_error("No save name supplied!");
     }
     // Open the output H5 file for writing; if it already exists, don't rewrite over it!
     H5::H5File h5file;
     int dup_count = 0;
     bool is_duplicate = false;
-    std::string full_fpath = filename + ".h5";
-    if (!job_id.empty()) {
-      full_fpath = job_id + "/" + filename + "_" + job_id + ".h5";
-    }
+    std::string filename =
+        cfg.mcmc.save_dir.value() + "/" + cfg.mcmc.save_name + "_run_" + std::to_string(cfg.mcmc.job_id.value());
+    std::string extension = ".h5";
     do {
       try {
         H5::Exception::dontPrint();
-        h5file = H5::H5File(full_fpath, H5F_ACC_EXCL);
+        h5file = H5::H5File(filename + extension, H5F_ACC_EXCL);
         is_duplicate = false;
       } catch (H5::FileIException error) {
         // error.printErrorStack();
-        std::cerr << "File '" << full_fpath << "' already exists." << std::endl;
+        std::cerr << "File '" << filename + extension << "' already exists." << std::endl;
         is_duplicate = true;
         ++dup_count;
-        filename = filename + "_" + std::to_string(dup_count);
+        extension = "_" + std::to_string(dup_count) + ".h5";
       }
       if (dup_count > 10) {
         throw std::runtime_error("Unable to save data, too many duplicates!");
       }
     } while (is_duplicate);
-    std::cout << "Writing data to H5 file '" + full_fpath + "'..." << std::endl;
+    std::cout << "\nWriting data to H5 file '" + h5file.getFileName() + "'..." << std::endl;
 
-    // Save MCMC parameters as HDF5 attributes
-    params.save_to_h5<H5::H5File>(h5file);
+    // Save the run config to an HDF5 string attribute as serialized JSON
+    add_attribute_h5<std::string>(static_cast<json>(cfg).dump(), "config", h5file);
+
+    // Save extra MCMC parameters as HDF5 attributes
     add_attribute_h5<int>(normalized, "normalized", h5file);
     add_attribute_h5<int>(n_ascend, "n_ascend", h5file);
     add_attribute_h5<int>(n_descend, "n_descend", h5file);
@@ -265,10 +262,7 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
     add_attribute_h5<int>(max_order, "max_order", h5file);
     add_attribute_h5<int>(v_meas_ext, "v_meas_ext", h5file);
     add_attribute_h5<int>(n_subspaces, "n_subspaces", h5file);
-    add_attribute_h5<int>(static_cast<int>(timestamp), "timestamp", h5file);
     add_attribute_h5<double>(norm_const, "norm_const", h5file);
-    add_attribute_h5<double>(d0_weight, "d0_weight", h5file);
-    add_attribute_h5<std::string>(diag_typestring, "diag_typestring", h5file);
     if (!name.empty()) {
       add_attribute_h5<std::string>(name, "integrator_name", h5file);
     }
@@ -313,19 +307,16 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
     }
   }
   // Summarize the current results
-  void summarize(std::string job_id = "", std::string filename = "") {
+  void summarize(bool to_file = false) {
     // Forward stdout to output log h5file if applicable
     std::streambuf *buffer;
-    std::ofstream outfile;
-    std::string full_fpath = filename + ".log";
-    if (filename.empty()) {
-      buffer = std::cout.rdbuf();
-    } else {
-      if (!job_id.empty()) {
-        full_fpath = job_id + "/" + filename + "_" + job_id + ".log";
-      }
-      outfile.open(full_fpath, std::ofstream::app);
+    std::ofstream outfile(cfg.mcmc.save_dir.value() + "/" + cfg.mcmc.save_name + "_run_" +
+                              std::to_string(cfg.mcmc.job_id.value()) + ".log",
+                          std::ofstream::app);
+    if (to_file) {
       buffer = outfile.rdbuf();
+    } else {
+      buffer = std::cout.rdbuf();
     }
     std::ostream out(buffer);
 
@@ -404,14 +395,14 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
     out << "]" << std::endl;
 
     // Measurement summary data
-    if (i_step >= params.n_warm) {
+    if (i_step >= cfg.mcmc.n_warm) {
       double n_meas_so_far;
       if (work_finished) {
-        // If the run is finished, i_step = params.n_meas,
+        // If the run is finished, i_step = cfg.mcmc.n_meas,
         // and we should not shift by +1 in this case
-        n_meas_so_far = params.n_meas;
+        n_meas_so_far = cfg.mcmc.n_meas;
       } else {
-        n_meas_so_far = i_step - params.n_warm + 1;
+        n_meas_so_far = i_step - cfg.mcmc.n_warm + 1;
       }
       // Saved counts (n_saved_V_i)
       out << "\nSubspace saved counts:\t[";
@@ -461,7 +452,7 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
   // D_0 is exactly known, we do not need to seed the coordinates in the setup
   // stage! Also seeds the random number generator(s) to be used in the
   // Metropolis step and updates.
-  constexpr void setup() { weight_curr = d0_weight; }
+  constexpr void setup() { weight_curr = norm_space_weight; }
   // Instantiates the Markov chain at some user-supplied phase space coordinate,
   // and determines the associated initial configuration weight. Also seeds the
   // random number generator(s) to be used in the Metropolis step and updates.
@@ -491,19 +482,11 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
     // Initialize temporary variables to hold coordinate seed values
     int v_seed_id;
     double v_seed_itime;
-    std::vector<int> v_seed_posn(params.dim);
+    std::vector<int> v_seed_posn(cfg.phys.dim);
     // We shift to an origin-centered binomial distribution: B(N, 1/2) - N/2
-    int lat_offset = -params.n_site_pd / 2;
+    int lat_offset = -cfg.phys.n_site_pd / 2;
     // Seed the vertices
     int n_seeded = 0;
-    // // Seed the center-of-mass coordinate (default constructor with N and beta defined from params)
-    // if (v_start == 0) {
-    //   coords_prop.push_back(hc_lat_st_coord(params.dim, params.n_site_pd, params.beta,
-    //                                         params.delta_tau, params.lat_const, debug));
-    //   // Start at the next vertex for the usual seeding procedure to follow
-    //   ++v_start;
-    //   ++n_seeded;
-    // }
     for (int i = v_start; i < v_stop; ++i) {
       // Seed spacetime variables for new unconstrained vertices
       if (constraints[i] == -1) {
@@ -511,23 +494,23 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
           std::cout << "Seeding vertex v_" << i << "..." << std::endl;
         }
         // Seed the center-of-mass coordinate (default
-        // constructor with N and beta defined from params)
+        // constructor with N and beta defined from phys)
         if (i == 0) {
-          coords_prop.push_back(hc_lat_st_coord(params.dim, params.n_site_pd, params.beta,
-                                                params.delta_tau, params.lat_const, debug));
+          coords_prop.push_back(hc_lat_st_coord(cfg.phys.dim, cfg.phys.n_site_pd, cfg.phys.beta,
+                                                cfg.propr.delta_tau, cfg.phys.lat_const, debug));
           ++n_seeded;
           continue;
         }
         v_seed_id = i;
-        v_seed_itime = params.beta * std_uniform(rand_gen);
-        for (int j = 0; j < params.dim; ++j) {
+        v_seed_itime = cfg.phys.beta * std_uniform(rand_gen);
+        for (int j = 0; j < cfg.phys.dim; ++j) {
           v_seed_posn[j] = lat_binomial(rand_gen);
           proposal_ratio /= boost::math::pdf(lat_binomial_dist, v_seed_posn[j]);
-          v_seed_posn[j] = pymod<int>(v_seed_posn[j] + lat_offset, params.n_site_pd);
+          v_seed_posn[j] = pymod<int>(v_seed_posn[j] + lat_offset, cfg.phys.n_site_pd);
         }
         // Construct the v_seed coordinate object and add it to the list
-        hc_lat_st_coord v_seed(v_seed_id, v_seed_itime, v_seed_posn, params.n_site_pd, params.beta,
-                               params.delta_tau, params.lat_const, debug);
+        hc_lat_st_coord v_seed(v_seed_id, v_seed_itime, v_seed_posn, cfg.phys.n_site_pd,
+                               cfg.phys.beta, cfg.propr.delta_tau, cfg.phys.lat_const, debug);
         coords_prop.push_back(v_seed);
         ++n_seeded;
       }
@@ -560,13 +543,13 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
     // The proposal ratio is the product of all inverse generation probabilities of
     // the new variables; we initialize it with the temporal part, and the rest
     // is computed in the seeding process (function 'seed_coords_prop')
-    proposal_ratio = std::pow(params.beta, n_new_times);
+    proposal_ratio = std::pow(cfg.phys.beta, n_new_times);
     // There is one extra time for outgoing vertex of polarization diagrams
     // int n_new_times = n_new_lines + (diag_type == 1);
     // The proposal ratio is the product of all inverse generation probabilities
     // of the new variables; for the temporal part of the distribution, the
     // factor of -1 accounts for the fixed COM coordinate
-    // proposal_ratio = std::pow(params.beta, n_new_times - 1);
+    // proposal_ratio = std::pow(cfg.phys.beta, n_new_times - 1);
     // Seed the new internal vertices (range(i) defined s.t. new ids start at
     // n_verts_curr), and update the proposal ratio to include the distribution
     // of each spatial variable
@@ -599,30 +582,30 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
     int n_verts_prop = ss_diags[idx_ss_prop].n_verts;
     // The proposal ratio is the product of all generation probabilities of the
     // variables to be removed; we initialize it with the temporal part
-    proposal_ratio = std::pow(1.0 / params.beta, n_rem_times);
+    proposal_ratio = std::pow(1.0 / cfg.phys.beta, n_rem_times);
     // There is one extra time for outgoing vertex of polarization diagrams
     // int n_rem_times = n_rem_lines + (diag_type == 1);
     // The proposal ratio is the product of all generation probabilities of the
     // variables to be removed; for the temporal part of the distribution, the
     // factor of -1 accounts for the fixed COM coordinate
-    // proposal_ratio = std::pow(1.0 / params.beta, n_rem_times - 1);
+    // proposal_ratio = std::pow(1.0 / cfg.phys.beta, n_rem_times - 1);
     // We shift to an origin-centered binomial distribution: B(N, 1/2) - N/2
-    int lat_offset = -params.n_site_pd / 2;
+    int lat_offset = -cfg.phys.n_site_pd / 2;
     for (int i = n_verts_prop; i < n_verts_curr; ++i) {
       // Only the independent (non-COM and unconstrained)
       // vertices contribute a non-unity proposal distribution
       if ((i == 0) || (constraints[i] != -1)) {
         continue;
       }
-      for (int j = 0; j < params.dim; ++j) {
+      for (int j = 0; j < cfg.phys.dim; ++j) {
         // std::cout << "current coordinate index: " << i << std::endl;
         int this_lat_posn = coords_curr[i].posn[j];
         // Shift back to a binomial distribution centered at N / 2 to compute the pmf correctly
-        if (this_lat_posn >= params.n_site_pd / 2.0) {
-          this_lat_posn -= params.n_site_pd;
+        if (this_lat_posn >= cfg.phys.n_site_pd / 2.0) {
+          this_lat_posn -= cfg.phys.n_site_pd;
         }
         if (debug && !(((this_lat_posn - lat_offset) >= 0) &&
-                       ((this_lat_posn - lat_offset) < params.n_site_pd))) {
+                       ((this_lat_posn - lat_offset) < cfg.phys.n_site_pd))) {
           std::cout << "Current lattice position: " << (this_lat_posn - lat_offset) << std::endl;
           throw std::out_of_range("Bad lattice position (not in [0, N))!");
         }
@@ -652,7 +635,7 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
     int n_posns = ss_diags[idx_ss_prop].n_posns;
     // Select internal variable(s) to alter; the total number of
     // modifiables is: (d+1)*n, where n is the subspace order
-    int n_modifiables = (params.dim + 1) * modifiables.size();
+    int n_modifiables = (cfg.phys.dim + 1) * modifiables.size();
     // Adjust the select_modifiable distribution parameters
     select_modifiable.param(DUnif_gen::param_type(0, n_modifiables - 1));
     // Alter the selected diagram variable(s), taking care of equal time and
@@ -664,8 +647,8 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
       // Get selected modifiable vertex ID
       v_modif = modifiables[selection];
       // Update selected vertex's time with a local shift
-      coords_prop[v_modif].itime += (params.beta / 10.0) * (2 * std_uniform(rand_gen) - 1);
-      coords_prop[v_modif].itime = pymod<double>(coords_prop[v_modif].itime, params.beta);
+      coords_prop[v_modif].itime += (cfg.phys.beta / 10.0) * (2 * std_uniform(rand_gen) - 1);
+      coords_prop[v_modif].itime = pymod<double>(coords_prop[v_modif].itime, cfg.phys.beta);
       // Enforce the equal-time constraint on mate(v_{modif}) if applicable
       if (mates[v_modif] != -1) {
         coords_prop[mates[v_modif]].itime = coords_prop[v_modif].itime;
@@ -680,8 +663,8 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
       // remainder (selection % dim) indexes the vertex components.
       selection = selection - n_times;
       // Get selected modifiable vertex ID and index for position component (axis)
-      v_modif = modifiables[selection / params.dim];
-      int i_axis = selection % params.dim;
+      v_modif = modifiables[selection / cfg.phys.dim];
+      int i_axis = selection % cfg.phys.dim;
       if (debug) {
         std::cout << "selection = " << selection << std::endl;
         std::cout << "v_modif = " << v_modif << std::endl;
@@ -697,7 +680,7 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
       coords_prop[v_modif].posn[i_axis] += posn_shift;
       // Enforce the lattice periodicity, n_i \in [0, N)
       coords_prop[v_modif].posn[i_axis] =
-          pymod<int>(coords_prop[v_modif].posn[i_axis], params.n_site_pd);
+          pymod<int>(coords_prop[v_modif].posn[i_axis], cfg.phys.n_site_pd);
       // Enforce the equal-position constraint on mate(v_{modif}) if applicable
       if (mates[v_modif] != -1) {
         coords_prop[mates[v_modif]].posn[i_axis] = coords_prop[v_modif].posn[i_axis];
@@ -756,13 +739,13 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
         // The FT factor is: e^{-i (p * r - nu * tau)}
         p_dot_r = 0.0;
         nu_tau = v_out_mf_j.imfreq * v_out_rt.itime;
-        for (std::size_t k = 0; k < params.dim; ++k) {
+        for (std::size_t k = 0; k < cfg.phys.dim; ++k) {
           p_dot_r += v_out_mf_j.mom[k] * v_out_rt.posn[k];
         }
         // Since the stored vectors mom and posn are index vectors,
         // include the missing scale factor (2 pi a / L) = (2 pi / N)
-        p_dot_r *= (2.0 * M_PI / static_cast<double>(params.n_site_pd));
-        // p_dot_r = (2.0 * M_PI / static_cast<double>(params.n_site_pd)) *
+        p_dot_r *= (2.0 * M_PI / static_cast<double>(cfg.phys.n_site_pd));
+        // p_dot_r = (2.0 * M_PI / static_cast<double>(cfg.phys.n_site_pd)) *
         //           std::inner_product(v_out_mf_j.mom.begin(), v_out_mf_j.mom.end(),
         //                              v_out_rt.posn.begin(), 0.0);
         // Explicitly enforce the time-reversal symmetry (TRS) for
@@ -863,7 +846,7 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
         ss_diag_weights_curr = ss_diag_weights_prop;
       }
       // Only update the acceptance count after warmup steps
-      if (i_step >= params.n_warm) {
+      if (i_step >= cfg.mcmc.n_warm) {
         ++n_accepted;
         // For adjusting d0 value / checking detailed balance
         if (selection == 0) {
@@ -878,46 +861,46 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
       std::cout << "Move rejected (p_accept = " << acceptance_ratio << ")" << std::endl;
     }
     // After the warm-up period, perform a measurement every n_skip steps
-    if ((i_step >= params.n_warm) && ((i_step - params.n_warm + 1) % params.n_skip == 0)) {
+    if ((i_step >= cfg.mcmc.n_warm) && ((i_step - cfg.mcmc.n_warm + 1) % cfg.mcmc.n_skip == 0)) {
       measure();
     }
     ++i_step;
   }
   // Do the full MCMC walk
-  meas_t integrate(std::string job_id = "", std::string outfile = "", bool normalize = true,
-                   bool save_serial = false, bool main_thread = true) {
+  meas_t integrate(bool main_thread = true) {
     setup();
-    while (i_step < params.n_warm + params.n_meas) {
+    bool to_file = true;
+    while (i_step < cfg.mcmc.n_warm + cfg.mcmc.n_meas) {
       // Do a Metropolis-Hastings step
       step();
       // Save MCMC state information for every millionth measurement to logfile,
       // and print it to stdout if the verbosity is high
-      if (main_thread && (i_step >= params.n_warm) && (i_step % 1000000 == 0)) {
-        summarize(job_id, outfile);  // print to logfile
+      if (main_thread && (i_step >= cfg.mcmc.n_warm) && (i_step % 1000000 == 0)) {
+        summarize(to_file);  // print to logfile
         if (verbose) {
           summarize();  // print to stdout
         }
       }
     }
-    assert(i_step == params.n_warm + params.n_meas);
+    assert(i_step == cfg.mcmc.n_warm + cfg.mcmc.n_meas);
     // Normalize the measurement data and mark the integration as finished
-    const meas_t &meas_data = results(normalize);
+    const meas_t &meas_data = results(cfg.mcmc.normalize);
     work_finished = true;
     // Optionally save the results of this thread to H5
-    if (save_serial) {
-      save(job_id, outfile);
+    if (cfg.mcmc.save_serial) {
+      save();
     }
     // Summarize integration results to logfile in the main thread only
     if (main_thread) {
-      summarize(job_id, outfile);  // print to logfile
-      summarize();                 // print to stdout
+      summarize(to_file);  // print to logfile
+      summarize();         // print to stdout
     }
     return meas_data;
   }
   // Calculates the configuration proposal weight for the appropriate diagram type
   double get_weight_prop() {
     if (idx_ss_prop == 0) {
-      return d0_weight;
+      return norm_space_weight;
     } else {
       return dn_weight();
     }
@@ -925,7 +908,7 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
   // Calculates the configuration proposal weight for mutation-type updates
   double get_weight_prop(int v_mutated) {
     if (idx_ss_prop == 0) {
-      return d0_weight;
+      return norm_space_weight;
     } else if (!using_local_wf) {
       return dn_weight();
     } else {
@@ -941,8 +924,8 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
     // Add the fermionic connections to the weight for every diagram
     const diagram_pool_el &diags = ss_diags[idx_ss_prop];
     // Constant prefactors
-    double prefactor = std::pow(-params.U_loc, diags.n_intn) *
-                       std::pow(params.lat_const, params.dim * diags.n_posns);
+    double prefactor = std::pow(-cfg.phys.U_loc, diags.n_intn) *
+                       std::pow(cfg.phys.lat_const, cfg.phys.dim * diags.n_posns);
     if (diag_type < 2) {
       prefactor *= (2 * diags.s_ferm + 1);
     }
@@ -959,7 +942,7 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
         // Evaluate the Green's function interpolant over
         // the spacetime distance associated with this line
         double del_tau;
-        std::vector<int> del_nr(params.dim);
+        std::vector<int> del_nr(cfg.phys.dim);
         std::tie(del_nr, del_tau) = coords_prop[edge[1]] - coords_prop[edge[0]];
         this_weight *= lat_g0_r_tau(del_nr[0], del_nr[1]).ap_eval(del_tau);
       }
@@ -1001,7 +984,7 @@ class mcmc_cfg_2d_sq_hub_mf_meas {
         double ferm_io_weight = 1.0;
         for (edge_t f_edge : f_edges) {
           double del_tau;
-          std::vector<int> del_nr(params.dim);
+          std::vector<int> del_nr(cfg.phys.dim);
           // Get the spacetime difference (using lattice spacing units)
           std::tie(del_nr, del_tau) = coords[i][f_edge[1]] - coords[i][f_edge[0]];
           // Evaluate the Green's function interpolant over

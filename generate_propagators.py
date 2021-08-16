@@ -4,6 +4,7 @@
 import sys
 import glob
 import json
+from typing import OrderedDict
 import h5py
 import optparse
 import numpy as np
@@ -87,7 +88,7 @@ def main():
     # Save / plot options
     parser.add_option("--config", type="string", default="config.yml",
                       help="relative path of the config file to be used (default: 'config.yml')")
-    parser.add_option("--save_dir", type="string", default="propagators",
+    parser.add_option("--propr_save_dir", type="string", default="propagators",
                       help="subdirectory to save results to, if applicable")
     parser.add_option("--plot_g0", default=False,  action="store_true",
                       help="generate plots for the lattice Green's function")
@@ -128,13 +129,13 @@ def main():
         cfg_override_string += '\n'
 
     # Reference param groups directly for brevity (cfg is still modified)
-    p_phys = cfg['phys_params']
-    p_propr = cfg['propr_params']
+    p_phys = cfg['phys']
+    p_propr = cfg['propr']
 
     # Get job start time for purposes of generating a UNIX timestamp ID
     starttime = datetime.utcnow()
     job_id = to_timestamp(starttime, rtype=int)
-    p_propr['propr_job_id'] = job_id
+    p_propr['job_id'] = job_id
     print(f'\nTimestamp: {job_id} (UTC)\nJob started at: {starttime}')
 
     # Currently, we only implement the 2D and 3D cases
@@ -160,8 +161,7 @@ def main():
     # Make sure there is no roundoff error in the nearest-neighbor distance calculations
     test_distance_roundoff(
         n_site_pd=p_phys['n_site_pd'], lat_const=p_phys['lat_const'])
-
-    print(p_phys['lat_length'], p_phys['n_site_pd'], p_phys['lat_const'])
+    # print(p_phys['lat_length'], p_phys['n_site_pd'], p_phys['lat_const'])
 
     # Sigma[k, rho] = Sigma_H[rho] |_{U_loc}
     # (must be parametrized in terms of k, rho for general density getter)
@@ -280,6 +280,10 @@ def main():
           ': '+str(path_k_coords[len(i_path) // 3]))
     assert len(np.unique(path_k_coords, axis=0)) == len(path_k_coords)
 
+    # Update number of measurement k-points in the 
+    # YAML config file to the above k-path length
+    cfg['mcmc']['n_k_meas'] = n_k_pts
+
     # Defines the maximum possible index value in the reduced
     # difference vector mesh, max(nr_1 - nr_2) = (N // 2) + 1
     p_phys['n_site_irred'] = (p_phys['n_site_pd'] // 2) + 1
@@ -292,27 +296,29 @@ def main():
                                tau_powlist_right[1:-1], [p_phys['beta'] - p_propr['delta_tau'], p_phys['beta']]))
     assert(len(tau_list[:-1]) == p_propr['n_tau'])
 
-    # Check for any existing propagator data in save_dir matching
+    # Check for any existing propagator data in the propagator save_dir matching
     # the current parameters; if none exists, generate them
     consistent_proprs_exist = False
     consistent_propr_path = None
-    propr_paths = glob.glob(f"./{optdict['save_dir']}/*/lat_g0_rt.h5")
+    propr_paths = glob.glob(f"./{optdict['propr_save_dir']}/*/lat_g0_rt*.h5")
+    print(propr_paths)
     for propr_path in propr_paths:
         g0_path = PosixPath(propr_path)
         g0_data = h5py.File(g0_path, 'r')
-        # Check for consistency of relevant attributes
         try:
-            params_consistent = (p_phys['n0'] == g0_data.attrs['n0']
-                                 and p_phys['mu'] == g0_data.attrs['mu']
-                                 and p_phys['mu_tilde'] == g0_data.attrs['mu_tilde']
-                                 and p_phys['lat_const'] == g0_data.attrs['lat_const']
-                                 and p_phys['n_site_pd'] == g0_data.attrs['n_site_pd']
-                                 and p_phys['dim'] == g0_data.attrs['dim']
-                                 and p_phys['beta'] == g0_data.attrs['beta']
-                                 and p_phys['t_hop'] == g0_data.attrs['t_hop']
-                                 and p_phys['U_loc'] == g0_data.attrs['U_loc']
-                                 and p_propr['n_tau'] == g0_data.attrs['n_tau'])
-        except AttributeError:
+            j_cfg = json.loads(json.dumps(cfg))
+            g0_cfg = json.loads(g0_data.attrs['config'])
+            # Ignore propagator job_id / save_dir for purposes of this consistency check
+            for d in (j_cfg['propr'], g0_cfg['propr']):
+                for k in ('job_id', 'save_dir'):
+                    d.pop(k, None)
+            # Check for consistency of physical/propagator parameters between the
+            # currently loaded propagator data and the current run configuration
+            params_consistent = (j_cfg['phys'] == g0_cfg['phys']
+                                 and j_cfg['propr'] == g0_cfg['propr'])
+        except (AttributeError, KeyError):
+            # Handle any HDF5 attribute / JSON key errors gently; they
+            # merely imply this Green's function data is incompatible
             continue
         if params_consistent:
             consistent_propr_path = g0_path
@@ -323,8 +329,8 @@ def main():
               + ' updating paths in cfg...', end='')
         consistent_save_dir = consistent_propr_path.parent
         consistent_job_id = consistent_save_dir.name.split('proprs_')[-1]
-        p_propr['propr_save_dir'] = str(consistent_save_dir)
-        p_propr['propr_job_id'] = str(consistent_job_id)
+        p_propr['save_dir'] = str(consistent_save_dir)
+        p_propr['job_id'] = int(consistent_job_id)
         print('done!')
     else:
         print('\nNo consistent propagator data found for the supplied config, generating it now...')
@@ -333,18 +339,18 @@ def main():
         # Make directory in which to save new propagator figs/data (if applicable and necessary)
         if not optdict['dry_run']:
             propr_dir = PosixPath(f'proprs_{job_id}')
-            save_dir = PosixPath(optdict['save_dir']) / propr_dir
+            save_dir = PosixPath(optdict['propr_save_dir']) / propr_dir
             save_dir.mkdir(parents=True, exist_ok=True)
-            p_propr['propr_save_dir'] = str(save_dir)
+            p_propr['save_dir'] = str(save_dir)
         else:
             save_dir = "."
-            p_propr['propr_save_dir'] = "N/A"
+            p_propr['save_dir'] = "N/A"
 
     # Summarize any config settings overriden by cmdline flags, and print the updated config
     cfg_update_string = ('Proposed config settings' if optdict['dry_run']
                          else 'Updated config settings')
     print(f'{cfg_override_string}\n{cfg_update_string}:')
-    json.dump(cfg, sys.stdout, indent=4, sort_keys=True)
+    json.dump(cfg, sys.stdout, indent=4)
     print('\n')
 
     if not optdict['dry_run']:
@@ -353,7 +359,7 @@ def main():
 
         # Dump YAML config to JSON for use with the C++ MCMC driver
         with open(config_file.with_suffix('.json'), 'w') as f:
-            json.dump(cfg, f, indent=4, sort_keys=True)
+            json.dump(cfg, f, indent=4)
 
     # Nothing more to do after updating configs in this case
     if consistent_proprs_exist:
@@ -401,18 +407,10 @@ def main():
     if not optdict['dry_run']:
         # Save the lattice G_0(r, tau) data to h5
         g0_h5file = save_dir / f'lat_g0_rt_{job_id}.h5'
-        # Open H5 file and write attributes/data to it
+        # Open H5 file and write config/data to it
         h5file = h5py.File(g0_h5file, 'w')
-        h5file.attrs['n0'] = p_phys['n0']
-        h5file.attrs['mu'] = p_phys['mu']
-        h5file.attrs['mu_tilde'] = p_phys['mu_tilde']
-        h5file.attrs['lat_const'] = p_phys['lat_const']
-        h5file.attrs['n_site_pd'] = p_phys['n_site_pd']
-        h5file.attrs['dim'] = p_phys['dim']
-        h5file.attrs['beta'] = p_phys['beta']
-        h5file.attrs['t_hop'] = p_phys['t_hop']
-        h5file.attrs['U_loc'] = p_phys['U_loc']
-        h5file.attrs['n_tau'] = p_propr['n_tau']
+        # Serialize config to JSON, and save as an H5 string attribute
+        h5file.attrs['config'] = json.dumps(cfg)
 
         # Get G_0 over the irreducible set of lattice
         # distance vectors, i.e., the first orthant of L;
@@ -557,16 +555,9 @@ def main():
         pi0_h5file = save_dir / f'lat_pi0_q4_{job_id}.h5'
         # Open H5 file and write attributes/data to it
         h5file = h5py.File(pi0_h5file, 'w')
-        h5file.attrs['n0'] = p_phys['n0']
-        h5file.attrs['mu'] = p_phys['mu']
-        h5file.attrs['mu_tilde'] = p_phys['mu_tilde']
-        h5file.attrs['lat_const'] = p_phys['lat_const']
-        h5file.attrs['n_site_pd'] = p_phys['n_site_pd']
-        h5file.attrs['n_nu'] = p_propr['n_nu']
-        h5file.attrs['dim'] = p_phys['dim']
-        h5file.attrs['beta'] = p_phys['beta']
-        h5file.attrs['t_hop'] = p_phys['t_hop']
-        h5file.attrs['U_loc'] = p_phys['U_loc']
+        # Serialize config to JSON, and save as an H5 string attribute
+        h5file.attrs['config'] = json.dumps(cfg)
+        # Number of tau points in the uniform mesh is the same as n_nu
         h5file.attrs['n_tau_unif'] = p_propr['n_nu']
 
         k_red_slice = p_phys['dim'] * \

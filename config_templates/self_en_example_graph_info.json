@@ -1,0 +1,10 @@
+{
+    "graphs": {
+        "bos_edges_common": [[0, 2], [1, 3]],
+        "topologies": {
+            "ferm_edges_topology_1": [[0, 1], [2, 3], [3, 2]]
+        }
+    },
+    "symm_factors": [1],
+    "n_loops": [1]
+}
