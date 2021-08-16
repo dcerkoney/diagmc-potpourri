@@ -1,4 +1,5 @@
 # profiling/debug results
+old_propagators/
 profiling/
 diags/
 run_*/
