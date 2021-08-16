@@ -145,6 +145,118 @@ constexpr bool is_pinned(int i_constr, int i_vert, int n_legs, int i_first_bos, 
   }
 }
 
+bool string_contains(std::string string, std::string substring) {
+  return (string.find(substring) != std::string::npos);
+}
+
+// Injects simple std::optional conversion functions into the nlohmann JSON library
+// (see: https://github.com/nlohmann/json/issues/1749#issuecomment-772996219).
+//
+// NOTE: This feature will be added to the library more robustly in a future release!
+//       (see: https://github.com/nlohmann/json/pull/2117,
+//             https://github.com/nlohmann/json/pull/2229)
+namespace nlohmann {
+
+template <class T>
+void to_json(nlohmann::json &j, const std::optional<T> &v) {
+  if (v.has_value())
+    j = *v;
+  else
+    j = nullptr;
+}
+
+template <class T>
+void from_json(const nlohmann::json &j, std::optional<T> &v) {
+  if (j.is_null())
+    v = std::nullopt;
+  else
+    v = j.get<T>();
+}
+
+}  // namespace nlohmann
+
+// Parameter configuration for MCMC on the square lattice Hubbard model
+struct hub_2dsqlat_mcmc_config {
+  /* Diagram parameters */
+  struct diag_config {
+    std::string diag_type;
+    std::vector<int> subspaces;
+    double norm_space_weight = 1.0;
+    int order;
+    int n_legs;
+    int n_intn;
+    int n_times;
+    int n_posns;
+  } diag;
+  /* MCMC parameters */
+  struct mcmc_config {
+    bool debug = false;
+    bool verbose = true;
+    bool normalize = true;
+    bool save_serial = false;
+    bool use_batch_U = false;
+    int n_warm = 100000;
+    int n_meas = 5000000;
+    int n_skip = 1;
+    int n_threads = 1;
+    int n_nu_meas = 1;
+    int n_k_meas = 1;
+    int max_posn_shift = 1;
+    // job_id and save_dir fields are set at runtime, and hence
+    // may be undefined during initial conversion from JSON
+    std::optional<std::time_t> job_id;
+    std::optional<std::string> save_dir;
+    std::string save_name;
+  } mcmc;
+  /* Physical parameters */
+  struct phys_config {
+    int dim;
+    int n_site;
+    int n_site_pd;
+    int n_site_irred;
+    int num_elec;
+    double lat_const;
+    double lat_length;
+    double vol_lat;
+    // Either target_mu or target_n0 will be defined, but not both
+    std::optional<double> target_mu;
+    std::optional<double> target_n0;
+    double mu_tilde;
+    double mu;
+    double n0;
+    double rs;
+    double ef;
+    double beta;
+    double t_hop;
+    double s_ferm;
+    double U_loc;
+    std::vector<double> U_batch;
+  } phys;
+  /* Propagator parameters */
+  struct propr_config {
+    double delta_tau;
+    int n_nu;
+    int n_tau;
+    std::time_t job_id;
+    std::string save_dir;
+  } propr;
+};
+
+// Macros to define JSON (de)serialization methods to_json/from_json
+// for each mcmc config group (all children/parent structs) concisely
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(hub_2dsqlat_mcmc_config::diag_config, diag_type, subspaces, norm_space_weight,
+                                   order, n_legs, n_intn, n_times, n_posns)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(hub_2dsqlat_mcmc_config::mcmc_config, debug, verbose, normalize,
+                                   save_serial, use_batch_U, n_warm, n_meas, n_skip, n_threads,
+                                   n_nu_meas, n_k_meas, max_posn_shift, job_id, save_dir, save_name)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(hub_2dsqlat_mcmc_config::phys_config, dim, n_site, n_site_pd,
+                                   n_site_irred, num_elec, lat_const, lat_length, vol_lat,
+                                   target_mu, target_n0, mu_tilde, mu, n0, rs, ef, beta, t_hop,
+                                   s_ferm, U_loc, U_batch)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(hub_2dsqlat_mcmc_config::propr_config, delta_tau, n_nu, n_tau,
+                                   job_id, save_dir)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(hub_2dsqlat_mcmc_config, diag, mcmc, phys, propr)
+
 // Perform some simple checks on H5 data/pred types (to avoid unexpected casting)
 template <typename Tstd, typename Th5 = H5::PredType>
 void check_h5type(std::string name, H5::DataType datatype, Th5 predtype) {
@@ -160,7 +272,7 @@ void check_h5type(std::string name, H5::DataType datatype, Th5 predtype) {
 // Load an attribute from an HDF5 location and return data of corresponding predtype
 // NOTE: may throw an exception, which should be caught!
 template <typename Tattr, typename Tloc = H5::Group>
-Tattr load_attribute_h5(std::string attr_name, Tloc h5loc) {
+Tattr load_h5_attribute(const std::string &attr_name, const Tloc &h5loc) {
   Tattr attr_buffer;
   if (!(std::is_base_of<H5::Group, Tloc>::value || std::is_same<H5::DataSet, Tloc>::value)) {
     throw not_implemeted_error(
@@ -172,26 +284,37 @@ Tattr load_attribute_h5(std::string attr_name, Tloc h5loc) {
     check_h5type<bool>(attr_name, attr_type, H5::PredType::NATIVE_HBOOL);
     attr.read(H5::PredType::NATIVE_HBOOL, &attr_buffer);
   } else if (std::is_same<Tattr, std::string>::value) {
-    H5::StrType h5str_type(H5::PredType::C_S1, H5T_VARIABLE);
     H5::Attribute attr = h5loc.openAttribute(attr_name);
-    H5::DataType attr_type = attr.getDataType();
-    check_h5type<std::string, H5::StrType>(attr_name, attr_type, h5str_type);
-    attr.read(h5str_type, &attr_buffer);
+    H5::StrType attr_type = attr.getStrType();
+    H5::StrType h5str_type(0, H5T_VARIABLE);
+    check_h5type<const char *, H5::StrType>(attr_name, attr_type, h5str_type);
+    attr.read(attr_type, attr_buffer);
   } else if (std::is_integral<Tattr>::value) {
     H5::Attribute attr = h5loc.openAttribute(attr_name);
     H5::DataType attr_type = attr.getDataType();
     check_h5type<long>(attr_name, attr_type, H5::PredType::NATIVE_LONG);
-    attr.read(H5::PredType::NATIVE_LONG, &attr_buffer);
+    attr.read(attr_type, &attr_buffer);
   } else if (std::is_floating_point<Tattr>::value) {
     H5::Attribute attr = h5loc.openAttribute(attr_name);
     H5::DataType attr_type = attr.getDataType();
     check_h5type<double>(attr_name, attr_type, H5::PredType::NATIVE_DOUBLE);
-    attr.read(H5::PredType::NATIVE_DOUBLE, &attr_buffer);
+    attr.read(attr_type, &attr_buffer);
   } else {
     throw not_implemeted_error("Attribute storage for H5 type of attr_buffer '" + attr_name +
                                "' not yet implemented.");
   }
   return attr_buffer;
+}
+
+// Check if a specified attribute in an H5File is equal to an expected value
+template <typename T>
+bool h5_attribute_equals(const T &expected_value, const std::string &attr_name,
+                         const std::string &filename, const H5::H5File &h5file) {
+  const T param_found = load_h5_attribute<T, H5::H5File>(attr_name, h5file);
+  if (param_found != expected_value) {
+    return false;
+  }
+  return true;
 }
 
 // Add a parameter to an HDF5 location as an attribute
@@ -421,9 +544,7 @@ class b_interp_1d : public interp_1d {
   double eval(double point) const { return linear_interp(f_mesh, point); }
   // Evaluates the periodic extension of the bosonic Green's function
   // object using information on the principle interval [0, beta).
-  double p_eval(double point) const {
-    return linear_interp(f_mesh, pymod<double>(point, beta));
-  }
+  double p_eval(double point) const { return linear_interp(f_mesh, pymod<double>(point, beta)); }
 
  private:
   // Linear interpolation function; approximates f(x) from mesh data.
@@ -627,42 +748,21 @@ struct diagram_pool_el {
   // Constructors
   diagram_pool_el();
   // Constructor for the case of spinless (Hubbard, G0W0) integrators
-  diagram_pool_el(double s_ferm_, int order_, int n_legs_, int n_intn_,
-                  int n_times_, int n_posns_, const graphs_el &graphs_,
+  diagram_pool_el(const hub_2dsqlat_mcmc_config &config_, const graphs_el &graphs_,
                   const std::vector<int> &symm_factors_, const std::vector<int> &n_loops_,
                   const vertices_3pt_el &nn_vertices_ = vertices_3pt_el())
-      : s_ferm(s_ferm_),
-        order(order_),
-        n_legs(n_legs_),
-        n_intn(n_intn_),
-        n_times(n_times_),
-        n_posns(n_posns_),
+      : s_ferm(config_.phys.s_ferm),
+        order(config_.diag.order),
+        n_legs(config_.diag.n_legs),
+        n_intn(config_.diag.n_intn),
+        n_times(config_.diag.n_times),
+        n_posns(config_.diag.n_posns),
         graphs(graphs_),
         symm_factors(symm_factors_),
         n_loops(n_loops_),
         nn_vertices(nn_vertices_),
-        n_verts(2 * order_),
+        n_verts(2 * config_.diag.order),
         n_diags(graphs_.f_edge_lists.size()) {}
-  // Constructor for the case of spinful (Extended Hubbard) integrators
-  diagram_pool_el(double s_ferm_, int order_, int n_legs_, int n_intn_,
-                  int n_times_, int n_posns_, const graphs_el &graphs_,
-                  const std::vector<int> &symm_factors_, const std::vector<int> &n_loops_,
-                  const std::vector<std::vector<std::vector<int>>> &loops_,
-                  const vertices_3pt_el &nn_vertices_ = vertices_3pt_el())
-      : s_ferm(s_ferm_),
-        order(order_),
-        n_legs(n_legs_),
-        n_intn(n_intn_),
-        n_times(n_times_),
-        n_posns(n_posns_),
-        graphs(graphs_),
-        symm_factors(symm_factors_),
-        n_loops(n_loops_),
-        loops(loops_),
-        nn_vertices(nn_vertices_),
-        n_verts(2 * order_),
-        n_diags(graphs_.f_edge_lists.size()),
-        n_spins_max(*max_element(std::begin(n_loops_), std::end(n_loops_))) {}
 };
 typedef std::vector<diagram_pool_el> diagram_pools_el;
 
@@ -682,148 +782,6 @@ diagram_pool_el::diagram_pool_el()
       symm_factors({1}),
       n_loops({0}),
       loops({}) {}
-
-// MCMC parameter class for the extended Hubbard model on a lattice
-struct mcmc_lattice_params {
-  // Fields
-  int dim;
-  int n_warm;
-  int n_meas;
-  int n_skip;
-  int n_site_pd;
-  int num_elec;    // Number of electrons in the lattice
-  double vol_lat;  // Volume of the lattice
-  double ef;       // Fermi energy
-  double mu;       // Chemical potential
-  double rs;       // Lattice Wigner-Seitz radius
-  double n0;       // Initial lattice electron density n0
-  double beta;
-  double t_hop;
-  double delta_tau;
-  double lat_const;
-  // Constructor
-  mcmc_lattice_params(int dim_, int n_warm_, int n_meas_, int n_skip_, int n_site_pd_,
-                      int num_elec_, double vol_lat_, double ef_, double mu_, double rs_,
-                      double beta_, double t_hop_, double delta_tau_, double lat_const_ = 1.0)
-      : dim(dim_),
-        n_warm(n_warm_),
-        n_meas(n_meas_),
-        n_skip(n_skip_),
-        n_site_pd(n_site_pd_),
-        num_elec(num_elec_),
-        vol_lat(vol_lat_),
-        ef(ef_),
-        mu(mu_),
-        rs(rs_),
-        beta(beta_),
-        t_hop(t_hop_),
-        delta_tau(delta_tau_),
-        lat_const(lat_const_),
-        n0(num_elec_ / vol_lat_) {}
-  // Save all parameters as attributes in a (valid) HDF5 location
-  template <typename Tloc = H5::Group>
-  void save_to_h5(Tloc h5loc) const {
-    add_attribute_h5<int, Tloc>(dim, "dim", h5loc);
-    add_attribute_h5<int, Tloc>(n_warm, "n_warm", h5loc);
-    add_attribute_h5<int, Tloc>(n_meas, "n_meas", h5loc);
-    add_attribute_h5<int, Tloc>(n_skip, "n_skip", h5loc);
-    add_attribute_h5<int, Tloc>(n_site_pd, "n_site_pd", h5loc);
-    add_attribute_h5<int, Tloc>(num_elec, "num_elec", h5loc);
-    add_attribute_h5<double, Tloc>(vol_lat, "vol_lat", h5loc);
-    add_attribute_h5<double, Tloc>(ef, "ef", h5loc);
-    add_attribute_h5<double, Tloc>(mu, "mu", h5loc);
-    add_attribute_h5<double, Tloc>(rs, "rs", h5loc);
-    add_attribute_h5<double, Tloc>(n0, "n0", h5loc);
-    add_attribute_h5<double, Tloc>(beta, "beta", h5loc);
-    add_attribute_h5<double, Tloc>(t_hop, "t_hop", h5loc);
-    add_attribute_h5<double, Tloc>(delta_tau, "delta_tau", h5loc);
-    add_attribute_h5<double, Tloc>(lat_const, "lat_const", h5loc);
-    return;
-  }
-};
-
-// MCMC parameter class for the lattice homogeneous electron gas (LHEG) model
-struct mcmc_lheg_params : public mcmc_lattice_params {
-  // Fields
-  double kappa;
-  double gamma;
-  double Lambda;
-  bool pauli_exclusion;
-  // Constructor
-  mcmc_lheg_params(mcmc_lattice_params lattice_params_, double kappa_, double gamma_,
-                   double Lambda_, bool pauli_exclusion_ = true)
-      : mcmc_lattice_params(lattice_params_),
-        kappa(kappa_),
-        gamma(gamma_),
-        Lambda(Lambda_),
-        pauli_exclusion(pauli_exclusion_) {}
-  // Save all parameters as attributes in a (valid) HDF5 location
-  template <typename Tloc = H5::Group>
-  void save_to_h5(Tloc h5loc) const {
-    mcmc_lattice_params::save_to_h5<Tloc>(h5loc);
-    add_attribute_h5<double, Tloc>(kappa, "kappa", h5loc);
-    add_attribute_h5<double, Tloc>(gamma, "gamma", h5loc);
-    add_attribute_h5<double, Tloc>(Lambda, "Lambda", h5loc);
-    add_attribute_h5<bool, Tloc>(pauli_exclusion, "pauli_exclusion", h5loc);
-    return;
-  }
-};
-
-// MCMC parameter class for the (extended) Hubbard model on a lattice
-struct mcmc_lat_ext_hub_params : public mcmc_lattice_params {
-  // Fields
-  int max_posn_shift = 1;  // Variable maximum step size in local position component shifts
-  int n_nu_meas = 0;       // For frequency-dependent correlation function measurements
-  int n_k_meas = 0;        // For momentum-dependent correlation function measurements
-  double mu_tilde;         // Reduced chemical potential
-  double U_loc;
-  double V_nn;
-  // Constructors
-  mcmc_lat_ext_hub_params(mcmc_lattice_params lattice_params_, double mu_tilde_, double U_loc_,
-                          double V_nn_ = 0)
-      : mcmc_lattice_params(lattice_params_), mu_tilde(mu_tilde_), U_loc(U_loc_), V_nn(V_nn_) {}
-  mcmc_lat_ext_hub_params(mcmc_lattice_params lattice_params_, int max_posn_shift_,
-                          double mu_tilde_, double U_loc_, double V_nn_ = 0)
-      : mcmc_lattice_params(lattice_params_),
-        max_posn_shift(max_posn_shift_),
-        mu_tilde(mu_tilde_),
-        U_loc(U_loc_),
-        V_nn(V_nn_) {}
-  // Constructors for momentum-frequency measurements
-  mcmc_lat_ext_hub_params(mcmc_lattice_params lattice_params_, int n_nu_meas_, int n_k_meas_,
-                          double mu_tilde_, double U_loc_, double V_nn_ = 0)
-      : mcmc_lattice_params(lattice_params_),
-        n_nu_meas(n_nu_meas_),
-        n_k_meas(n_k_meas_),
-        mu_tilde(mu_tilde_),
-        U_loc(U_loc_),
-        V_nn(V_nn_) {}
-  mcmc_lat_ext_hub_params(mcmc_lattice_params lattice_params_, int max_posn_shift_, int n_nu_meas_,
-                          int n_k_meas_, double mu_tilde_, double U_loc_, double V_nn_ = 0)
-      : mcmc_lattice_params(lattice_params_),
-        max_posn_shift(max_posn_shift_),
-        n_nu_meas(n_nu_meas_),
-        n_k_meas(n_k_meas_),
-        mu_tilde(mu_tilde_),
-        U_loc(U_loc_),
-        V_nn(V_nn_) {}
-  // Save all parameters as attributes in a (valid) HDF5 location
-  template <typename Tloc = H5::Group>
-  void save_to_h5(Tloc h5loc) const {
-    mcmc_lattice_params::save_to_h5<Tloc>(h5loc);
-    add_attribute_h5<int>(max_posn_shift, "max_posn_shift", h5loc);
-    add_attribute_h5<double, Tloc>(mu_tilde, "mu_tilde", h5loc);
-    add_attribute_h5<double, Tloc>(U_loc, "U_loc", h5loc);
-    add_attribute_h5<double, Tloc>(V_nn, "V_nn", h5loc);
-    if (n_nu_meas > 0) {
-      add_attribute_h5<int, Tloc>(n_nu_meas, "n_nu_meas", h5loc);
-    }
-    if (n_k_meas > 0) {
-      add_attribute_h5<int, Tloc>(n_k_meas, "n_k_meas", h5loc);
-    }
-    return;
-  }
-};
 
 // Class representing a space - (imaginary) time coordinate
 class st_coord {
@@ -1232,6 +1190,149 @@ double lat_dist(fcc_lat_st_coord v1, fcc_lat_st_coord v2) {
 }  // namespace develop
 
 namespace deprecated {
+
+// MCMC parameter class for the extended Hubbard model on a lattice
+struct mcmc_lattice_params {
+  // Fields
+  int dim;
+  int n_warm;
+  int n_meas;
+  int n_skip;
+  int n_site_pd;
+  int num_elec;    // Number of electrons in the lattice
+  double vol_lat;  // Volume of the lattice
+  double ef;       // Fermi energy
+  double mu;       // Chemical potential
+  double rs;       // Lattice Wigner-Seitz radius
+  double n0;       // Initial lattice electron density n0
+  double beta;
+  double t_hop;
+  double delta_tau;
+  double lat_const;
+  // Constructor
+  mcmc_lattice_params(int dim_, int n_warm_, int n_meas_, int n_skip_, int n_site_pd_,
+                      int num_elec_, double vol_lat_, double ef_, double mu_, double rs_,
+                      double beta_, double t_hop_, double delta_tau_, double lat_const_ = 1.0)
+      : dim(dim_),
+        n_warm(n_warm_),
+        n_meas(n_meas_),
+        n_skip(n_skip_),
+        n_site_pd(n_site_pd_),
+        num_elec(num_elec_),
+        vol_lat(vol_lat_),
+        ef(ef_),
+        mu(mu_),
+        rs(rs_),
+        beta(beta_),
+        t_hop(t_hop_),
+        delta_tau(delta_tau_),
+        lat_const(lat_const_),
+        n0(num_elec_ / vol_lat_) {}
+  // Save all parameters as attributes in a (valid) HDF5 location
+  template <typename Tloc = H5::Group>
+  void save_to_h5(Tloc h5loc) const {
+    add_attribute_h5<int, Tloc>(dim, "dim", h5loc);
+    add_attribute_h5<int, Tloc>(n_warm, "n_warm", h5loc);
+    add_attribute_h5<int, Tloc>(n_meas, "n_meas", h5loc);
+    add_attribute_h5<int, Tloc>(n_skip, "n_skip", h5loc);
+    add_attribute_h5<int, Tloc>(n_site_pd, "n_site_pd", h5loc);
+    add_attribute_h5<int, Tloc>(num_elec, "num_elec", h5loc);
+    add_attribute_h5<double, Tloc>(vol_lat, "vol_lat", h5loc);
+    add_attribute_h5<double, Tloc>(ef, "ef", h5loc);
+    add_attribute_h5<double, Tloc>(mu, "mu", h5loc);
+    add_attribute_h5<double, Tloc>(rs, "rs", h5loc);
+    add_attribute_h5<double, Tloc>(n0, "n0", h5loc);
+    add_attribute_h5<double, Tloc>(beta, "beta", h5loc);
+    add_attribute_h5<double, Tloc>(t_hop, "t_hop", h5loc);
+    add_attribute_h5<double, Tloc>(delta_tau, "delta_tau", h5loc);
+    add_attribute_h5<double, Tloc>(lat_const, "lat_const", h5loc);
+    return;
+  }
+};
+
+// MCMC parameter class for the lattice homogeneous electron gas (LHEG) model
+struct mcmc_lheg_params : public mcmc_lattice_params {
+  // Fields
+  double kappa;
+  double gamma;
+  double Lambda;
+  bool pauli_exclusion;
+  // Constructor
+  mcmc_lheg_params(mcmc_lattice_params lattice_params_, double kappa_, double gamma_,
+                   double Lambda_, bool pauli_exclusion_ = true)
+      : mcmc_lattice_params(lattice_params_),
+        kappa(kappa_),
+        gamma(gamma_),
+        Lambda(Lambda_),
+        pauli_exclusion(pauli_exclusion_) {}
+  // Save all parameters as attributes in a (valid) HDF5 location
+  template <typename Tloc = H5::Group>
+  void save_to_h5(Tloc h5loc) const {
+    mcmc_lattice_params::save_to_h5<Tloc>(h5loc);
+    add_attribute_h5<double, Tloc>(kappa, "kappa", h5loc);
+    add_attribute_h5<double, Tloc>(gamma, "gamma", h5loc);
+    add_attribute_h5<double, Tloc>(Lambda, "Lambda", h5loc);
+    add_attribute_h5<bool, Tloc>(pauli_exclusion, "pauli_exclusion", h5loc);
+    return;
+  }
+};
+
+// MCMC parameter class for the (extended) Hubbard model on a lattice
+struct mcmc_lat_ext_hub_params : public mcmc_lattice_params {
+  // Fields
+  int max_posn_shift = 1;  // Variable maximum step size in local position component shifts
+  int n_nu_meas = 0;       // For frequency-dependent correlation function measurements
+  int n_k_meas = 0;        // For momentum-dependent correlation function measurements
+  double mu_tilde;         // Reduced chemical potential
+  double U_loc;
+  double V_nn;
+  // Constructors for scalar or spacetime measurements
+  mcmc_lat_ext_hub_params(mcmc_lattice_params lattice_params_, double mu_tilde_, double U_loc_,
+                          double V_nn_ = 0)
+      : mcmc_lattice_params(lattice_params_), mu_tilde(mu_tilde_), U_loc(U_loc_), V_nn(V_nn_) {}
+  mcmc_lat_ext_hub_params(mcmc_lattice_params lattice_params_, int max_posn_shift_,
+                          double mu_tilde_, double U_loc_, double V_nn_ = 0)
+      : mcmc_lattice_params(lattice_params_),
+        max_posn_shift(max_posn_shift_),
+        mu_tilde(mu_tilde_),
+        U_loc(U_loc_),
+        V_nn(V_nn_) {}
+  // Constructors for momentum-frequency measurements
+  mcmc_lat_ext_hub_params(mcmc_lattice_params lattice_params_, int n_nu_meas_, int n_k_meas_,
+                          double mu_tilde_, double U_loc_, double V_nn_ = 0)
+      : mcmc_lattice_params(lattice_params_),
+        n_nu_meas(n_nu_meas_),
+        n_k_meas(n_k_meas_),
+        mu_tilde(mu_tilde_),
+        U_loc(U_loc_),
+        V_nn(V_nn_) {}
+  mcmc_lat_ext_hub_params(mcmc_lattice_params lattice_params_, int max_posn_shift_, int n_nu_meas_,
+                          int n_k_meas_, double mu_tilde_, double U_loc_, double V_nn_ = 0)
+      : mcmc_lattice_params(lattice_params_),
+        max_posn_shift(max_posn_shift_),
+        n_nu_meas(n_nu_meas_),
+        n_k_meas(n_k_meas_),
+        mu_tilde(mu_tilde_),
+        U_loc(U_loc_),
+        V_nn(V_nn_) {}
+  // Save all parameters as attributes in a (valid) HDF5 location
+  template <typename Tloc = H5::Group>
+  void save_to_h5(Tloc h5loc) const {
+    mcmc_lattice_params::save_to_h5<Tloc>(h5loc);
+    add_attribute_h5<int>(max_posn_shift, "max_posn_shift", h5loc);
+    add_attribute_h5<double, Tloc>(mu_tilde, "mu_tilde", h5loc);
+    add_attribute_h5<double, Tloc>(U_loc, "U_loc", h5loc);
+    add_attribute_h5<double, Tloc>(V_nn, "V_nn", h5loc);
+    if (n_nu_meas > 0) {
+      add_attribute_h5<int, Tloc>(n_nu_meas, "n_nu_meas", h5loc);
+    }
+    if (n_k_meas > 0) {
+      add_attribute_h5<int, Tloc>(n_k_meas, "n_k_meas", h5loc);
+    }
+    return;
+  }
+  //
+};
 
 // Defines types for continuous-time fermionic Green's functions
 // on a hypercubic lattice with explicit dimensionality

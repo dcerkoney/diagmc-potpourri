@@ -512,14 +512,14 @@ class LatticeDensity:
         if target_mu is None and target_rho is None:
             raise ValueError(
                 'The user must supply either the target density or chemical potential!')
-        if target_mu is None:
+        if target_rho is not None:
             # num_elec able to most closely produce the target density
             num_elec = int(round((n_site_pd ** dim) * target_rho))
             # If the rounding process gives zero electrons in the system, choose N_e = 1 instead
             if num_elec == 0:
                 num_elec = 1
                 print('\nWarning: using minimal non-zero electron density for N = ' +
-                      str(n_site_pd)+', L = '+str(self.lat_length) +
+                      str(n_site_pd)+', L = '+str(self.n_site_pd * self.lat_const) +
                       ': target_rho = '+str(target_rho)+'.')
             self.mu = self.mu_from_num_elec(num_elec)
             self.num_elec = num_elec
@@ -1171,10 +1171,10 @@ def get_lat_g0_k_tau_from_g0_r_tau(g0_r_tau_ifft_mesh, lat_const, num_elec, n_si
 def get_pi0_q4_path_from_g0_r_tau_quad(g0_r_tau_ifft_red_mesh, path_q_coords, inu_list,
                                        tau_list, beta, delta_tau, dim, n_site_pd, lat_const,
                                        verbose=False):
-    '''Calculates the electron-hole ('polarization') bubble $\Pi_0(q, i\nu)$ numerically
-       exactly via Gaussian quadrature, given $G_0(r, \tau)$ on the lattice. Also returns a
-       d-dimensional array of 1d interpolants in Matsubara frequency, $\Pi_0(q_\mathbf{n})(i\nu)$,
-       which will only be relevant when inu_list is sparse (does not contain all freqs up to m_max).'''
+    r'''Calculates the electron-hole ('polarization') bubble $\Pi_0(q, i\nu)$ numerically
+        exactly via Gaussian quadrature, given $G_0(r, \tau)$ on the lattice. Also returns a
+        d-dimensional array of 1d interpolants in Matsubara frequency, $\Pi_0(q_\mathbf{n})(i\nu)$,
+        which will only be relevant when inu_list is sparse (does not contain all freqs up to m_max).'''
     tau_list_cont = np.copy(tau_list)
     tau_list_cont[tau_list_cont < delta_tau] = delta_tau
     tau_list_cont[tau_list_cont > beta - delta_tau] = beta - delta_tau
@@ -1240,12 +1240,12 @@ def get_pi0_q4_path_from_g0_r_tau_quad(g0_r_tau_ifft_red_mesh, path_q_coords, in
 
 
 def get_pi0_q4_from_g0_r_tau_fft(g0_r_tau, n_nu, dim, beta, delta_tau, n_site_pd, lat_const):
-    '''Defines the electron-hole ('polarization') bubble \Pi_0(q, i\nu) on the lattice. 
-       Performs FFT from the result in the (r, \tau) representation, where \Pi_0 is a
-       product rather than a convolution of G_0's.
+    r'''Defines the electron-hole ('polarization') bubble \Pi_0(q, i\nu) on the lattice. 
+        Performs FFT from the result in the (r, \tau) representation, where \Pi_0 is a
+        product rather than a convolution of G_0's.
 
-       NOTE: It is assumed that G_0 is spin-independent, such that we trace over
-             the spin factor in \Pi_0 analytically, \Pi_0 = 2 \Pi^\sigma_0.'''
+        NOTE: It is assumed that G_0 is spin-independent, such that we trace over
+              the spin factor in \Pi_0 analytically, \Pi_0 = 2 \Pi^\sigma_0.'''
 
     assert isinstance(g0_r_tau, np.ndarray)
     # If G_0(r) is an interpolant in \tau, upsample it on a uniform mesh
@@ -1309,19 +1309,19 @@ def get_pi0_q4_from_g0_r_tau_fft(g0_r_tau, n_nu, dim, beta, delta_tau, n_site_pd
 
 
 def get_lat_wstar_q(pi0_q_inu, lat_const, n_site_pd, n_nu, dim, beta):
-    '''Gets the lattice RPA screened interaction in the momentum space representations,
-       W_{*}(q, ~). The imaginary-time result is obtained via FFT from the numerically
-       exact interaction in the (q, i\nu) representation to (q, \tau) space. It is
-       assumed that \Pi(q, i\nu) is a d-dimensional array of frequency interpolants.
+    r'''Gets the lattice RPA screened interaction in the momentum space representations,
+        W_{*}(q, ~). The imaginary-time result is obtained via FFT from the numerically
+        exact interaction in the (q, i\nu) representation to (q, \tau) space. It is
+        assumed that \Pi(q, i\nu) is a d-dimensional array of frequency interpolants.
 
-       NOTE: The singularity at the \Gamma point is treated by simply omitting that contribution, 
-       W_{*} = W_{0} \delta_{q \ne 0} (i.e., Andrey's simple scheme. This worked sufficiently
-       well, he says, for one-shot GW calculations, although we use this scheme here purely in the
-       interest of simplicity of our initial implementation of a W-like interaction in real-space).
+        NOTE: The singularity at the \Gamma point is treated by simply omitting that contribution, 
+        W_{*} = W_{0} \delta_{q \ne 0} (i.e., Andrey's simple scheme. This worked sufficiently
+        well, he says, for one-shot GW calculations, although we use this scheme here purely in the
+        interest of simplicity of our initial implementation of a W-like interaction in real-space).
 
-       NOTE: We assume the \Pi_0 data is on a uniform frequency mesh, so that:
-           m_list = np.arange(n_nu),
-           tau_fftlist = beta * np.arange(n_nu + 1) / float(n_nu).'''
+        NOTE: We assume the \Pi_0 data is on a uniform frequency mesh, so that:
+            m_list = np.arange(n_nu),
+            tau_fftlist = beta * np.arange(n_nu + 1) / float(n_nu).'''
 
     kscale = 2.0 * np.pi / float(n_site_pd * lat_const)
     q_tau_mesh_shape = dim * (n_site_pd,) + (n_nu + 1,)
@@ -1376,11 +1376,11 @@ def get_lat_wstar_q(pi0_q_inu, lat_const, n_site_pd, n_nu, dim, beta):
 
 
 def get_lat_wstar_r(vstar_q, wstar_tilde_q4, wstar_tilde_q_tau, lat_const, dim):
-    '''Gets the lattice RPA screened interaction in the position space representations,
-       W_{*}(r, ~). Obtains the lattice RPA screened interaction W_{*}(r, \tau) via 
-       (exact) FFT of the approximate momentum-space result W_{*}(q, \tau), given as
-       input. Since V_{*}(r) is now the FFT of V(q) \delta_{q \ne 0}, it must be
-       stored in matrix format as for the dynamic part, \widetilde{W}_{*}(r, \tau).'''
+    r'''Gets the lattice RPA screened interaction in the position space representations,
+        W_{*}(r, ~). Obtains the lattice RPA screened interaction W_{*}(r, \tau) via 
+        (exact) FFT of the approximate momentum-space result W_{*}(q, \tau), given as
+        input. Since V_{*}(r) is now the FFT of V(q) \delta_{q \ne 0}, it must be
+        stored in matrix format as for the dynamic part, \widetilde{W}_{*}(r, \tau).'''
     # Do the 3D IFFTs from k to r
     vstar_r = np.real(np.fft.ifftn(vstar_q)) / lat_const**dim
 

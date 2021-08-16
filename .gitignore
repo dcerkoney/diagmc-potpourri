@@ -1,9 +1,10 @@
-# profiling/debug results
+# Ignore profiling/debug-related subdirectories
+old_propagators/
 profiling/
 diags/
 run_*/
 
-# project notes/references
+# Project notes/references
 papers
 notes
 

@@ -10,7 +10,9 @@
 #include <iostream>
 #include <iterator>
 #include <numeric>
+#include <optional>
 #include <random>  // std::random_device
+#include <sstream>
 #include <stdexcept>
 #include <type_traits>
 
@@ -19,6 +21,7 @@
 #include <bitset>
 #include <complex>
 #include <map>
+#include <regex>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -40,5 +43,9 @@
 //       so should be changed to the following in the future!
 // #include <boost/random/random_device.hpp>
 
-/* HDF5 header */
+/* HDF5 library include */
 #include "H5Cpp.h"
+
+/* JSON library include */
+#define JSON_USE_IMPLICIT_CONVERSIONS 0  // Turn off implicit conversions from JSON values
+#include "json.hpp"

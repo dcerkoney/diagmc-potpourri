@@ -3,46 +3,48 @@
 ##################################################################################
 
 ### Diagram parameters for measurement/normalization subspaces ###
-diag_params:
+diag:
+  # The class of measurement diagram(s), chosen from the following:
+  # [vacuum, charge_poln, self_en_stat, self_en_dyn]
+  diag_type: self_en_dyn
   subspaces: [0, 2] # V = V_0 \oplus V_n
-  D_0: 1.0 # Initial diagram weight D_0 for the normalization subspace V_0
+  norm_space_weight: 1.0 # Initial diagram weight D_0 for the normalization subspace V_0
   order: 2 # Order n in perturbation theory for the measurement space V_n
   n_legs: 2 # Number of external legs in the V_n measurement
   n_intn: 2 # (= n) Number of interaction lines in all V_n graphs (order in U)
   n_times: 1 # (= n - 1) One modifiable time per internal line (static U), plus outgoing leg
   n_posns: 1 # (= n - 1) One modifiable position per internal line (local U), plus outgoing leg
-  # The class of measurement diagram(s), chosen from the following:
-  # [vacuum, charge_poln, self_en_stat, self_en_dyn]
-  diag_type: self_en_dyn
 
 ### MCMC measurement parameters ###
-mcmc_params:
-  mcmc_job_id: null # Job ID no. (POSIX integer timestamp) for this MCMC run data
+mcmc:
   debug: false # Debug-level verbosity
   verbose: true # Summarize after every half-millionth measurement
   normalize: true # Should the integration results be normalized?
   save_serial: true # Should the thread results be individually saved?
-  batch_U: false # Should we perform a batch calculation for each U in U_batch?
+  use_batch_U: false # Should we perform a batch calculation for each U in U_batch?
   n_warm: 100000 # Number of steps in the burn-in / warmup phase
   n_meas: 5000000 # Total number of steps in the measurement phase (including skips)
   n_skip: 1 # Number of steps to skip in ancy points to measure at
   n_threads: 1 # Number of MPI threads used in the calculation
   n_nu_meas: 10 # Number of external frequency points to measure at
+  n_k_meas:      # Number of external momentum points in the k-path along which we measure
   max_posn_shift: 3 # Variable maximum step size in local position component shifts
+  job_id:      # Job ID no. (POSIX integer timestamp) for this MCMC run data
+  save_dir:      # Save directory for the run results (default: './run_{job_id}')
   save_name: self_en_dyn_hub_2dsqlat # Prefix for saved MCMC data
 
 ### Physical/lattice parameters ###
-phys_params:
+phys:
   dim: 2 # Spatial dimensionality of the problem
+  n_site:      # Total number of lattice sites
   n_site_pd: 30 # Number of lattice sites along a single direction (i.e., L / a)
-  n_site: null # Total number of lattice sites
-  n_site_irred: null # Cutoff for (BC) 'irreducible' lattice distances
+  n_site_irred:      # Cutoff for (BC) 'irreducible' lattice distances
+  num_elec:      # Number of electrons in the lattice
   lat_const: 1.0 # Hypercubic lattice constant a
-  lat_length: null # Lattice length in Bohr radii
-  vol_lat: null # Volume of the lattice
-  num_elec: null # Number of electrons in the lattice
-  # Target (noninteracting) chemical potential. If supplied, we work
-  # at fixed chemical potential and variable density.
+  lat_length:      # Lattice length in Bohr radii
+  vol_lat:      # Volume of the lattice
+  # Target (noninteracting) chemical potential. If supplied and target_n0
+  # is null, we work at fixed chemical potential and variable density.
   target_mu: null
   # Target density in units of the lattice constant; since the number of electrons
   # is coarse-grained, the actual density may differ slightly. If supplied, we work
@@ -52,9 +54,9 @@ phys_params:
   # mu_tilde \approx mu - (U n / 2) (exact in the thermodynamic limit);
   # we implement the HF resummation by working as a function of (fixed)
   # reduced chemical potential, i.e., we define G_HF(mu) := G_0(mu_tilde)
-  mu_tilde: null
-  mu: null # Physical chemical potential corresponding to mu_tilde
-  rs: null # Wigner-Seitz radius (for HEG correspondence)
+  mu_tilde:     
+  mu:      # Physical chemical potential corresponding to mu_tilde
+  rs:      # Wigner-Seitz radius (for HEG correspondence)
   n0: 1.0 # Initial lattice electron density n0, set to half-filling
   ef: 0.0 # Fermi energy (Hartrees)
   beta: 2.0 # Inverse temperature (1 / eV)
@@ -64,9 +66,10 @@ phys_params:
   # List of U values to use for the (optional) batch-mode calculation
   U_batch: [0.1, 0.5, 1.0, 2.0, 4.0]
 
-propr_params:
-  propr_job_id: null # Job ID no. for propagator data used in this run
-  propr_save_dir: null # Path to propagator data used in this run
+### Propagator parameters ###
+propr:
   delta_tau: 1.0e-10 # Numerical imaginary time infinitesimal (for tau mesh)
-  n_tau: 1024 # (Even) number of im. time points in the non-uniform FFT mesh [0, beta)
   n_nu: 1024 # (Even) number of bosonic frequency points for uniform FFT mesh
+  n_tau: 1024 # (Even) number of im. time points in the logarithmic FFT mesh [0, beta)
+  job_id:      # Job ID no. for propagator data used in this run
+  save_dir:      # Path to propagator data used in this run
