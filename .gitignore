@@ -59,6 +59,9 @@ __pycache__/
 *.t1
 *.1
 
+# Git files
+.token
+
 # Executables and intermediary files
 hub_2dsqlat_cf_meas
 config.json
