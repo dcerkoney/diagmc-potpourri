@@ -1,4 +1,4 @@
-#include "diagmc_hubbard_2dsqlat.hpp"
+#include "diagmc_integrators.hpp"
 #include "diagmc_includes.hpp"
 #include "diagmc_tools.hpp"
 
@@ -23,7 +23,7 @@ using json = nlohmann::json;
 
 // Defines the measurement type: a Matsubara (4-momentum) correlation function
 //                               for the Hubbard model on a 2D square lattice
-using meas_t = mcmc_cfg_2d_sq_hub_mf_meas::meas_t;
+using meas_t = rt_mcmc_cfg_2d_sq_hub_mf_meas::meas_t;
 
 // Update the original YAML config file with parameters which may have been edited
 // during the MCMC run (namely: {norm_space_weight, n_k_meas, save_serial, job_id, save_dir}).
@@ -243,7 +243,7 @@ lattice_2d_f_interp load_greens_function_h5(const std::string& h5_filename,
 #ifdef HAVE_MPI
 // Aggregate MPI results, compute the standard error over threads, and save the results to HDF5
 void aggregate_and_save(int mpi_size, int mpi_rank, int mpi_main,
-                        const mcmc_cfg_2d_sq_hub_mf_meas& integrator) {
+                        const rt_mcmc_cfg_2d_sq_hub_mf_meas& integrator) {
   bool is_main_thread = (mpi_rank == mpi_main);
   bool normalized = integrator.normalized;
 
@@ -643,7 +643,7 @@ int main(int argc, char* argv[]) {
       assert(meas_sums.size() == subspaces.size());
 
       // Finally, build the MCMC integrator object
-      mcmc_cfg_2d_sq_hub_mf_meas mcmc_integrator(cfg, lat_g0_r_tau, diag_pools, mf_meas_coords,
+      rt_mcmc_cfg_2d_sq_hub_mf_meas mcmc_integrator(cfg, lat_g0_r_tau, diag_pools, mf_meas_coords,
                                                  meas_sums);
 
       // Now integrate! (optionally, saving thread subresults to hdf5 (if save_serial = true))

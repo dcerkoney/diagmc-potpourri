@@ -218,7 +218,7 @@ struct hub_2dsqlat_mcmc_config {
     double lat_const;
     double lat_length;
     double vol_lat;
-    // Either target_mu or target_n0 will be defined, but not both
+    // Either target_mu or target_n0 may be defined, but not both
     std::optional<double> target_mu;
     std::optional<double> target_n0;
     double mu_tilde;
@@ -380,18 +380,7 @@ class lattice_3d {
   constexpr const T &operator()(int i, int j, int k) const { return data[k + N_k * (j + N_j * i)]; }
 };
 
-// 1D mesh class (contains the 1D grid and function data)
-struct fmesh_1d {
-  // Fields
-  std::vector<double> data;
-  std::vector<double> x_grid;
-  // Constructor
-  fmesh_1d(const std::vector<double> &data_, const std::vector<double> &x_grid_)
-      : data(data_), x_grid(x_grid_) {}
-};
-
-// 2D mesh class (contains the function data
-// on the mesh, and the grids for each variable)
+// 2D mesh class (contains the function data on the mesh, and the grids for each variable)
 struct fmesh_2d {
   // Fields
   std::vector<std::vector<double>> data;
@@ -403,192 +392,7 @@ struct fmesh_2d {
       : data(data_), x_grid(x_grid_), y_grid(y_grid_) {}
 };
 
-// 1D interpolant class (used, e.g. to define
-// continuous-time objects from tau grid data)
-class interp_1d {
- public:
-  // Fields
-  fmesh_1d f_mesh;
-  // Constructor
-  interp_1d(const fmesh_1d &f_mesh_) : f_mesh(f_mesh_) {}
-  // An explicit default constructor
-  interp_1d() : f_mesh({}, {}) {}
-  // Use bilinear interpolation to evaluate the interpoland at any point
-  double eval(double point) const { return linear_interp(f_mesh, point); }
-  // Evaluates the antiperiodic extension of the interp_1d object
-  // using information on the principle interval [0, period).
-  double ap_eval(double point, double period) const {
-    int sign = 1;
-    double point_shifted = point;
-    while (point_shifted < 0) {
-      sign *= -1;
-      point_shifted += period;
-    }
-    while (point_shifted >= period) {
-      sign *= -1;
-      point_shifted -= period;
-    }
-    return sign * linear_interp(f_mesh, point_shifted);
-  }
-
- private:
-  // Linear interpolation function; approximates f(x) from mesh data.
-  // NOTE: This algorithm applies regardless of mesh uniformity!
-  double linear_interp(const fmesh_1d &f_mesh, double x) const {
-    // If the values are outside the range of the x and y grids,
-    // return 0 (i.e., use extrapolation with a fill value of zero)
-    if ((x < f_mesh.x_grid.front()) || (x > f_mesh.x_grid.back())) {
-      return 0;
-    }
-    // Identify the nearest mesh neighbors of the evaluation point (x, y)
-    std::vector<double>::const_iterator iter_x2;
-    iter_x2 = std::lower_bound(f_mesh.x_grid.begin(), f_mesh.x_grid.end(), x);
-    // Special case: if the evaluation point contains f_mesh.x_grid[-1],
-    // shift the bounding points left by 1 manually (std::next not
-    // applicable if lower bound gives last point in grid)
-    if (iter_x2 == f_mesh.x_grid.begin()) {
-      iter_x2 = std::next(iter_x2);
-    }
-    // Now, we can reliably get the last two corners
-    // of the bounding box, including edge cases
-    auto iter_x1 = std::prev(iter_x2);
-    // Get the actual indices associated with each iterator
-    int idx_x1 = iter_x1 - f_mesh.x_grid.begin();
-    int idx_x2 = iter_x2 - f_mesh.x_grid.begin();
-    // Precompute the grid points x_1 and x_2
-    double x_1 = f_mesh.x_grid[idx_x1];
-    double x_2 = f_mesh.x_grid[idx_x2];
-    // Precompute the function values at the grid points f_1 and f_2
-    double f_1 = f_mesh.data[idx_x1];
-    double f_2 = f_mesh.data[idx_x2];
-    // Use bilinear interpolation to extrapolate
-    // the function value at the evaluation point
-    return (f_1 * (x_2 - x) + f_2 * (x - x_1)) / (x_2 - x_1);
-  }
-};
-
-// For a fermionic Green's function interpolant (antiperiodic), the period is beta
-class f_interp_1d : public interp_1d {
- public:
-  // Fields
-  double beta;
-  // Constructor
-  f_interp_1d(const fmesh_1d &f_mesh_, double beta_) : interp_1d(f_mesh_), beta(beta_) {}
-  // Use bilinear interpolation to evaluate the interpoland at any point
-  double eval(double point) const { return linear_interp(f_mesh, point); }
-  // Evaluates the antiperiodic extension of the fermionic Green's function
-  // object using information on the principle interval [0, beta).
-  double ap_eval(double point) const {
-    int sign = 1;
-    double point_shifted = point;
-    while (point_shifted < 0) {
-      sign *= -1;
-      point_shifted += beta;
-    }
-    while (point_shifted >= beta) {
-      sign *= -1;
-      point_shifted -= beta;
-    }
-    return sign * linear_interp(f_mesh, point_shifted);
-  }
-
- private:
-  // Linear interpolation function; approximates f(x) from mesh data.
-  // NOTE: This algorithm applies regardless of mesh uniformity!
-  double linear_interp(const fmesh_1d &f_mesh, double x) const {
-    // If the values are outside the range of the x and y grids,
-    // return 0 (i.e., use extrapolation with a fill value of zero)
-    if ((x < f_mesh.x_grid.front()) || (x > f_mesh.x_grid.back())) {
-      return 0;
-    }
-    // Identify the nearest mesh neighbors of the evaluation point (x, y)
-    std::vector<double>::const_iterator iter_x2;
-    iter_x2 = std::lower_bound(f_mesh.x_grid.begin(), f_mesh.x_grid.end(), x);
-    // Special case: if the evaluation point contains f_mesh.x_grid[-1],
-    // shift the bounding points left by 1 manually (std::next not
-    // applicable if lower bound gives last point in grid)
-    if (iter_x2 == f_mesh.x_grid.begin()) {
-      iter_x2 = std::next(iter_x2);
-    }
-    // Now, we can reliably get the last two corners
-    // of the bounding box, including edge cases
-    auto iter_x1 = std::prev(iter_x2);
-    // Get the actual indices associated with each iterator
-    int idx_x1 = iter_x1 - f_mesh.x_grid.begin();
-    int idx_x2 = iter_x2 - f_mesh.x_grid.begin();
-    // Precompute the grid points x_1 and x_2
-    double x_1 = f_mesh.x_grid[idx_x1];
-    double x_2 = f_mesh.x_grid[idx_x2];
-    // Precompute the function values at the grid points f_1 and f_2
-    double f_1 = f_mesh.data[idx_x1];
-    double f_2 = f_mesh.data[idx_x2];
-    // Use bilinear interpolation to extrapolate
-    // the function value at the evaluation point
-    return (f_1 * (x_2 - x) + f_2 * (x - x_1)) / (x_2 - x_1);
-  }
-};
-
-// Continuous-time fermionic Green's functions on a hypercubic lattice,
-// represented as a contiguous std::vector of linear interpolants
-typedef lattice_2d<f_interp_1d> lattice_2d_f_interp;
-typedef lattice_3d<f_interp_1d> lattice_3d_f_interp;
-
-// For a bosonic Green's function interpolant (periodic), the period is beta
-class b_interp_1d : public interp_1d {
- public:
-  // Fields
-  double beta;
-  // Constructor
-  b_interp_1d(const fmesh_1d &f_mesh_, double beta_) : interp_1d(f_mesh_), beta(beta_) {}
-  // Use bilinear interpolation to evaluate the interpoland at any point
-  double eval(double point) const { return linear_interp(f_mesh, point); }
-  // Evaluates the periodic extension of the bosonic Green's function
-  // object using information on the principle interval [0, beta).
-  double p_eval(double point) const { return linear_interp(f_mesh, pymod<double>(point, beta)); }
-
- private:
-  // Linear interpolation function; approximates f(x) from mesh data.
-  // NOTE: This algorithm applies regardless of mesh uniformity!
-  double linear_interp(const fmesh_1d &f_mesh, double x) const {
-    // If the values are outside the range of the x and y grids,
-    // return 0 (i.e., use extrapolation with a fill value of zero)
-    if ((x < f_mesh.x_grid.front()) || (x > f_mesh.x_grid.back())) {
-      return 0;
-    }
-    // Identify the nearest mesh neighbors of the evaluation point (x, y)
-    std::vector<double>::const_iterator iter_x2;
-    iter_x2 = std::lower_bound(f_mesh.x_grid.begin(), f_mesh.x_grid.end(), x);
-    // Special case: if the evaluation point contains f_mesh.x_grid[-1],
-    // shift the bounding points left by 1 manually (std::next not
-    // applicable if lower bound gives last point in grid)
-    if (iter_x2 == f_mesh.x_grid.begin()) {
-      iter_x2 = std::next(iter_x2);
-    }
-    // Now, we can reliably get the last two corners
-    // of the bounding box, including edge cases
-    auto iter_x1 = std::prev(iter_x2);
-    // Get the actual indices associated with each iterator
-    int idx_x1 = iter_x1 - f_mesh.x_grid.begin();
-    int idx_x2 = iter_x2 - f_mesh.x_grid.begin();
-    // Precompute the grid points x_1 and x_2
-    double x_1 = f_mesh.x_grid[idx_x1];
-    double x_2 = f_mesh.x_grid[idx_x2];
-    // Precompute the function values at the grid points f_1 and f_2
-    double f_1 = f_mesh.data[idx_x1];
-    double f_2 = f_mesh.data[idx_x2];
-    // Use bilinear interpolation to extrapolate
-    // the function value at the evaluation point
-    return (f_1 * (x_2 - x) + f_2 * (x - x_1)) / (x_2 - x_1);
-  }
-};
-
-// Continuous-time bosonic Green's functions on a hypercubic lattice,
-// represented as a contiguous std::vector of linear interpolants
-typedef lattice_2d<b_interp_1d> lattice_2d_b_interp;
-typedef lattice_3d<b_interp_1d> lattice_3d_b_interp;
-
-// 2D interpolant class (used, e.g., to define
-// spatially continuous objects from r-grid data)
+// 2D interpolant class (used, e.g., to define spatially continuous objects from r-grid data)
 class interp_2d {
  public:
   // Fields
@@ -670,6 +474,107 @@ class interp_2d {
            ((x_2 - x_1) * (y_2 - y_1));
   }
 };
+
+// 1D mesh class (contains the 1D grid and function data)
+struct fmesh_1d {
+  // Fields
+  std::vector<double> data;
+  std::vector<double> x_grid;
+  // Constructor
+  fmesh_1d(const std::vector<double> &data_, const std::vector<double> &x_grid_)
+      : data(data_), x_grid(x_grid_) {}
+};
+
+// 1D interpolant class (used, e.g. to define
+// continuous-time objects from tau grid data)
+class interp_1d {
+ public:
+  // Fields
+  fmesh_1d f_mesh;
+  // Constructor
+  interp_1d(const fmesh_1d &f_mesh_) : f_mesh(f_mesh_) {}
+  // An explicit default constructor
+  interp_1d() : f_mesh({}, {}) {}
+  // Use bilinear interpolation to evaluate the interpoland at any point
+  double eval(double point) const { return linear_interp(f_mesh, point); }
+  // Linear interpolation function; approximates f(x) from mesh data.
+  // NOTE: This algorithm applies regardless of mesh uniformity!
+  double linear_interp(const fmesh_1d &f_mesh, double x) const {
+    // If the values are outside the range of the x and y grids,
+    // return 0 (i.e., use extrapolation with a fill value of zero)
+    if ((x < f_mesh.x_grid.front()) || (x > f_mesh.x_grid.back())) {
+      return 0;
+    }
+    // Identify the nearest mesh neighbors of the evaluation point (x, y)
+    std::vector<double>::const_iterator iter_x2;
+    iter_x2 = std::lower_bound(f_mesh.x_grid.begin(), f_mesh.x_grid.end(), x);
+    // Special case: if the evaluation point contains f_mesh.x_grid[-1],
+    // shift the bounding points left by 1 manually (std::next not
+    // applicable if lower bound gives last point in grid)
+    if (iter_x2 == f_mesh.x_grid.begin()) {
+      iter_x2 = std::next(iter_x2);
+    }
+    // Now, we can reliably get the last two corners
+    // of the bounding box, including edge cases
+    auto iter_x1 = std::prev(iter_x2);
+    // Get the actual indices associated with each iterator
+    int idx_x1 = iter_x1 - f_mesh.x_grid.begin();
+    int idx_x2 = iter_x2 - f_mesh.x_grid.begin();
+    // Precompute the grid points x_1 and x_2
+    double x_1 = f_mesh.x_grid[idx_x1];
+    double x_2 = f_mesh.x_grid[idx_x2];
+    // Precompute the function values at the grid points f_1 and f_2
+    double f_1 = f_mesh.data[idx_x1];
+    double f_2 = f_mesh.data[idx_x2];
+    // Use bilinear interpolation to extrapolate
+    // the function value at the evaluation point
+    return (f_1 * (x_2 - x) + f_2 * (x - x_1)) / (x_2 - x_1);
+  }
+};
+
+// For a bosonic Green's function interpolant (periodic), the period is beta
+class b_interp_1d : public interp_1d {
+ public:
+  // Fields
+  double beta;
+  // Constructor
+  b_interp_1d(const fmesh_1d &f_mesh_, double beta_) : interp_1d(f_mesh_), beta(beta_) {}
+  // Evaluates the periodic extension of the bosonic Green's function
+  // object using information on the principle interval [0, beta).
+  double p_eval(double point) const { return eval(pymod<double>(point, beta)); }
+};
+
+// For a fermionic Green's function interpolant (antiperiodic), the period is beta
+class f_interp_1d : public interp_1d {
+ public:
+  // Fields
+  double beta;
+  // Constructor
+  f_interp_1d(const fmesh_1d &f_mesh_, double beta_) : interp_1d(f_mesh_), beta(beta_) {}
+  // Evaluates the antiperiodic extension of the fermionic Green's function
+  // object using information on the principle interval [0, beta).
+  double ap_eval(double point) const {
+    int sign = 1;
+    double point_shifted = point;
+    while (point_shifted < 0) {
+      sign *= -1;
+      point_shifted += beta;
+    }
+    while (point_shifted >= beta) {
+      sign *= -1;
+      point_shifted -= beta;
+    }
+    return sign * eval(point_shifted);
+  }
+};
+
+// Continuous-time bosonic lattice Green's function types
+typedef lattice_2d<b_interp_1d> lattice_2d_b_interp;
+typedef lattice_3d<b_interp_1d> lattice_3d_b_interp;
+
+// Continuous-time fermionic lattice Green's function types
+typedef lattice_2d<f_interp_1d> lattice_2d_f_interp;
+typedef lattice_3d<f_interp_1d> lattice_3d_f_interp;
 
 // Defines the (split bosonic/fermionic) edge list representation of a set of graphs; since
 // (wlog) the bosonic edges are assumed equal for all graphs, we only define the list once
@@ -1190,161 +1095,6 @@ double lat_dist(fcc_lat_st_coord v1, fcc_lat_st_coord v2) {
 }  // namespace develop
 
 namespace deprecated {
-
-// MCMC parameter class for the extended Hubbard model on a lattice
-struct mcmc_lattice_params {
-  // Fields
-  int dim;
-  int n_warm;
-  int n_meas;
-  int n_skip;
-  int n_site_pd;
-  int num_elec;    // Number of electrons in the lattice
-  double vol_lat;  // Volume of the lattice
-  double ef;       // Fermi energy
-  double mu;       // Chemical potential
-  double rs;       // Lattice Wigner-Seitz radius
-  double n0;       // Initial lattice electron density n0
-  double beta;
-  double t_hop;
-  double delta_tau;
-  double lat_const;
-  // Constructor
-  mcmc_lattice_params(int dim_, int n_warm_, int n_meas_, int n_skip_, int n_site_pd_,
-                      int num_elec_, double vol_lat_, double ef_, double mu_, double rs_,
-                      double beta_, double t_hop_, double delta_tau_, double lat_const_ = 1.0)
-      : dim(dim_),
-        n_warm(n_warm_),
-        n_meas(n_meas_),
-        n_skip(n_skip_),
-        n_site_pd(n_site_pd_),
-        num_elec(num_elec_),
-        vol_lat(vol_lat_),
-        ef(ef_),
-        mu(mu_),
-        rs(rs_),
-        beta(beta_),
-        t_hop(t_hop_),
-        delta_tau(delta_tau_),
-        lat_const(lat_const_),
-        n0(num_elec_ / vol_lat_) {}
-  // Save all parameters as attributes in a (valid) HDF5 location
-  template <typename Tloc = H5::Group>
-  void save_to_h5(Tloc h5loc) const {
-    add_attribute_h5<int, Tloc>(dim, "dim", h5loc);
-    add_attribute_h5<int, Tloc>(n_warm, "n_warm", h5loc);
-    add_attribute_h5<int, Tloc>(n_meas, "n_meas", h5loc);
-    add_attribute_h5<int, Tloc>(n_skip, "n_skip", h5loc);
-    add_attribute_h5<int, Tloc>(n_site_pd, "n_site_pd", h5loc);
-    add_attribute_h5<int, Tloc>(num_elec, "num_elec", h5loc);
-    add_attribute_h5<double, Tloc>(vol_lat, "vol_lat", h5loc);
-    add_attribute_h5<double, Tloc>(ef, "ef", h5loc);
-    add_attribute_h5<double, Tloc>(mu, "mu", h5loc);
-    add_attribute_h5<double, Tloc>(rs, "rs", h5loc);
-    add_attribute_h5<double, Tloc>(n0, "n0", h5loc);
-    add_attribute_h5<double, Tloc>(beta, "beta", h5loc);
-    add_attribute_h5<double, Tloc>(t_hop, "t_hop", h5loc);
-    add_attribute_h5<double, Tloc>(delta_tau, "delta_tau", h5loc);
-    add_attribute_h5<double, Tloc>(lat_const, "lat_const", h5loc);
-    return;
-  }
-};
-
-// MCMC parameter class for the lattice homogeneous electron gas (LHEG) model
-struct mcmc_lheg_params : public mcmc_lattice_params {
-  // Fields
-  double kappa;
-  double gamma;
-  double Lambda;
-  bool pauli_exclusion;
-  // Constructor
-  mcmc_lheg_params(mcmc_lattice_params lattice_params_, double kappa_, double gamma_,
-                   double Lambda_, bool pauli_exclusion_ = true)
-      : mcmc_lattice_params(lattice_params_),
-        kappa(kappa_),
-        gamma(gamma_),
-        Lambda(Lambda_),
-        pauli_exclusion(pauli_exclusion_) {}
-  // Save all parameters as attributes in a (valid) HDF5 location
-  template <typename Tloc = H5::Group>
-  void save_to_h5(Tloc h5loc) const {
-    mcmc_lattice_params::save_to_h5<Tloc>(h5loc);
-    add_attribute_h5<double, Tloc>(kappa, "kappa", h5loc);
-    add_attribute_h5<double, Tloc>(gamma, "gamma", h5loc);
-    add_attribute_h5<double, Tloc>(Lambda, "Lambda", h5loc);
-    add_attribute_h5<bool, Tloc>(pauli_exclusion, "pauli_exclusion", h5loc);
-    return;
-  }
-};
-
-// MCMC parameter class for the (extended) Hubbard model on a lattice
-struct mcmc_lat_ext_hub_params : public mcmc_lattice_params {
-  // Fields
-  int max_posn_shift = 1;  // Variable maximum step size in local position component shifts
-  int n_nu_meas = 0;       // For frequency-dependent correlation function measurements
-  int n_k_meas = 0;        // For momentum-dependent correlation function measurements
-  double mu_tilde;         // Reduced chemical potential
-  double U_loc;
-  double V_nn;
-  // Constructors for scalar or spacetime measurements
-  mcmc_lat_ext_hub_params(mcmc_lattice_params lattice_params_, double mu_tilde_, double U_loc_,
-                          double V_nn_ = 0)
-      : mcmc_lattice_params(lattice_params_), mu_tilde(mu_tilde_), U_loc(U_loc_), V_nn(V_nn_) {}
-  mcmc_lat_ext_hub_params(mcmc_lattice_params lattice_params_, int max_posn_shift_,
-                          double mu_tilde_, double U_loc_, double V_nn_ = 0)
-      : mcmc_lattice_params(lattice_params_),
-        max_posn_shift(max_posn_shift_),
-        mu_tilde(mu_tilde_),
-        U_loc(U_loc_),
-        V_nn(V_nn_) {}
-  // Constructors for momentum-frequency measurements
-  mcmc_lat_ext_hub_params(mcmc_lattice_params lattice_params_, int n_nu_meas_, int n_k_meas_,
-                          double mu_tilde_, double U_loc_, double V_nn_ = 0)
-      : mcmc_lattice_params(lattice_params_),
-        n_nu_meas(n_nu_meas_),
-        n_k_meas(n_k_meas_),
-        mu_tilde(mu_tilde_),
-        U_loc(U_loc_),
-        V_nn(V_nn_) {}
-  mcmc_lat_ext_hub_params(mcmc_lattice_params lattice_params_, int max_posn_shift_, int n_nu_meas_,
-                          int n_k_meas_, double mu_tilde_, double U_loc_, double V_nn_ = 0)
-      : mcmc_lattice_params(lattice_params_),
-        max_posn_shift(max_posn_shift_),
-        n_nu_meas(n_nu_meas_),
-        n_k_meas(n_k_meas_),
-        mu_tilde(mu_tilde_),
-        U_loc(U_loc_),
-        V_nn(V_nn_) {}
-  // Save all parameters as attributes in a (valid) HDF5 location
-  template <typename Tloc = H5::Group>
-  void save_to_h5(Tloc h5loc) const {
-    mcmc_lattice_params::save_to_h5<Tloc>(h5loc);
-    add_attribute_h5<int>(max_posn_shift, "max_posn_shift", h5loc);
-    add_attribute_h5<double, Tloc>(mu_tilde, "mu_tilde", h5loc);
-    add_attribute_h5<double, Tloc>(U_loc, "U_loc", h5loc);
-    add_attribute_h5<double, Tloc>(V_nn, "V_nn", h5loc);
-    if (n_nu_meas > 0) {
-      add_attribute_h5<int, Tloc>(n_nu_meas, "n_nu_meas", h5loc);
-    }
-    if (n_k_meas > 0) {
-      add_attribute_h5<int, Tloc>(n_k_meas, "n_k_meas", h5loc);
-    }
-    return;
-  }
-  //
-};
-
-// Defines types for continuous-time fermionic Green's functions
-// on a hypercubic lattice with explicit dimensionality
-// d = 2, 3 (antiperiodic in beta)
-typedef std::vector<std::vector<f_interp_1d>> lattice_f_interp_2d;
-typedef std::vector<std::vector<std::vector<f_interp_1d>>> lattice_f_interp_3d;
-
-// Defines types for continuous-time bosonic Green's functions
-// on a hypercubic lattice with explicit dimensionality
-// d = 2, 3 (periodic in beta)
-typedef std::vector<std::vector<b_interp_1d>> lattice_b_interp_2d;
-typedef std::vector<std::vector<std::vector<b_interp_1d>>> lattice_b_interp_3d;
 
 // Defines the permutation group representation of a graph, consisting
 // of one fermionic (psi) and one bosonic (phi) connection row vector
