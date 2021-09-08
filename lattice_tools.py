@@ -1,33 +1,23 @@
 #!/usr/bin/env python3
 
 # Package imports
-import pathlib
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
-from types import LambdaType
 from matplotlib import cm
 from itertools import product
+from inspect import signature
+from types import FunctionType
 from scipy.integrate import quad
 from scipy import fftpack, interpolate, optimize
 
+# Local script imports
+from misc_tools import safe_filename
 
 ##############################################
 # Generic lattice (and HEG) helper functions #
 ##############################################
-
-
-def safe_filename(dir, savename, file_extension='pdf', overwrite=False):
-    # Optionally avoid overwriting duplicate filenames
-    filename = pathlib.PosixPath(dir) / f'{savename}.{file_extension}'
-    if not overwrite:
-        dup_count = 1
-        while filename.is_file():
-            filename = pathlib.PosixPath(
-                dir) / f'{savename}({dup_count}).{file_extension}'
-            dup_count += 1
-    return filename
 
 
 def batch_dot(a, b):
@@ -167,7 +157,7 @@ def lat_epsilon_k_meshgrid(dim, n_site_pd, lat_const, t_hop, qp_rescale=1.0):
 def fill_band(dim, num_elec, n_site_pd, lat_const, t_hop, plot_filling=False):
     '''Get the Fermi momentum and energy by filling the band with N_e electrons.'''
     # Reciprocal lattice scale
-    k_scale = 2.0*np.pi / float(n_site_pd*lat_const)
+    k_scale = 2.0 * np.pi / float(n_site_pd * lat_const)
     # Get all the momentum magnitudes and coordinates in the lattice
     # (includes momentum and spin degeneracies)
     ek_levels, k_coords = get_all_k_sigma_states(
@@ -240,6 +230,7 @@ def fill_band(dim, num_elec, n_site_pd, lat_const, t_hop, plot_filling=False):
         ax.set_aspect('equal')
         fig.savefig('filled_momentum_states_n_site_pd='+str(n_site_pd)+'.pdf')
         plt.close('all')
+    assert isinstance(ef, float)
     return ef, kf_vecs
 
 
@@ -503,7 +494,7 @@ class LatticeDensity:
         self.k_mesh, self.epsilon_k_mesh = lat_epsilon_k_meshgrid(
             dim, n_site_pd, lat_const, t_hop, qp_rescale)
         if sigma is not None:
-            if not isinstance(sigma, LambdaType):
+            if not (isinstance(sigma, FunctionType) and len(signature(sigma).parameters) >= 2):
                 raise ValueError(
                     "Self-energy must be parametrized in terms of momentum k and electron number N_e!")
             self.sigma = sigma

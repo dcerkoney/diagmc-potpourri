@@ -59,9 +59,9 @@ __pycache__/
 *.t1
 *.1
 
-# Executables
-self_en_example
-chi_ch_example
+# Executables and intermediary files
+hub_2dsqlat_cf_meas
+config.json
 *.exe
 *.out
 *.app

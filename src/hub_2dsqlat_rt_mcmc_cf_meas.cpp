@@ -18,7 +18,7 @@ namespace fs = std::experimental::filesystem;
 namespace fs = boost::filesystem;
 #endif
 
-// "Use away" extraneous nlohmann namespace for convenience
+// We use the ordered_json type to preserve insertion order
 using json = nlohmann::json;
 
 // Defines the measurement type: a Matsubara (4-momentum) correlation function
@@ -34,7 +34,7 @@ void update_yaml_config(const hub_2dsqlat_mcmc_config& cfg,
   std::vector<std::string> update_groups = {"diag", "mcmc", "phys"};
   // Avoid precision loss on conversion of double value norm_space_weight to string
   std::stringstream norm_space_weight_full;
-  norm_space_weight_full << std::setprecision(17) << cfg.diag.norm_space_weight;
+  norm_space_weight_full << std::setprecision(20) << cfg.diag.norm_space_weight;
   // A dictionary of the parameters to be updated
   std::map<std::string, std::string> param_updates = {
       {"norm_space_weight", norm_space_weight_full.str()},
@@ -569,9 +569,11 @@ int main(int argc, char* argv[]) {
       const auto n_loops = j_graph_info.at("n_loops").get<std::vector<int>>();
       const auto symm_factors = j_graph_info.at("symm_factors").get<std::vector<int>>();
 
-      // Build the measurement diagram pool
-      const graphs_el graphs_vn(b_edge_list, f_edge_lists);
+      // Store nearest-neighbor vertices redundantly for fast local updates at high orders
       const vertices_3pt_el nn_vertices(f_edge_lists);
+
+      // Build the measurement diagram pool (a collection of diagrams, loops, and n.n. vertices)
+      const graphs_el graphs_vn(b_edge_list, f_edge_lists);
       const diagram_pool_el diags_vn(cfg, graphs_vn, symm_factors, n_loops, nn_vertices);
 
       // Build the full set of subspace diagram pools to be passed to the integrator
@@ -608,40 +610,22 @@ int main(int argc, char* argv[]) {
         nu_list.push_back((2 * m + eta) * M_PI / cfg.phys.beta);
       }
 
-      // External measurement k-path coordinate indices;
-      // we measure the susceptibility at all k-points along the
-      // G-X-M-G high-symmetry path in the first Brilloin zone
-      std::vector<std::vector<int>> path_nk_coords;
-      const int n_bz_edge = static_cast<int>(std::floor(cfg.phys.n_site_pd / 2.0));
-      // Update the MCMC config with the number of measurement k-points
-      cfg.mcmc.n_k_meas = 3 * n_bz_edge;
-      std::vector<int> ik_G_X(n_bz_edge);                    // Excludes duplicate endpoint X
-      std::vector<int> ik_X_M(n_bz_edge);                    // Excludes duplicate endpoint M
-      std::vector<int> ik_M_G(n_bz_edge);                    // Excludes duplicate endpoint G
-      std::iota(std::begin(ik_G_X), std::end(ik_G_X), 0);    // ik_G_X = range(0, n_bz_edge)
-      std::iota(std::begin(ik_X_M), std::end(ik_X_M), 0);    // ik_X_M = range(0, n_bz_edge)
-      std::iota(std::rbegin(ik_M_G), std::rend(ik_M_G), 1);  // ik_M_G = range(1, n_bz_edge)[::-1]
-      for (const auto nk_x : ik_G_X) {
-        path_nk_coords.push_back({nk_x, 0});
-      }
-      for (const auto nk_y : ik_X_M) {
-        path_nk_coords.push_back({n_bz_edge, nk_y});
-      }
-      for (const auto nk_xy : ik_M_G) {
-        path_nk_coords.push_back({nk_xy, nk_xy});
-      }
-      // Total number of k-path coordinates is the path length
+      // Load the measurement k-path coordinate indices from JSON
+      std::ifstream k_path_file("k_path_info.json");
+      json k_path_info;
+      k_path_file >> k_path_info;
+      const auto path_nk_coords = k_path_info.at("k_path").get<std::vector<std::vector<int>>>();
       assert(cfg.mcmc.n_k_meas == path_nk_coords.size());
-
+      
       // Build the external momentum-frequency measurement coordinates;
       // they are explicitly labeled, so we store them as a 1D array
       hc_lat_mf_coords mf_meas_coords;
       const int n_meas_coords = cfg.mcmc.n_nu_meas * cfg.mcmc.n_k_meas;
       int id = 0;
       for (const auto& nu : nu_list) {
-        for (const auto& n_k : path_nk_coords) {
+        for (const auto& nk_vec : path_nk_coords) {
           mf_meas_coords.push_back(
-              hc_lat_mf_coord(id, nu, n_k, cfg.phys.n_site_pd, cfg.phys.lat_const));
+              hc_lat_mf_coord(id, nu, nk_vec, cfg.phys.n_site_pd, cfg.phys.lat_const));
           ++id;
         }
       }
@@ -684,10 +668,11 @@ int main(int argc, char* argv[]) {
         // Also update relevant entries in the YAML config file (by hand)
         update_yaml_config(cfg);
 
-        // Copy the updated config files to the run's save directory
-        fs::copy_file("config.yml", cfg.mcmc.save_dir.value() + "/" + "config.yml");
-        fs::copy_file("config.json", cfg.mcmc.save_dir.value() + "/" + "config.json");
-        fs::copy_file("graph_info.json", cfg.mcmc.save_dir.value() + "/" + "graph_info.json");
+        // Copy all config / JSON files to the run's save directory
+        for (const auto& filename :
+             {"config.yml", "config.json", "graph_info.json", "k_path_info.json"}) {
+          fs::copy_file(filename, cfg.mcmc.save_dir.value() + "/" + filename);
+        }
 
         // Write end/elapsed time to logfile and stdout
         std::time_t endtime = std::time(nullptr);

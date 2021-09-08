@@ -187,34 +187,26 @@ def plot_chi_n_ch(cfg):
     if cfg['phys']['n0'] == 1:
         # Double-check that we actually obtained a near-zero answer for ef
         # (i.e., that the k_F vectors are legitimate)
-        assert np.allclose(ef, cfg['phys']['ef'])
+        assert np.allclose(ef, 0.0)
 
-    # Build an ordered path of k-points in the Brillouin zone; we choose the high-symmetry
-    # path for the simple square lattice (\Gamma - X - M - \Gamma), discarding duplicate
-    # coordinates at the path vertices (accounted for in plotting step).
-    n_path_edges = 3
-    n_edge = int(np.floor(cfg['phys']['n_site_pd'] / 2.0))
-    nk_coords_Gamma_X = [[x, 0] for x in range(0, n_edge + 1)]
-    nk_coords_X_M = [[n_edge, y] for y in range(1, n_edge + 1)]
-    # NOTE: We have introduced the duplicate \Gamma point at
-    #       the end of the k-point list for plotting purposes
-    nk_coords_M_Gamma = [[xy, xy] for xy in range(0, n_edge)[::-1]]
-    # Indices for the high-symmetry points
-    idx_Gamma1 = 0
-    idx_X = len(nk_coords_Gamma_X) - 1
-    idx_M = len(nk_coords_Gamma_X) + len(nk_coords_X_M) - 1
-    idx_Gamma2 = len(nk_coords_Gamma_X) + \
-        len(nk_coords_X_M) + len(nk_coords_M_Gamma) - 1
-    # Build the full ordered high-symmetry path
-    path_nk_coords = np.concatenate(
-        (nk_coords_Gamma_X, nk_coords_X_M, nk_coords_M_Gamma))
-    # path_nk_coords = path_nk_coords - n_site_pd * (path_nk_coords == 30)
-    k_scale = 2.0 * np.pi / float(cfg['phys']['lat_length'])
+    # Build the high-symmetry (\Gamma -- X -- M -- \Gamma) path
+    # and save it to 'kpath.dat' unless this is a dry-run
+    with open(pathlib.PosixPath(f"./{cfg['mcmc']['save_dir']}") / 'k_path_info.json') as f:
+        k_path_info = json.load(f)
+        path_nk_coords = np.asarray(k_path_info['k_path'])
+        k_scale = k_path_info['k_scale']
+        high_symm_indices = k_path_info['high_symm_indices']
+        high_symm_path = k_path_info['high_symm_path']
+
+    # Include scale factor for k-points
     path_k_coords = k_scale * path_nk_coords
-    n_k_plot = len(path_k_coords)
+    n_path_edges = 3
+    n_edge = len(path_k_coords) / n_path_edges
+
+    # Add in the (redundant) Gamma point to the end of the path for plotting purposes
+    i_path = np.arange(len(path_k_coords) + 1)
 
     # Find the corresponding indices in the full k_list
-    i_path = np.arange(len(path_k_coords))
     i_path_kf_locs = []
     for i, this_k_coord in enumerate(path_k_coords):
         for kf_vec in kf_vecs:
@@ -226,10 +218,6 @@ def plot_chi_n_ch(cfg):
     # when at half-filling
     if (len(i_path_kf_locs) < 2) and (cfg['phys']['n0'] == 1):
         i_path_kf_locs = [cfg['mcmc']['n_k_meas'] / 3.0, cfg['mcmc']['n_k_meas'] * 5 / 6.0]
-
-    # The missing k-point is the duplicate \Gamma point
-    assert n_k_plot == cfg['mcmc']['n_k_meas'] + 1
-    assert len(chi_n_ch_means) == cfg['mcmc']['n_k_meas'] * n_nu_meas
 
     # Reshape the calculated susceptibility data into
     chi_n_ch_calc_means = chi_n_ch_means.reshape(
@@ -279,8 +267,6 @@ def plot_chi_n_ch(cfg):
         axes[iom].legend(loc='upper left')
         # Add some evenly-spaced minor ticks to the axis
         n_minor_ticks = 9
-        path_nk_coords = np.concatenate(
-            (nk_coords_Gamma_X, nk_coords_X_M, nk_coords_M_Gamma))
         minor_ticks = []
         for i in range(n_path_edges):
             offset = i * n_edge
@@ -291,8 +277,8 @@ def plot_chi_n_ch(cfg):
         minor_ticks = np.asarray(minor_ticks)[mask_major]
         axes[iom].set_xticks(minor_ticks, minor=True)
         # Label the high-symmetry points
-        axes[iom].set_xticks((idx_Gamma1, idx_X, idx_M, idx_Gamma2))
-        axes[iom].set_xticklabels((r'$\Gamma$', r'$X$', r'$M$', r'$\Gamma$'))
+        axes[iom].set_xticks(high_symm_indices)
+        axes[iom].set_xticklabels(high_symm_path)
         iqmstring = r''
         # if iom == 0:
         #     iqmstring = r'=0'
@@ -376,34 +362,26 @@ def plot_static_chi_ch_together(cfg, plot_rpa=True):
     if cfg['phys']['n0'] == 1:
         # Double-check that we actually obtained a near-zero answer for ef
         # (i.e., that the k_F vectors are legitimate)
-        assert np.allclose(ef, cfg['phys']['ef'])
+        assert np.allclose(ef, 0.0)
 
-    # Build an ordered path of k-points in the Brillouin zone; we choose the high-symmetry
-    # path for the simple square lattice (\Gamma - X - M - \Gamma), discarding duplicate
-    # coordinates at the path vertices (accounted for in plotting step).
-    n_path_edges = 3
-    n_edge = int(np.floor(cfg['phys']['n_site_pd'] / 2.0))
-    nk_coords_Gamma_X = [[x, 0] for x in range(0, n_edge + 1)]
-    nk_coords_X_M = [[n_edge, y] for y in range(1, n_edge + 1)]
-    # NOTE: We have introduced the duplicate \Gamma point at
-    #       the end of the k-point list for plotting purposes
-    nk_coords_M_Gamma = [[xy, xy] for xy in range(0, n_edge)[::-1]]
-    # Indices for the high-symmetry points
-    idx_Gamma1 = 0
-    idx_X = len(nk_coords_Gamma_X) - 1
-    idx_M = len(nk_coords_Gamma_X) + len(nk_coords_X_M) - 1
-    idx_Gamma2 = len(nk_coords_Gamma_X) + \
-        len(nk_coords_X_M) + len(nk_coords_M_Gamma) - 1
-    # Build the full ordered high-symmetry path
-    path_nk_coords = np.concatenate(
-        (nk_coords_Gamma_X, nk_coords_X_M, nk_coords_M_Gamma))
-    # path_nk_coords = path_nk_coords - n_site_pd * (path_nk_coords == 30)
-    k_scale = 2.0 * np.pi / float(cfg['phys']['lat_length'])
+    # Build the high-symmetry (\Gamma -- X -- M -- \Gamma) path
+    # and save it to 'kpath.dat' unless this is a dry-run
+    with open(pathlib.PosixPath(f"./{cfg['mcmc']['save_dir']}") / 'k_path_info.json') as f:
+        k_path_info = json.load(f)
+        path_nk_coords = np.asarray(k_path_info['k_path'])
+        k_scale = k_path_info['k_scale']
+        high_symm_indices = k_path_info['high_symm_indices']
+        high_symm_path = k_path_info['high_symm_path']
+
+    # Include scale factor for k-points
     path_k_coords = k_scale * path_nk_coords
-    n_k_plot = len(path_k_coords)
+    n_path_edges = 3
+    n_edge = len(path_k_coords) / n_path_edges
+
+    # Add in the (redundant) Gamma point to the end of the path for plotting purposes
+    i_path = np.arange(len(path_k_coords) + 1)
 
     # Find the corresponding indices in the full k_list
-    i_path = np.arange(len(path_k_coords))
     i_path_kf_locs = []
     for i, this_k_coord in enumerate(path_k_coords):
         for kf_vec in kf_vecs:
@@ -417,10 +395,6 @@ def plot_static_chi_ch_together(cfg, plot_rpa=True):
         i_path_kf_locs = [cfg['mcmc']['n_k_meas'] /
                           3.0, cfg['mcmc']['n_k_meas'] * 5 / 6.0]
 
-    # The missing k-point is the duplicate \Gamma point
-    assert n_k_plot == cfg['mcmc']['n_k_meas'] + 1
-    assert len(chi_n_ch_means) == cfg['mcmc']['n_k_meas'] * n_nu_meas
-
     # Reshape the calculated susceptibility data into a 2D array
     chi_n_ch_calc_means = chi_n_ch_means.reshape(
         (n_nu_meas, cfg['mcmc']['n_k_meas']))
@@ -432,7 +406,7 @@ def plot_static_chi_ch_together(cfg, plot_rpa=True):
     # Get the exact noninteracting static susceptibility along the k-path
     chi_0_ch_exact = np.zeros((n_nu_meas, cfg['mcmc']['n_k_meas']))
     # Skip the duplicate \Gamma point when filling the array
-    for ik, nk in enumerate(path_nk_coords[:-1]):
+    for ik, nk in enumerate(path_nk_coords):
         slice_obj = tuple(nk) + (slice(None, n_nu_meas),)
         chi_0_ch_exact[:, ik] = chi_1_ch_ex_data[slice_obj]
 
@@ -482,8 +456,6 @@ def plot_static_chi_ch_together(cfg, plot_rpa=True):
     ax.legend(loc='upper left')
     # Add some evenly-spaced minor ticks to the axis
     n_minor_ticks = 9
-    path_nk_coords = np.concatenate(
-        (nk_coords_Gamma_X, nk_coords_X_M, nk_coords_M_Gamma))
     minor_ticks = []
     for i in range(n_path_edges):
         offset = i * n_edge
@@ -494,8 +466,8 @@ def plot_static_chi_ch_together(cfg, plot_rpa=True):
     minor_ticks = np.asarray(minor_ticks)[mask_major]
     ax.set_xticks(minor_ticks, minor=True)
     # Label the high-symmetry points
-    ax.set_xticks((idx_Gamma1, idx_X, idx_M, idx_Gamma2))
-    ax.set_xticklabels((r'$\Gamma$', r'$X$', r'$M$', r'$\Gamma$'))
+    ax.set_xticks(high_symm_indices)
+    ax.set_xticklabels(high_symm_path)
     ax.set_title(
         rf'Static charge susceptibility $\chi_{{\mathrm{{ch}}}}[G_{{H}}, U](\mathbf{{q}})$ to $\mathcal{{O}}\hspace{{-0.5ex}}\left(U^n\right)$', pad=13)
     ax.text(
@@ -571,34 +543,26 @@ def plot_self_en(cfg):
     if cfg['phys']['n0'] == 1:
         # Double-check that we actually obtained a near-zero answer for ef
         # (i.e., that the k_F vectors are legitimate)
-        assert np.allclose(ef, cfg['phys']['ef'])
+        assert np.allclose(ef, 0.0)
 
-    # Build an ordered path of k-points in the Brillouin zone; we choose the high-symmetry
-    # path for the simple square lattice (\Gamma - X - M - \Gamma), discarding duplicate
-    # coordinates at the path vertices (accounted for in plotting step).
-    n_path_edges = 3
-    n_edge = int(np.floor(cfg['phys']['n_site_pd'] / 2.0))
-    nk_coords_Gamma_X = [[x, 0] for x in range(0, n_edge + 1)]
-    nk_coords_X_M = [[n_edge, y] for y in range(1, n_edge + 1)]
-    # NOTE: We have introduced the duplicate \Gamma point at
-    #       the end of the k-point list for plotting purposes
-    nk_coords_M_Gamma = [[xy, xy] for xy in range(0, n_edge)[::-1]]
-    # Indices for the high-symmetry points
-    idx_Gamma1 = 0
-    idx_X = len(nk_coords_Gamma_X) - 1
-    idx_M = len(nk_coords_Gamma_X) + len(nk_coords_X_M) - 1
-    idx_Gamma2 = len(nk_coords_Gamma_X) + \
-        len(nk_coords_X_M) + len(nk_coords_M_Gamma) - 1
-    # Build the full ordered high-symmetry path
-    path_nk_coords = np.concatenate(
-        (nk_coords_Gamma_X, nk_coords_X_M, nk_coords_M_Gamma))
-    # path_nk_coords = path_nk_coords - n_site_pd * (path_nk_coords == 30)
-    k_scale = 2.0 * np.pi / float(cfg['phys']['lat_length'])
+    # Build the high-symmetry (\Gamma -- X -- M -- \Gamma) path
+    # and save it to 'kpath.dat' unless this is a dry-run
+    with open(pathlib.PosixPath(f"./{cfg['mcmc']['save_dir']}") / 'k_path_info.json') as f:
+        k_path_info = json.load(f)
+        path_nk_coords = np.asarray(k_path_info['k_path'])
+        k_scale = k_path_info['k_scale']
+        high_symm_indices = k_path_info['high_symm_indices']
+        high_symm_path = k_path_info['high_symm_path']
+
+    # Include scale factor for k-points
     path_k_coords = k_scale * path_nk_coords
-    n_k_plot = len(path_k_coords)
+    n_path_edges = 3
+    n_edge = len(path_k_coords) / n_path_edges
+
+    # Add in the (redundant) Gamma point to the end of the path for plotting purposes
+    i_path = np.arange(len(path_k_coords) + 1)
 
     # Find the corresponding indices in the full k_list
-    i_path = np.arange(len(path_k_coords))
     i_path_kf_locs = []
     for i, this_k_coord in enumerate(path_k_coords):
         for kf_vec in kf_vecs:
@@ -611,10 +575,6 @@ def plot_self_en(cfg):
     if (len(i_path_kf_locs) < 2) and (cfg['phys']['n0'] == 1):
         i_path_kf_locs = [cfg['mcmc']['n_k_meas'] /
                           3.0, cfg['mcmc']['n_k_meas'] * 5 / 6.0]
-
-    # The missing k-point is the duplicate \Gamma point
-    assert n_k_plot == cfg['mcmc']['n_k_meas'] + 1
-    assert len(self_en_means) == cfg['mcmc']['n_k_meas'] * n_om_meas
 
     # Reshape the calculated susceptibility data into
     self_en_means = self_en_means.reshape((n_om_meas, cfg['mcmc']['n_k_meas']))
@@ -664,8 +624,6 @@ def plot_self_en(cfg):
     ax.legend(loc='upper right')
     # Add some evenly-spaced minor ticks to the axis
     n_minor_ticks = 9
-    path_nk_coords = np.concatenate(
-        (nk_coords_Gamma_X, nk_coords_X_M, nk_coords_M_Gamma))
     minor_ticks = []
     for i in range(n_path_edges):
         offset = i * n_edge
@@ -676,8 +634,8 @@ def plot_self_en(cfg):
     minor_ticks = np.asarray(minor_ticks)[mask_major]
     ax.set_xticks(minor_ticks, minor=True)
     # Label the high-symmetry points
-    ax.set_xticks((idx_Gamma1, idx_X, idx_M, idx_Gamma2))
-    ax.set_xticklabels((r'$\Gamma$', r'$X$', r'$M$', r'$\Gamma$'))
+    ax.set_xticks(high_symm_indices)
+    ax.set_xticklabels(high_symm_path)
     ax.set_title(rf"$\Sigma^{{({cfg['diag']['n_intn']})}}$" +
                  rf'$[G_{{H}}, U](\mathbf{{k}}, i\omega_0 = \pi T)$', pad=13)
     ax.text(
@@ -743,8 +701,6 @@ def plot_self_en(cfg):
         ax.legend(loc='upper left', ncol=3, framealpha=1.0)
         # Add some evenly-spaced minor ticks to the axis
         n_minor_ticks = 9
-        path_nk_coords = np.concatenate(
-            (nk_coords_Gamma_X, nk_coords_X_M, nk_coords_M_Gamma))
         minor_ticks = []
         for i_tick in range(n_path_edges):
             offset = i_tick * n_edge
@@ -755,8 +711,8 @@ def plot_self_en(cfg):
         minor_ticks = np.asarray(minor_ticks)[mask_major]
         ax.set_xticks(minor_ticks, minor=True)
         # Label the high-symmetry points
-        ax.set_xticks((idx_Gamma1, idx_X, idx_M, idx_Gamma2))
-        ax.set_xticklabels((r'$\Gamma$', r'$X$', r'$M$', r'$\Gamma$'))
+        ax.set_xticks(high_symm_indices)
+        ax.set_xticklabels(high_symm_path)
         ax.set_title(rf"{component_names[i]}$\Sigma^{{({cfg['diag']['n_intn']})}}$" +
                      rf'$[G_{{H}}, U](\mathbf{{k}}, i\omega_n)$', pad=13)
         ax.text(
