@@ -5,6 +5,6 @@
             "ferm_edges_topology_1": [[0, 1], [2, 3], [3, 2]]
         }
     },
-    "symm_factors": [1],
-    "n_loops": [1]
+    "n_loops": [1],
+    "symm_factors": [1]
 }
