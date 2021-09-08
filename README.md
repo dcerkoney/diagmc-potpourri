@@ -1,4 +1,5 @@
-# ![banner](https://github.com/dcerkoney/diagmc-potpourri/blob/e1538d14651915a346723ca66f72bc97c08ed54c/.readme/banner.png?raw=true)
+![banner](https://github.com/dcerkoney/diagmc-potpourri/blob/e1538d14651915a346723ca66f72bc97c08ed54c/.readme/banner.png?raw=true)
+
 # diagmc-potpourri
 A Markov chain Monte Carlo library for various low-order Feynman diagram computations.
 
