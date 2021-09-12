@@ -47,7 +47,7 @@ For backwards compatibility with some very old compilers (e.g., GCC < 5.3), the 
    ```
   
 ### 3. [ruamel.yaml](https://pypi.org/project/ruamel.yaml/)
-Used for config files for YAML with round-trip comment support.
+Used for YAML config files with round-trip comment support.
    ```sh
     pip3 install ruamel.yaml 
    ```
