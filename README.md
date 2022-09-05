@@ -6,15 +6,15 @@ A Markov chain Monte Carlo library for various low-order Feynman diagram computa
 ![chi_2_ch](https://github.com/dcerkoney/diagmc-potpourri/blob/e1538d14651915a346723ca66f72bc97c08ed54c/.readme/chi_2_ch_2dsqhub_run_1629109813.png?raw=true)
 
 <p align="middle">
-  <img src="https://github.com/dcerkoney/diagmc-potpourri/blob/e1538d14651915a346723ca66f72bc97c08ed54c/.readme/static_chi_ch_2dsqhub_run_1629109813.png?raw=true" width="200" />
-  <img src="https://github.com/dcerkoney/diagmc-potpourri/blob/e1538d14651915a346723ca66f72bc97c08ed54c/.readme/re_sigma_2_2dsqhub_run_1629106445.png?raw=true" width="200" /> 
-  <img src="https://github.com/dcerkoney/diagmc-potpourri/blob/e1538d14651915a346723ca66f72bc97c08ed54c/.readme/sigma_2_iom0_2dsqhub_run_1629106445.png?raw=true" width="200" />
+  <img src="https://github.com/dcerkoney/diagmc-potpourri/blob/e1538d14651915a346723ca66f72bc97c08ed54c/.readme/static_chi_ch_2dsqhub_run_1629109813.png?raw=true" width="250" />
+  <img src="https://github.com/dcerkoney/diagmc-potpourri/blob/e1538d14651915a346723ca66f72bc97c08ed54c/.readme/re_sigma_2_2dsqhub_run_1629106445.png?raw=true" width="250" /> 
+  <img src="https://github.com/dcerkoney/diagmc-potpourri/blob/e1538d14651915a346723ca66f72bc97c08ed54c/.readme/sigma_2_iom0_2dsqhub_run_1629106445.png?raw=true" width="250" />
 </p>
 
 <p align="middle">
-  <img src="https://github.com/dcerkoney/diagmc-potpourri/blob/e1538d14651915a346723ca66f72bc97c08ed54c/.readme/im_sigma_2_loc_2dsqhub_run_1629107326.png?raw=true" width="200" /> 
-  <img src="https://github.com/dcerkoney/diagmc-potpourri/blob/e1538d14651915a346723ca66f72bc97c08ed54c/.readme/re_sigma_2_loc_2dsqhub_run_1629107326.png?raw=true" width="200" />
-  <img src="https://github.com/dcerkoney/diagmc-potpourri/blob/e1538d14651915a346723ca66f72bc97c08ed54c/.readme/sigma_2_iom0_2dsqhub_run_1629107326.png?raw=true" width="200" />
+  <img src="https://github.com/dcerkoney/diagmc-potpourri/blob/e1538d14651915a346723ca66f72bc97c08ed54c/.readme/im_sigma_2_loc_2dsqhub_run_1629107326.png?raw=true" width="250" /> 
+  <img src="https://github.com/dcerkoney/diagmc-potpourri/blob/e1538d14651915a346723ca66f72bc97c08ed54c/.readme/re_sigma_2_loc_2dsqhub_run_1629107326.png?raw=true" width="250" />
+  <img src="https://github.com/dcerkoney/diagmc-potpourri/blob/e1538d14651915a346723ca66f72bc97c08ed54c/.readme/sigma_2_iom0_2dsqhub_run_1629107326.png?raw=true" width="250" />
 </p>
 
 <!-- DEPENDENCIES -->
