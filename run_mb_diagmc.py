@@ -156,6 +156,8 @@ def main():
                       help="tight-binding hopping parameter t")
     parser.add_option("--U_loc", type="float",  default=None,
                       help="onsite Hubbard interaction in Hartrees")
+    parser.add_option("--n_band", type="int",  default=None,
+                      help="number of bands for multi-band Hubbard runs")
     parser.add_option("--n_threads", type="int",  default=None,
                       help="number of MPI threads for the MCMC run")
 
@@ -253,8 +255,8 @@ def main():
                 openmpi_prefix.append('--oversubscribe')
 
         # Call the C++ executable to perform the MCMC run
-        print("\nCalling MCMC C++ executable hub_2dsqlat_rt_mcmc_cf_meas...")
-        subprocess.run(openmpi_prefix + ['./hub_2dsqlat_rt_mcmc_cf_meas'],
+        print("\nCalling MCMC C++ executable mb_hub_2dsqlat_rt_mcmc_cf_meas...")
+        subprocess.run(openmpi_prefix + ['./mb_hub_2dsqlat_rt_mcmc_cf_meas'],
                        stdout=sys.stdout, stderr=sys.stderr)
 
         # Reformats the updated config.json file using jsbeautify
@@ -274,6 +276,7 @@ def main():
     end_time = datetime.utcnow()
     print(f'\nJob ended at: {end_time}')
     print(f'Elapsed time: {end_time - start_time}')
+    return
 
 
 # End of main()

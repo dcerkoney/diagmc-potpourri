@@ -224,7 +224,7 @@ def map_vertices_defaultdict(graph, vmap):
 # Returns the set difference of two diagram lists up to topological
 # equivalence, [L1] - [L2], where [X] := {[x] | x \in X} and
 # [x] denotes a single topological equivalence class.
-def get_diag_set_diff(g_list, g_sublist, fixed_pts=[]):
+def get_diag_set_diff(g_list, g_sublist, fixed_pts=None):
     # First, get the naive set difference (not considering topological equivalence)
     naive_set_diff = [diag for diag in g_list if diag not in g_sublist]
     # Now, additionally remove any diagrams which are
@@ -310,6 +310,8 @@ def del_conn_if_exists_al(graph, v1, v2, line_type):
 
 # Get all permutations on a list / array with fixed points, supplied as a list of indices
 def perms_with_fixed_points(permutable, fixed_pts, fp_idxs):
+    if not fixed_pts:
+        fp_idxs, fixed_pts = [], []
     assert np.array_equal(fixed_pts, sorted(fixed_pts))
     for perm in map(list, itertools.permutations(permutable)):
         # Insert fixed vertices at their respective indices
@@ -319,7 +321,7 @@ def perms_with_fixed_points(permutable, fixed_pts, fp_idxs):
 
 
 # Generate all possible vertex permutations (i.e., topological equivalents) for a given graph
-def all_swaps(graph, fixed_pts=[], fp_idxs=[], db=False):
+def all_swaps(graph, fixed_pts=None, fp_idxs=None, db=False):
     if not fixed_pts:
         perms = itertools.permutations(graph.keys())
     else:
@@ -332,17 +334,17 @@ def all_swaps(graph, fixed_pts=[], fp_idxs=[], db=False):
             permutable=[k for k in graph.keys() if k not in fixed_pts],
             fixed_pts=fixed_pts, fp_idxs=fp_idxs)
     # The identity permutation is first in the list
-    next(perms)
+    next(perms, None)
     # Otherwise, yield the swapped graphs
     for perm in perms:
-        if db: 
+        if db:
             print(perm)
         yield map_vertices_dict(graph=graph, vmap=dict(zip(graph.keys(), perm)))
 
 
 # Generate all possible vertex permutations (i.e., topological equivalents) for a given graph,
 # including all leg permutations with fixed internal vertices (e.g., to remove hole self-energies)
-def all_swaps_with_external(graph, fixed_pts=[], fp_idxs=[]):
+def all_swaps_with_external(graph, fixed_pts=None, fp_idxs=None):
     if not fixed_pts:
         perms = itertools.permutations(graph.keys())
     else:
@@ -357,7 +359,7 @@ def all_swaps_with_external(graph, fixed_pts=[], fp_idxs=[]):
         # The set of all permutations is the direct product of internal and external permutations
         perms = itertools.chain(internal_perms, external_perms)
     # Skip the identity permutation
-    next(perms)
+    next(perms, None)
     # Otherwise, yield the swapped graphs
     for perm in perms:
         yield map_vertices_dict(graph=graph, vmap=dict(zip(graph.keys(), perm)))
@@ -366,7 +368,9 @@ def all_swaps_with_external(graph, fixed_pts=[], fp_idxs=[]):
 # Check for topological equivalence by permuting the vertices of every diagram,
 # and checking whether or not the result is in the naive list of diagrams; if it is,
 # do not add it to the list of distinct diagrams.
-def rem_top_equiv_al(naive_graphs_al_dd, fixed_pts=[], db=False):
+def rem_top_equiv_al(naive_graphs_al_dd, fixed_pts=None, db=False):
+    if not fixed_pts:
+        fplist = []
     n_graphs = len(naive_graphs_al_dd)
     distincts = np.ones(n_graphs, dtype=bool)
     duplicates = np.zeros(n_graphs, dtype=bool)
@@ -388,7 +392,7 @@ def rem_top_equiv_al(naive_graphs_al_dd, fixed_pts=[], db=False):
                 continue
             # If the ith graph is the same as any permutation of the jth graph,
             # they are topologically equivalent, so mark the jth graph as a duplicate
-            fp_idxs = [i for i, v in enumerate(naive_graphs_al_d[j].keys()) if v in fixed_pts]
+            fp_idxs = [i for i, v in enumerate(naive_graphs_al_d[j].keys()) if v in fplist]
             if any(naive_graphs_al_d[i] == perm_graph_j
                    for perm_graph_j in all_swaps(naive_graphs_al_d[j],
                                                  fixed_pts, fp_idxs)):
@@ -846,7 +850,7 @@ def get_momentum_loops(graph, v_start=0, diag_type='vacuum', lb_prefer='b', verb
 
     # Include the external loop for correlation functions
     # by temporarily adding a ficticious edge to the graph
-    if any(dt in diag_type for dt in ['poln', 'self_en']):
+    if any(keyword in diag_type for keyword in ['poln', 'self_en']):
         # Insert the fake external edge at list index
         # 0 if bosonic, and index 1 if fermionic
         ext_type = ('b' if 'poln' in diag_type else 'f')
@@ -882,6 +886,8 @@ def get_momentum_loops(graph, v_start=0, diag_type='vacuum', lb_prefer='b', verb
                 graph_el[i] = e2
     if verbose:
         print(f'graph_el (orig):\n{graph_el}')
+        print(f'loop basis edges:\n{loop_basis_edges_sel}')
+
     # Convert the graph to split edge list representation
     graph_sel = graph_el_to_split_el(graph_el)
 
@@ -926,7 +932,6 @@ def get_momentum_loops(graph, v_start=0, diag_type='vacuum', lb_prefer='b', verb
                 if v_downstream != v_stop and v_downstream not in spanning_tree:
                     if verbose:
                         print(f'Skipping dead end downstream edge {this_edge}...')
-                    pass
                 else:
                     # Add this edge to the loop and advance downstream
                     if verbose:
@@ -967,11 +972,13 @@ def get_momentum_loops(graph, v_start=0, diag_type='vacuum', lb_prefer='b', verb
         print(f'\nmomentum_loops:\n{momentum_loops}\n')
 
     # Remove the ficticious external momentum flow edge from the graph
-    if any(dt in diag_type for dt in ['poln', 'self_en']):
+    if any(keyword in diag_type for keyword in ['poln', 'self_en']):
         del_conn_al(graph=graph, v1=1, v2=0, line_type=ext_type)
         if verbose:
             print(f'Fixed graph: {graph_al_defaultdict_to_dict(graph)}')
+
     return momentum_loops, graph_sel, loop_basis_edges_sel
+    # return momentum_loops, loop_basis_edges_sel
 
 
 # Determine the total number of fermion loops (i.e., fermion-connected cycles) in the graph
@@ -1005,9 +1012,11 @@ def num_cycles(graph):
     return n_cycles
 
 
-# Get the external fermionic path in a self-energy graph (e.g., for spin assignment).
-# Assumes two external legs, and that these are first in the list by convention.
-def get_self_en_ext_ferm_path(graph, legs=[0, 1]):
+def get_self_en_ext_ferm_path(graph, legs):
+    '''
+    Get the external fermionic path in a self-energy graph (e.g., for spin assignment).
+    Assumes two external legs, and that these are first in the list by convention.
+    '''
     # Mark all the vertices as initially unvisited
     visited = [False] * (len(graph))
     # Check for fermionic connectivity between all
@@ -1149,7 +1158,8 @@ def legs_ferm_connected(graph, legs):
 
 # Checks for a bold fermionic connection (i.e., indirect fermion
 # connected with no boson line leakage) from v_start to v_end
-def bold_ferm_connected(graph, v_start, v_end, diag_type='vacuum', legs=[]):
+# def bold_ferm_connected(graph, v_start, v_end, diag_type='vacuum', legs=[]):
+def bold_ferm_connected(graph, v_start, v_end):
     # Mark all the vertices as unvisited
     ferm_visited = np.full(len(graph), False)
     bos_visited = np.full(len(graph), False)
@@ -1444,8 +1454,9 @@ def is_bFI(graph, diag_type='vacuum', legs=[]):
     # Now check the internal connections for any bold Fock terms
     for (i, j) in itertools.combinations(set(graph.keys()) - set(legs), 2):
         has_bold_ferm_conn = (
-            bold_ferm_connected(graph, i, j, diag_type, legs) +
-            bold_ferm_connected(graph, j, i, diag_type, legs))
+            bold_ferm_connected(graph, i, j) + bold_ferm_connected(graph, j, i))
+            # bold_ferm_connected(graph, i, j, diag_type, legs) +
+            # bold_ferm_connected(graph, j, i, diag_type, legs))
         has_bos_conn = has_connection(graph, i, j, 'b')
         # Found a bold Fock self-energy term => not bold Fock irreducible
         if has_bold_ferm_conn and has_bos_conn:
@@ -1464,8 +1475,9 @@ def is_bFI_simple(graph, n_legs, diag_type):
     # Now check the internal connections for any bold Fock terms
     for v1, v2 in itertools.combinations(range(len(graph) - n_legs), 2):
         has_bold_ferm_conn = (
-            bold_ferm_connected(graph, v1, v2, diag_type, legs=[n_verts - 2, n_verts - 1]) +
-            bold_ferm_connected(graph, v2, v1, diag_type, legs=[n_verts - 2, n_verts - 1]))
+            bold_ferm_connected(graph, v1, v2) + bold_ferm_connected(graph, v2, v1))
+            # bold_ferm_connected(graph, v1, v2, diag_type, legs=[n_verts - 2, n_verts - 1]) +
+            # bold_ferm_connected(graph, v2, v1, diag_type, legs=[n_verts - 2, n_verts - 1]))
         has_bos_conn = has_connection(graph, v1, v2, 'b')
         # Found a bold Fock self-energy term => not bold Fock irreducible
         if has_bold_ferm_conn and has_bos_conn:
@@ -1932,7 +1944,8 @@ def unwrap_BSA(graph, gamma3_base_set, vlinks, gamma3_base_orders, max_order, di
     return flatten(unwrapped_graphs)
 
 
-# TODO: the external leg convention must be maintained for self-energy diagrams! (partially resolved, at low orders)
+# TODO: the external leg convention must be maintained for self-energy 
+#       diagrams! (partially resolved, at low orders)
 def insert_gamma3(diag_type, graph, gamma3, vlinks, v_insert=1):
     # Add the gamma3 term into the graph
     # print(vlinks)

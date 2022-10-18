@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 
-# Package imports
-import glob
-import h5py
+# Standard imports
 import json
-import optparse
-import numpy as np
-import matplotlib.pyplot as plt
-
-from ruamel.yaml import YAML
+import glob
+import argparse
 from pathlib import PosixPath
 from datetime import datetime
+from ruamel.yaml import YAML
+
+# Package imports
+import h5py
+import numpy as np
+import matplotlib.pyplot as plt
 
 # Local script imports
 from misc_tools import (
@@ -27,9 +28,11 @@ from lattice_tools import (
 
 
 def simple_cubic_high_symm_path(lat_const, n_site_pd, save=True):
-    # Build an ordered path of k-points in the Brillouin zone; we choose the high-symmetry
-    # path for the simple square lattice (\Gamma -- X -- M -- \Gamma), discarding duplicate
-    # coordinates at the path vertices (accounted for in plotting step).
+    '''
+    Build an ordered path of k-points in the Brillouin zone; we choose the high-symmetry
+    path for the simple square lattice (Gamma -- X -- M -- Gamma), discarding duplicate
+    coordinates at the path vertices (accounted for in plotting step).
+    '''
     N_edge = int(np.floor(n_site_pd / 2.0))
     nk_coords_Gamma_X = [[x, 0] for x in range(0, N_edge + 1)]
     nk_coords_X_M = [[N_edge, y] for y in range(1, N_edge + 1)]
@@ -59,33 +62,33 @@ def simple_cubic_high_symm_path(lat_const, n_site_pd, save=True):
 
 
 def main():
-    """Get the lattice Green's function and polarization bubble to Hartree level for Hubbard-type theories."""
-    usage = """usage: %prog [ options ]"""
-    parser = optparse.OptionParser(usage)
+    '''Get the lattice Green's function and polarization bubble to Hartree level for Hubbard-type theories.'''
+    usage = '''usage: %prog [ options ]'''
+    parser = argparse.ArgumentParser(usage)
 
     # Propagator mesh sizes (optional flags for overriding config file params)
-    parser.add_option("--n_tau", type="int",   default=None,
+    parser.add_argument("--n_tau", type="int",   default=None,
                       help="number of tau points in the nonuniform mesh "
                       + "used for downsampling (an even number)")
-    parser.add_option("--n_nu", type="int",   default=None,
+    parser.add_argument("--n_nu", type="int",   default=None,
                       help="number of bosonic frequency points in "
                       + "the uniform FFT mesh (an even number)")
 
     # Save / plot options
-    parser.add_option("--config", type="string", default="config.yml",
+    parser.add_argument("--config", type="string", default="config.yml",
                       help="relative path of the config file to be used (default: 'config.yml')")
-    parser.add_option("--propr_save_dir", type="string", default="propagators",
+    parser.add_argument("--propr_save_dir", type="string", default="propagators",
                       help="subdirectory to save results to, if applicable")
-    parser.add_option("--plot_g0", default=False,  action="store_true",
+    parser.add_argument("--plot_g0", default=False,  action="store_true",
                       help="generate plots for the lattice Green's function")
-    parser.add_option("--plot_pi0", default=False,  action="store_true",
+    parser.add_argument("--plot_pi0", default=False,  action="store_true",
                       help="generate plots for the polarization bubble")
-    parser.add_option("--dry_run", default=False,  action="store_true",
+    parser.add_argument("--dry_run", default=False,  action="store_true",
                       help="perform a dry run (don't update config file or save propagator data)")
 
-    # Next, parse  the arguments and collect all options into a dictionary
-    (options, _) = parser.parse_args()
-    optdict = vars(options)
+    # Next, parse  the arguments and collect all arguments into a dictionary
+    (args, _) = parser.parse_args()
+    optdict = vars(args)
     
     # Parse YAML config file
     yaml_interface = YAML(typ='rt')
@@ -93,12 +96,11 @@ def main():
     config_file = PosixPath(optdict['config'])
     try:
         cfg = yaml_interface.load(config_file)
-    except FileNotFoundError:
+    except FileNotFoundError as fnfe:
         raise FileNotFoundError(
-            f"The specified config file '{config_file}' was not found!")
-    except Exception:
-        raise OSError(
-            f"The specified config file '{config_file}' is invalid YAML!")
+            f"The specified config file '{config_file}' was not found!") from fnfe
+    except Exception as exn:
+        raise OSError(f"The specified config file '{config_file}' is invalid YAML!") from exn
 
     # Override the config with user-supplied cmdline args where applicable
     cfg_override_string = ''
@@ -433,7 +435,7 @@ def main():
                 dir=save_dir,
                 savename=(f"lat_pi0_q_inu{this_m}_N={p_phys['n_site_pd']}_beta={p_phys['beta']:g}" +
                           f"_n_tau={p_propr['n_tau']}_n_nu={p_propr['n_nu']}" +
-                          f"_fft_upsampled"),
+                          "_fft_upsampled"),
                 file_extension='pdf',
                 overwrite=True,
             )

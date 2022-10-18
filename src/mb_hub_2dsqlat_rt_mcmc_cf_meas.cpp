@@ -1,5 +1,5 @@
-#include "diagmc_integrators.hpp"
 #include "diagmc_includes.hpp"
+#include "diagmc_integrators.hpp"
 #include "diagmc_tools.hpp"
 #include "random.hpp"
 
@@ -24,7 +24,7 @@ using json = nlohmann::json;
 
 // Defines the measurement type: a Matsubara (4-momentum) correlation function
 //                               for the Hubbard model on a 2D square lattice
-using meas_t = rt_mcmc_cfg_2d_sq_hub_mf_meas::meas_t;
+using meas_t = mb_rt_mcmc_2d_sq_hub_mf_integrator::meas_t;
 
 // Update the original YAML config file with parameters which may have been edited
 // during the MCMC run (namely: {norm_space_weight, n_k_meas, save_serial, job_id, save_dir}).
@@ -130,8 +130,8 @@ bool consistent_propagator_data(const std::string& h5_filename, const json& conf
 }
 
 // Loads the lattice Green's function data from HDF5
-lattice_2d_f_interp load_greens_function_h5(const std::string& h5_filename,
-                                            const hub_2dsqlat_mcmc_config& cfg) {
+mb_lattice_2d_f_interp load_greens_function_h5(const std::string& h5_filename,
+                                               const hub_2dsqlat_mcmc_config& cfg) {
   // Open H5 file
   H5::H5File file = H5::H5File(h5_filename, H5F_ACC_RDONLY);
 
@@ -145,8 +145,8 @@ lattice_2d_f_interp load_greens_function_h5(const std::string& h5_filename,
   hdf5::verify_attribute_type<double>("tau_mesh", datatype);
 
   // Tau mesh is assumed rank 1 (1D)
-  std::vector<hsize_t> dims(1);
-  dataspace.getSimpleExtentDims(dims.data(), NULL);
+  hsize_t dims[1];
+  dataspace.getSimpleExtentDims(dims, NULL);
   std::size_t size = static_cast<std::size_t>(dims[0]);
 
   // Read the (flattened) lattice G_0 data
@@ -197,7 +197,7 @@ lattice_2d_f_interp load_greens_function_h5(const std::string& h5_filename,
   hdf5::verify_attribute_type<long>("shape", shape_type);
 
   // Shape array is rank 1 (1D)
-  dataspace.getSimpleExtentDims(dims.data(), NULL);
+  dataspace.getSimpleExtentDims(dims, NULL);
   size = static_cast<std::size_t>(dims[0]);
   assert(size == 3);
 
@@ -217,32 +217,57 @@ lattice_2d_f_interp load_greens_function_h5(const std::string& h5_filename,
   // Build G_0 interpolant matrix //
   //////////////////////////////////
 
-  // G_0(r, tau) mesh is (d + 1)-dimensional
-  double beta = cfg.phys.beta;
+  // New Green's function format:
+  //    g_r_tau({band_start, band_end, del_nr[0], del_nr[1]}).ap_eval(del_tau)
+  //
+  // Use same (1-band) data for any given set of bands
+  //    => G_{a,b} = G_0 \delta_{a,b} for any band indices a,b
+
+  int n_band = cfg.phys.n_band.value_or(1);
   int n_tau = cfg.propr.n_tau;
+  double beta = cfg.phys.beta;
   int n_site_irred = cfg.phys.n_site_irred;
   assert(shape == std::vector<long>({n_site_irred, n_site_irred, n_tau}));
 
   // Build a vector of linear 1D interpolants from flattened lattice G_0 data
+  std::cout << "\nBuilding multi-band G_0...";
   std::vector<f_interp_1d> lat_g0_vec_interp;
-  for (int i = 0; i < n_site_irred; ++i) {
-    for (int j = 0; j < n_site_irred; ++j) {
-      std::vector<double> g0_tau_data;
-      for (int k = 0; k < n_tau; ++k) {
-        g0_tau_data.push_back(lat_g0_vec[k + n_tau * (j + n_site_irred * i)]);
+  for (int a = 0; a < n_band; ++a) {
+    for (int b = 0; b < n_band; ++b) {
+      // Testing with a band-diagonal Green's function
+      if (a != b) {
+        std::vector<f_interp_1d> empty_block(n_site_irred * n_site_irred);
+        lat_g0_vec_interp.insert(lat_g0_vec_interp.end(), empty_block.begin(), empty_block.end());
+      } else {
+        for (int i = 0; i < n_site_irred; ++i) {
+          for (int j = 0; j < n_site_irred; ++j) {
+            std::vector<double> g0_tau_data;
+            for (int k = 0; k < n_tau; ++k) {
+              g0_tau_data.push_back(lat_g0_vec[k + n_tau * (j + n_site_irred * i)]);
+            }
+            // lat_g0_vec_interp.push_back(f_interp_1d(meshfunc_1d(g0_tau_data, tau_mesh), beta));
+            lat_g0_vec_interp.push_back(f_interp_1d(g0_tau_data, tau_mesh, beta));
+          }
+        }
       }
-      // lat_g0_vec_interp.push_back(f_interp_1d(meshfunc_1d(g0_tau_data, tau_mesh), beta));
-      lat_g0_vec_interp.push_back(f_interp_1d(g0_tau_data, tau_mesh, beta));
     }
   }
-  lattice_2d_f_interp lat_g0_r_tau(n_site_irred, lat_g0_vec_interp);
-  return lat_g0_r_tau;
+  std::array<int, 4> n_sites = {n_band, n_band, n_site_irred, n_site_irred};
+  mb_lattice_2d_f_interp lat_g0_ab_r_tau(n_sites, lat_g0_vec_interp);
+  std::cout << "done!" << std::endl;
+  std::cout << lat_g0_ab_r_tau.n_sites.size() << std::endl;
+  for (auto n : lat_g0_ab_r_tau.n_sites) {
+    std::cout << n << " ";
+  }
+  std::cout << std::endl;
+  std::cout << lat_g0_ab_r_tau.data.size() << std::endl;
+  return lat_g0_ab_r_tau;
 }
 
 #ifdef HAVE_MPI
 // Aggregate MPI results, compute the standard error over threads, and save the results to HDF5
 void aggregate_and_save(int mpi_size, int mpi_rank, int mpi_main,
-                        const rt_mcmc_cfg_2d_sq_hub_mf_meas& integrator) {
+                        const mb_rt_mcmc_2d_sq_hub_mf_integrator& integrator) {
   bool is_main_thread = (mpi_rank == mpi_main);
   bool normalized = integrator.normalized;
 
@@ -355,8 +380,18 @@ void aggregate_and_save(int mpi_size, int mpi_rank, int mpi_main,
     hdf5::write_attribute<int>("n_subspaces", integrator.n_subspaces, h5file);
     hdf5::write_attribute<double>("norm_const", integrator.norm_const, h5file);
     if (!integrator.name.empty()) {
-      hdf5::write_attribute<std::string>("integrator_name", integrator.name, h5file);
+      hdf5::write_attribute<std::string>(integrator.name, "integrator_name", h5file);
     }
+
+    // Build an HDF5 compound datatype for complex numbers out of complex_t structs
+    typedef struct complex_t {
+      double re;
+      double im;
+      complex_t(double re_, double im_) : re(re_), im(im_) {}
+    } complex_t;
+    H5::CompType hcomplextype(sizeof(complex_t));
+    hcomplextype.insertMember("re", HOFFSET(complex_t, re), H5::PredType::NATIVE_DOUBLE);
+    hcomplextype.insertMember("im", HOFFSET(complex_t, im), H5::PredType::NATIVE_DOUBLE);
 
     // Write the subspace measurement results to labeled datasets
     for (std::size_t i = 1; i < cfg.diag.subspaces.size(); i++) {
@@ -366,22 +401,21 @@ void aggregate_and_save(int mpi_size, int mpi_rank, int mpi_main,
       if (cfg.mcmc.verbose) {
         std::cout << "Saving " << ss_data_name << "...";
       }
-      // Convert the subspace data to a vector of hdf5::complex's
-      std::vector<hdf5::complex_t> ss_data;
+      // Convert the subspace data to a vector of complex_t's
+      std::vector<complex_t> ss_data;
       for (std::size_t j = 0; j < meas_data[i].size(); j++) {
-        ss_data.push_back(hdf5::complex_t(meas_data[i][j].real(), meas_data[i][j].imag()));
+        ss_data.push_back(complex_t(meas_data[i][j].real(), meas_data[i][j].imag()));
       }
       // Write the zeroth statistical moment to H5 file
       int rank = 1;
       hsize_t dim[] = {meas_data[i].size()};
       H5::DataSpace dataspace(rank, dim);
-      H5::DataType datatype = hdf5::ComplexType::COMP_COMPLEX;
-      H5::DataSet dataset = h5file.createDataSet(ss_data_name, datatype, dataspace);
-      dataset.write(ss_data.data(), datatype);
+      H5::DataSet dataset = h5file.createDataSet(ss_data_name, hcomplextype, dataspace);
+      dataset.write(ss_data.data(), hcomplextype);
       if (cfg.mcmc.verbose) {
         std::cout << "done!" << std::endl;
         if (cfg.mcmc.debug) {
-          for (hdf5::complex_t data_pt : ss_data) {
+          for (complex_t data_pt : ss_data) {
             std::cout << data_pt.re << " + " << data_pt.im << "i" << std::endl;
           }
         }
@@ -424,8 +458,11 @@ int main(int argc, char* argv[]) {
     // Deserialize to a config object
     auto cfg = j_config.get<hub_2dsqlat_mcmc_config>();
 
-    // Init complex compound hdf5 type
-    hdf5::ComplexType();
+    // We need the number of bands to be specified for a multi-band run
+    if (!cfg.phys.n_band.has_value()) {
+      std::cout << "Warning: the number of bands is unset in the YAML config, setting n_band = 1!"
+                << std::endl;
+    }
 
 #ifdef HAVE_MPI
     // Get MPI parameters for parallel runs
@@ -466,9 +503,9 @@ int main(int argc, char* argv[]) {
       cfg.phys.U_loc = this_U;
 
       // Update normalization diagram weight test param norm_space_weight (D_0) value
-      cfg.diag.norm_space_weight =
-          (-0.000143769 + 0.0143555 * this_U + 0.0571346 * this_U * this_U) *
-          (-0.0630317 + 0.0794737 * cfg.phys.beta + 0.00206871 * cfg.phys.beta * cfg.phys.beta);
+      // cfg.diag.norm_space_weight =
+      //     (-0.000143769 + 0.0143555 * this_U + 0.0571346 * this_U * this_U) *
+      //     (-0.0630317 + 0.0794737 * cfg.phys.beta + 0.00206871 * cfg.phys.beta * cfg.phys.beta);
 
       // Open a logfile for this job
       std::ofstream logfile;
@@ -496,7 +533,7 @@ int main(int argc, char* argv[]) {
         fs::create_directory(cfg.mcmc.save_dir.value());
         // logfile.open("test.log");
         logfile.open(cfg.mcmc.save_dir.value() + "/" + cfg.mcmc.save_name + "_run_" +
-                            std::to_string(cfg.mcmc.job_id.value()) + ".log");
+                     std::to_string(cfg.mcmc.job_id.value()) + ".log");
         logfile << "MPI run with " << mpi_size << " thread(s)" << std::endl;
         std::cout << "MPI run with " << mpi_size << " thread(s)" << std::endl;
         // Write start time to logfile and stdout
@@ -509,7 +546,7 @@ int main(int argc, char* argv[]) {
 
       // Find and load Green's function data consistent with the current test parameters;
       // we look recursively for any h5 files in the "propagators" parent directory.
-      lattice_2d_f_interp lat_g0_r_tau;
+      mb_lattice_2d_f_interp lat_g0_ab_r_tau;
       for (const auto& dir_entry : fs::recursive_directory_iterator(cfg.propr.save_dir)) {
         // If this is a subdirectory, continue iterating
         if (fs::is_directory(dir_entry)) {
@@ -527,16 +564,18 @@ int main(int argc, char* argv[]) {
             std::cout << "\nFound consistent Green's function data in propagator subdirectory '"
                       << path_string << "', loading it...";
           }
-          lat_g0_r_tau = load_greens_function_h5(path_string, cfg);
+          lat_g0_ab_r_tau = load_greens_function_h5(path_string, cfg);
           if (is_main_thread) {
             std::cout << "done!" << std::endl;
           }
           break;
         }
       }
-      if (lat_g0_r_tau.data.empty()) {
+      if (lat_g0_ab_r_tau.data.empty()) {
         throw std::runtime_error("No applicable Green's function data found!");
       }
+
+      std::cout << "Building diagram pools...";
 
       // Build the measurement (V_3) diagram pool; there
       // are 5 nonzero topologies at third order (O(U^2))
@@ -560,17 +599,20 @@ int main(int argc, char* argv[]) {
 
       // Additional graph info
       const auto n_loops = j_graph_info.at("n_loops").get<std::vector<int>>();
+      const auto loops = j_graph_info.at("loops").get<std::vector<std::vector<std::vector<int>>>>();
       const auto symm_factors = j_graph_info.at("symm_factors").get<std::vector<int>>();
 
       // Store nearest-neighbor vertices redundantly for fast local updates at high orders
       const vertices_3pt_el nn_vertices(f_edge_lists);
 
-      // Build the measurement diagram pool (a collection of diagrams and nearest-neighbor vertices)
+      // Build the measurement diagram pool (a collection of diagrams, loops, and n.n. vertices)
       const graphs_el graphs_vn(b_edge_list, f_edge_lists);
-      const diagram_pool_el diags_vn(cfg, graphs_vn, symm_factors, nn_vertices);
+      const diagram_pool_el diags_vn(cfg, graphs_vn, symm_factors, n_loops, loops, nn_vertices);
 
       // Build the full set of subspace diagram pools to be passed to the integrator
       const diagram_pools_el diag_pools = {diags_v0, diags_vn};
+
+      std::cout << "done!" << std::endl;
 
       if (debug) {
         double n_diags = 5;
@@ -609,7 +651,7 @@ int main(int argc, char* argv[]) {
       k_path_file >> k_path_info;
       const auto path_nk_coords = k_path_info.at("k_path").get<std::vector<std::vector<int>>>();
       assert(cfg.mcmc.n_k_meas == static_cast<int>(path_nk_coords.size()));
-      
+
       // Build the external momentum-frequency measurement coordinates;
       // they are explicitly labeled, so we store them as a 1D array
       lat_mf_coords mf_meas_coords;
@@ -636,8 +678,8 @@ int main(int argc, char* argv[]) {
       assert(meas_sums.size() == cfg.diag.subspaces.size());
 
       // Finally, build the MCMC integrator object
-      rt_mcmc_cfg_2d_sq_hub_mf_meas mcmc_integrator(cfg, lat_g0_r_tau, diag_pools, mf_meas_coords,
-                                                 meas_sums);
+      mb_rt_mcmc_2d_sq_hub_mf_integrator mcmc_integrator(cfg, lat_g0_ab_r_tau, diag_pools,
+                                                         mf_meas_coords, meas_sums);
 
       // Now integrate! (optionally, saving thread subresults to hdf5 (if save_serial = true))
       mcmc_integrator.integrate(is_main_thread);
@@ -658,7 +700,7 @@ int main(int argc, char* argv[]) {
         std::ofstream outfile("config.json");
         outfile << std::setw(4) << updated_j_config << std::endl;
 
-        // Also update relevant entries in the YAML config file (by hand)
+        // Also update relevant entries in the YAML config file in place
         update_yaml_config(cfg);
 
         // Copy all config / JSON files to the run's save directory

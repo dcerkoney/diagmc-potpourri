@@ -4,9 +4,7 @@
 /* cmath constant definitions */
 #define _USE_MATH_DEFINES
 
-/* Typedefs */
-typedef std::bitset<16> IntBits;
-// Distribution / random number generator typedefs
+// Distribution/generator typedefs
 typedef boost::random::mt19937 Rand_engine;
 typedef boost::math::binomial Binom_dist;
 typedef boost::random::binomial_distribution<int> Binom_gen;
@@ -14,22 +12,25 @@ typedef boost::random::uniform_int_distribution<int> DUnif_gen;
 typedef boost::random::uniform_real_distribution<double> Unif_gen;
 typedef boost::random::discrete_distribution<int, double> Discr_gen;
 
-/* Global variables */
-// Build the random generator and distributions to be used in the Metropolis
-// step and configuration updates. We seed the random number
-// generator with the standard 64-bit Mersenne twister
-DUnif_gen coin_flip(0, 1);
-DUnif_gen roll_1d3(0, 2);
-DUnif_gen roll_1d4(0, 3);
-Unif_gen std_uniform(0.0, 1.0);
+// Some common distributions to be used in the Metropolis step and configuration updates.
+// Unif_gen std_uniform(0.0, 1.0);
+// DUnif_gen coin_flip(0, 1);
+// template <int n>
+// DUnif_gen roll_1dn(0, n - 1);
 
-// For the following distributions, the parameters are
-// determined at runtime (construction) or are variable
-DUnif_gen select_posn_component;
-DUnif_gen select_modifiable;
-Discr_gen posn_shift_gen;
-Binom_gen lat_binomial;
-Binom_dist lat_binomial_dist;
+// Repeat a string s n times
+std::string repeat(int n, std::string s) {
+  std::ostringstream os;
+  for (int i = 0; i < n; i++) {
+    os << s;
+  }
+  return os.str();
+}
+
+// Unicode divider lines
+std::string BULLET_PT = "\u2022";
+std::string BOLD_DIVIDER_SMALL = repeat(20, "\u2550");
+std::string DIVIDER_MEDIUM = repeat(51, "\u2500");
 
 class not_implemeted_error : public virtual std::logic_error {
  public:
@@ -119,6 +120,7 @@ constexpr bool are_close(double a, double b, double rtol = 1e-5, double atol = 1
 // Returns true if, in the current set of temporal constraints,
 // the time tau[i_vert] is to be pinned to tau[i_vert - 1].
 constexpr bool is_pinned(int i_constr, int i_vert, int n_legs, int i_first_bos, int diag_type) {
+  std::bitset<32> constraint_bitset(i_constr);
   // The two external legs are always unpinned,
   // except for static self energy diagrams
   if ((diag_type != 2) && (i_vert < n_legs)) {
@@ -128,9 +130,9 @@ constexpr bool is_pinned(int i_constr, int i_vert, int n_legs, int i_first_bos, 
   // boson lines break the alternating convention, and
   // hence are hard-coded as special cases here
   else if ((diag_type == 3) && (i_vert == 2)) {
-    return IntBits(i_constr).test(0);
+    return constraint_bitset.test(0);
   } else if ((diag_type == 3) && (i_vert == 3)) {
-    return IntBits(i_constr).test(1);
+    return constraint_bitset.test(1);
   }
   // Barring the above special cases, even vertices
   // are always unpinned (by convention)
@@ -141,39 +143,13 @@ constexpr bool is_pinned(int i_constr, int i_vert, int n_legs, int i_first_bos, 
   // in the current set of (temporal) constraints,
   // defined wlog by the integer i_constr
   else {
-    return IntBits(i_constr).test((i_vert - i_first_bos) / 2);
+    return constraint_bitset.test((i_vert - i_first_bos) / 2);
   }
 }
 
 bool string_contains(std::string string, std::string substring) {
   return (string.find(substring) != std::string::npos);
 }
-
-// Injects simple std::optional conversion functions into the nlohmann JSON library
-// (see: https://github.com/nlohmann/json/issues/1749#issuecomment-772996219).
-//
-// NOTE: This feature will be added to the library more robustly in a future release!
-//       (see: https://github.com/nlohmann/json/pull/2117,
-//             https://github.com/nlohmann/json/pull/2229)
-namespace nlohmann {
-
-template <class T>
-void to_json(nlohmann::json &j, const std::optional<T> &v) {
-  if (v.has_value())
-    j = *v;
-  else
-    j = nullptr;
-}
-
-template <class T>
-void from_json(const nlohmann::json &j, std::optional<T> &v) {
-  if (j.is_null())
-    v = std::nullopt;
-  else
-    v = j.get<T>();
-}
-
-}  // namespace nlohmann
 
 // Parameter configuration for MCMC on the square lattice Hubbard model
 struct hub_2dsqlat_mcmc_config {
@@ -215,6 +191,7 @@ struct hub_2dsqlat_mcmc_config {
     int n_site_pd;
     int n_site_irred;
     int num_elec;
+    std::optional<int> n_band;
     double lat_const;
     double lat_length;
     double vol_lat;
@@ -242,165 +219,278 @@ struct hub_2dsqlat_mcmc_config {
   } propr;
 };
 
+// // Multiband MCMC config refinement
+// struct mb_hub_2dsqlat_mcmc_config : hub_2dsqlat_mcmc_config {
+//   struct phys_config : hub_2dsqlat_mcmc_config::phys_config {
+//     int n_band;
+//   } phys;
+// };
+
 // Macros to define JSON (de)serialization methods to_json/from_json
 // for each mcmc config group (all children/parent structs) concisely
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(hub_2dsqlat_mcmc_config::diag_config, diag_type, subspaces, norm_space_weight,
-                                   order, n_legs, n_intn, n_times, n_posns)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(hub_2dsqlat_mcmc_config::diag_config, diag_type, subspaces,
+                                   norm_space_weight, order, n_legs, n_intn, n_times, n_posns)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(hub_2dsqlat_mcmc_config::mcmc_config, debug, verbose, normalize,
                                    save_serial, use_batch_U, n_warm, n_meas, n_skip, n_threads,
                                    n_nu_meas, n_k_meas, max_posn_shift, job_id, save_dir, save_name)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(hub_2dsqlat_mcmc_config::phys_config, dim, n_site, n_site_pd,
-                                   n_site_irred, num_elec, lat_const, lat_length, vol_lat,
+                                   n_site_irred, num_elec, n_band, lat_const, lat_length, vol_lat,
                                    target_mu, target_n0, mu_tilde, mu, n0, rs, ef, beta, t_hop,
                                    s_ferm, U_loc, U_batch)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(hub_2dsqlat_mcmc_config::propr_config, delta_tau, n_nu, n_tau,
                                    job_id, save_dir)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(hub_2dsqlat_mcmc_config, diag, mcmc, phys, propr)
 
-// Perform some simple checks on H5 data/pred types (to avoid unexpected casting)
-template <typename Tstd, typename Th5 = H5::PredType>
-void check_h5type(std::string name, H5::DataType datatype, Th5 predtype) {
-  if (datatype.getClass() != predtype.getClass()) {
-    throw std::runtime_error("Unable to read " + name + ", incorrect data-type");
-  }
-  if (datatype.getSize() != sizeof(Tstd)) {
-    throw std::runtime_error("Unable to read " + name + ", incorrect precision");
-  }
-  return;
-}
+namespace hdf5 {
 
-// Load an attribute from an HDF5 location and return data of corresponding predtype
-// NOTE: may throw an exception, which should be caught!
-template <typename Tattr, typename Tloc = H5::Group>
-Tattr load_h5_attribute(const std::string &attr_name, const Tloc &h5loc) {
-  Tattr attr_buffer;
-  if (!(std::is_base_of<H5::Group, Tloc>::value || std::is_same<H5::DataSet, Tloc>::value)) {
-    throw not_implemeted_error(
-        "Invalid H5 object supplied; should be an H5 file, group, or dataset.");
+// Build an HDF5 compound datatype for complex numbers out of complex structs
+typedef struct complex_t {
+  double re;
+  double im;
+  complex_t(double re_, double im_) : re(re_), im(im_) {}
+} complex_t;
+
+class ComplexType {
+ public:
+  const static H5::CompType &COMP_COMPLEX;
+  ComplexType() {
+    // Initialize HDF5 compound datatype for complex numbers
+    H5::CompType COMP_COMPLEX(sizeof(complex_t));
+    COMP_COMPLEX.insertMember("re", HOFFSET(complex_t, re), H5::PredType::NATIVE_DOUBLE);
+    COMP_COMPLEX.insertMember("im", HOFFSET(complex_t, im), H5::PredType::NATIVE_DOUBLE);
   }
-  if (std::is_same<Tattr, bool>::value) {
-    H5::Attribute attr = h5loc.openAttribute(attr_name);
-    H5::DataType attr_type = attr.getDataType();
-    check_h5type<bool>(attr_name, attr_type, H5::PredType::NATIVE_HBOOL);
-    attr.read(H5::PredType::NATIVE_HBOOL, &attr_buffer);
+};
+
+// Enum for implemented attribute kinds for reads/writes (we enforce strict size checks on each)
+enum class attr_kind {
+  boolean,
+  string,
+  integral,
+  real,
+  complex,
+};
+
+// Map to native sizes of each attribute kind
+std::unordered_map<attr_kind, std::size_t> attr_sizes = {
+    {attr_kind::boolean, sizeof(bool)},      {attr_kind::string, sizeof(const char *)},
+    {attr_kind::integral, sizeof(long)},     {attr_kind::real, sizeof(double)},
+    {attr_kind::complex, sizeof(complex_t)},
+};
+
+// Map to unique pointers of H5::DataType derivatives for each attribute kind
+std::unordered_map<attr_kind, std::unique_ptr<H5::DataType>> attr_type_ptrs = {
+    {attr_kind::boolean, std::make_unique<H5::PredType>(H5::PredType::NATIVE_HBOOL)},
+    {attr_kind::string, std::make_unique<H5::StrType>(0, H5T_VARIABLE)},
+    {attr_kind::integral, std::make_unique<H5::PredType>(H5::PredType::NATIVE_LONG)},
+    {attr_kind::real, std::make_unique<H5::PredType>(H5::PredType::NATIVE_DOUBLE)},
+    {attr_kind::complex, std::make_unique<H5::CompType>(ComplexType::COMP_COMPLEX)},
+};
+
+// Perform some simple checks on H5 data/pred types (to avoid unexpected casting)
+template <typename Tattr>
+void verify_attribute_type(std::string attr_name, H5::DataType data_type) {
+  // Use type traits to deduce the correct H5::PredType and native size
+  attr_kind kind;
+  if constexpr (std::is_same<Tattr, bool>::value) {
+    kind = attr_kind::boolean;
   } else if (std::is_same<Tattr, std::string>::value) {
-    H5::Attribute attr = h5loc.openAttribute(attr_name);
-    H5::StrType attr_type = attr.getStrType();
-    H5::StrType h5str_type(0, H5T_VARIABLE);
-    check_h5type<const char *, H5::StrType>(attr_name, attr_type, h5str_type);
-    attr.read(attr_type, attr_buffer);
+    kind = attr_kind::string;
   } else if (std::is_integral<Tattr>::value) {
-    H5::Attribute attr = h5loc.openAttribute(attr_name);
-    H5::DataType attr_type = attr.getDataType();
-    check_h5type<long>(attr_name, attr_type, H5::PredType::NATIVE_LONG);
-    attr.read(attr_type, &attr_buffer);
+    kind = attr_kind::integral;
   } else if (std::is_floating_point<Tattr>::value) {
-    H5::Attribute attr = h5loc.openAttribute(attr_name);
-    H5::DataType attr_type = attr.getDataType();
-    check_h5type<double>(attr_name, attr_type, H5::PredType::NATIVE_DOUBLE);
-    attr.read(attr_type, &attr_buffer);
+    kind = attr_kind::real;
+  } else if (std::is_same<Tattr, complex_t>::value) {
+    kind = attr_kind::complex;
   } else {
     throw not_implemeted_error("Attribute storage for H5 type of attr_buffer '" + attr_name +
                                "' not yet implemented.");
   }
-  return attr_buffer;
-}
-
-// Check if a specified attribute in an H5File is equal to an expected value
-template <typename T>
-bool h5_attribute_equals(const T &expected_value, const std::string &attr_name,
-                         const std::string &filename, const H5::H5File &h5file) {
-  const T param_found = load_h5_attribute<T, H5::H5File>(attr_name, h5file);
-  if (param_found != expected_value) {
-    return false;
+  std::size_t expected_size = attr_sizes.at(kind);
+  H5T_class_t expected_class = attr_type_ptrs.at(kind)->getClass();
+  // Test that the H5 data/pred type and size information agree
+  if (data_type.getClass() != expected_class) {
+    throw std::runtime_error("Unable to read " + attr_name + ", incorrect data-type");
   }
-  return true;
-}
-
-// Add a parameter to an HDF5 location as an attribute
-// NOTE: may throw an exception, which should be caught!
-template <typename Tattr, typename Tloc = H5::Group>
-void add_attribute_h5(Tattr param, std::string param_name, Tloc h5loc) {
-  if (!(std::is_base_of<H5::Group, Tloc>::value || std::is_same<H5::DataSet, Tloc>::value)) {
-    throw not_implemeted_error(
-        "Invalid H5 object supplied; should be an H5 file, group, or dataset.");
-  }
-  H5std_string attr_name(param_name);
-  H5::DataSpace attr_space(H5S_SCALAR);
-  if (std::is_same<Tattr, bool>::value) {
-    H5::Attribute attr = h5loc.createAttribute(attr_name, H5::PredType::NATIVE_HBOOL, attr_space);
-    attr.write(H5::PredType::NATIVE_HBOOL, &param);
-  } else if (std::is_same<Tattr, std::string>::value) {
-    H5::StrType h5str_type(H5::PredType::C_S1, H5T_VARIABLE);
-    H5::Attribute attr = h5loc.createAttribute(attr_name, h5str_type, attr_space);
-    attr.write(h5str_type, &param);
-  } else if (std::is_integral<Tattr>::value) {
-    H5::Attribute attr = h5loc.createAttribute(attr_name, H5::PredType::NATIVE_INT, attr_space);
-    attr.write(H5::PredType::NATIVE_INT, &param);
-  } else if (std::is_floating_point<Tattr>::value) {
-    H5::Attribute attr = h5loc.createAttribute(attr_name, H5::PredType::NATIVE_DOUBLE, attr_space);
-    attr.write(H5::PredType::NATIVE_DOUBLE, &param);
-  } else {
-    throw not_implemeted_error("Attribute storage for H5 type of param '" + param_name +
-                               "' not yet implemented.");
+  if (data_type.getSize() != expected_size) {
+    throw std::runtime_error("Unable to read " + attr_name + ", incorrect precision");
   }
   return;
 }
 
+// Read an attribute from an HDF5 location and return data of corresponding predtype
+// NOTE: may throw an exception, which should be caught!
+template <typename Tattr, typename Tloc = H5::Group>
+Tattr read_attribute(const std::string &attr_name, const Tloc &h5loc) {
+  if constexpr (!std::is_base_of<H5::Attribute, Tattr>::value) {
+    throw std::runtime_error("Tattr is not an H5 attribute.");
+  }
+  if constexpr (!std::is_base_of<H5::Group, Tloc>::value &&
+                !std::is_same<H5::DataSet, Tloc>::value) {
+    throw std::runtime_error("Tloc is not a valid H5 file, group, or dataset.");
+  }
+  H5::Attribute attr = h5loc.openAttribute(attr_name);
+  H5::DataType attr_type = attr.getDataType();
+  // Verify that this attribute is loadable (correct H5::DataType and type size)
+  verify_attribute_type<Tattr>(attr_name, attr_type);
+  // Read the H5 attribute into the buffer
+  Tattr attr_buffer;
+  attr.read(attr_type, &attr_buffer);
+  return attr_buffer;
+}
+
+// Write a parameter to an HDF5 location as an attribute
+// NOTE: may throw an exception, which should be caught!
+template <typename Tattr, typename Tloc = H5::Group>
+void write_attribute(std::string param_name, Tattr param, Tloc h5loc) {
+  if constexpr (!std::is_base_of<H5::Attribute, Tattr>::value) {
+    throw std::runtime_error("Tattr is not an H5 attribute.");
+  }
+  if constexpr (!std::is_base_of<H5::Group, Tloc>::value &&
+                !std::is_same<H5::DataSet, Tloc>::value) {
+    throw std::runtime_error("Tloc is not a valid H5 file, group, or dataset.");
+  }
+  // Use type traits to deduce the correct H5::PredType and native size
+  attr_kind kind;
+  if constexpr (std::is_same<Tattr, bool>::value) {
+    kind = attr_kind::boolean;
+  } else if (std::is_same<Tattr, std::string>::value) {
+    kind = attr_kind::string;
+  } else if (std::is_integral<Tattr>::value) {
+    kind = attr_kind::integral;
+  } else if (std::is_floating_point<Tattr>::value) {
+    kind = attr_kind::real;
+  } else if (std::is_same<Tattr, complex_t>::value) {
+    kind = attr_kind::complex;
+  } else {
+    throw not_implemeted_error("Attribute storage for H5 type of param '" + param_name +
+                               "' not yet implemented.");
+  }
+  H5std_string attr_name(param_name);
+  H5::DataSpace attr_space(H5S_SCALAR);
+  H5::DataType attr_type = *attr_type_ptrs.at(kind);
+  H5::Attribute attr = h5loc.createAttribute(attr_name, attr_type, attr_space);
+  attr.write(attr_type, &param);
+  return;
+}
+
+// Check if a specified attribute in an H5File is equal to an expected value
+template <typename T>
+bool attribute_equals(const T &expected_value, const std::string &attr_name,
+                      const std::string &filename, const H5::H5File &h5file) {
+  const T &param_found = read_attribute<T, H5::H5File>(attr_name, h5file);
+  return (param_found == expected_value);
+}
+
+}  // end namespace hdf5
+
 // Represent a 2D lattice of arbitrary objects using
 // a variable-size contiguous (1D) std::vector
 template <typename T>
-class lattice_2d {
+class vector_2d {
  public:
   // int N_i;
   int N_j;
   std::vector<T> data;
-  // Constructors
-  lattice_2d() = default;
-  lattice_2d(int N_i_, int N_j_, const std::vector<T> &data_)
-      : /* N_i(N_i_), */ N_j(N_j_), data(data_) {}
+  vector_2d() = default;
+  vector_2d(int N_j_, const std::vector<T> &data_) : N_j(N_j_), data(data_) {}
   // Index the 2D lattice
   constexpr const T &operator()(int i, int j) const { return data[j + N_j * i]; }
+  constexpr const T &operator()(const std::vector<int> &n) const { return data[n[1] + N_j * n[0]]; }
 };
 
 // Represent a 3D lattice of arbitrary objects using
 // a variable-size contiguous (1D) std::vector
 template <typename T>
-class lattice_3d {
+class vector_3d {
  public:
   // int N_i;
   int N_j;
   int N_k;
   std::vector<T> data;
-  // Constructors
-  lattice_3d() = default;
-  lattice_3d(int N_i_, int N_j_, int N_k_, const std::vector<T> &data_)
-      : /* N_i(N_i_), */ N_j(N_j_), N_k(N_k_), data(data_) {}
+  vector_3d() = default;
+  vector_3d(int N_j_, int N_k_, const std::vector<T> &data_) : N_j(N_j_), N_k(N_k_), data(data_) {}
   // Index the 3D lattice
   constexpr const T &operator()(int i, int j, int k) const { return data[k + N_k * (j + N_j * i)]; }
+  constexpr const T &operator()(const std::vector<int> &n) const {
+    return data[n[2] + N_k * (n[1] + N_j * n[0])];
+  }
 };
 
-// 2D mesh class (contains the function data on the mesh, and the grids for each variable)
-struct fmesh_2d {
-  // Fields
-  std::vector<std::vector<double>> data;
+template <typename T, int N>
+class vector_nd {
+ public:
+  std::array<int, N> n_sites;
+  std::vector<T> data;
+  vector_nd() = default;
+  vector_nd(const std::array<int, N> &n_sites_, const std::vector<T> &data_)
+      : n_sites(n_sites_), data(data_) {}
+  // Index the n-dimensional lattice (assumes len(nd_idx) == len(n_sites) = n)
+  constexpr const T &operator()(const std::array<int, N> &nd_idx) const {
+    int index = nd_idx[0];
+    for (std::size_t i = 1; i < N; ++i) {
+      index = nd_idx[i] + index * n_sites[i];
+    }
+    return data[index];
+  }
+};
+
+// 1D interpolant class (used, e.g. to define continuous-time objects from tau grid data)
+class interp_1d {
+ public:
+  std::vector<double> f_data;
   std::vector<double> x_grid;
-  std::vector<double> y_grid;
-  // Constructor
-  fmesh_2d(const std::vector<std::vector<double>> &data_, const std::vector<double> &x_grid_,
-           const std::vector<double> &y_grid_)
-      : data(data_), x_grid(x_grid_), y_grid(y_grid_) {}
+  interp_1d() = default;
+  interp_1d(const std::vector<double> &f_data_, const std::vector<double> &x_grid_)
+      : f_data(f_data_), x_grid(x_grid_) {}
+  // Use bilinear interpolation to evaluate the interpoland at any point
+  double eval(double point) const { return linear_interp(point); }
+  // Linear interpolation function; approximates f(x) from mesh data.
+  // NOTE: This algorithm applies regardless of mesh uniformity!
+  double linear_interp(double x) const {
+    // If the values are outside the range of the x and y grids,
+    // return 0 (i.e., use extrapolation with a fill value of zero)
+    if ((x < x_grid.front()) || (x > x_grid.back())) {
+      return 0;
+    }
+    // Identify the nearest mesh neighbors of the evaluation point (x, y)
+    std::vector<double>::const_iterator iter_x2;
+    iter_x2 = std::lower_bound(x_grid.begin(), x_grid.end(), x);
+    // Special case: if the evaluation point contains x_grid[-1],
+    // shift the bounding points left by 1 manually (std::next not
+    // applicable if lower bound gives last point in grid)
+    if (iter_x2 == x_grid.begin()) {
+      iter_x2 = std::next(iter_x2);
+    }
+    // Now, we can reliably get the last two corners
+    // of the bounding box, including edge cases
+    auto iter_x1 = std::prev(iter_x2);
+    // Get the actual indices associated with each iterator
+    int idx_x1 = iter_x1 - x_grid.begin();
+    int idx_x2 = iter_x2 - x_grid.begin();
+    // Precompute the grid points x_1 and x_2
+    double x_1 = x_grid[idx_x1];
+    double x_2 = x_grid[idx_x2];
+    // Precompute the function values at the grid points f_1 and f_2
+    double f_1 = f_data[idx_x1];
+    double f_2 = f_data[idx_x2];
+    // Use bilinear interpolation to extrapolate
+    // the function value at the evaluation point
+    return (f_1 * (x_2 - x) + f_2 * (x - x_1)) / (x_2 - x_1);
+  }
 };
 
 // 2D interpolant class (used, e.g., to define spatially continuous objects from r-grid data)
 class interp_2d {
  public:
-  // Fields
-  fmesh_2d f_mesh;
-  // Constructor
-  interp_2d(const fmesh_2d &f_mesh_) : f_mesh(f_mesh_) {}
+  std::vector<std::vector<double>> f_data;
+  const std::vector<double> x_grid;
+  const std::vector<double> y_grid;
+  interp_2d() = default;
+  interp_2d(const std::vector<std::vector<double>> &f_data_, const std::vector<double> &x_grid_,
+            const std::vector<double> &y_grid_)
+      : f_data(f_data_), x_grid(x_grid_), y_grid(y_grid_) {}
   // Use bilinear interpolation to evaluate the interpoland at any point
-  double eval(const std::vector<double> &point) const { return bilinear_interp(f_mesh, point); }
+  double eval(const std::vector<double> &point) const { return bilinear_interp(point); }
   // Evaluates the antiperiodic extension of the interp_2d object in
   // a single periodic variable using information on the principle interval.
   // The periodic variable in the evaluation point is specified by ap_idx.
@@ -415,58 +505,58 @@ class interp_2d {
       sign *= -1;
       point_shifted[ap_idx] -= period;
     }
-    return sign * bilinear_interp(f_mesh, point_shifted);
+    return sign * bilinear_interp(point_shifted);
   }
 
  private:
   // Bilinear interpolation function
-  double bilinear_interp(const fmesh_2d &f_mesh, const std::vector<double> &point) const {
+  double bilinear_interp(const std::vector<double> &point) const {
     // Define the x and y values at which to evaluate the function
     double x = point[0], y = point[1];
     // If the values are outside the range of the x and y grids,
     // return 0 (i.e., use extrapolation with a fill value of zero)
-    if ((x < f_mesh.x_grid.front()) || (x > f_mesh.x_grid.back())) {
+    if ((x < x_grid.front()) || (x > x_grid.back())) {
       return 0;
     }
-    if ((y < f_mesh.y_grid.front()) || (y > f_mesh.y_grid.back())) {
+    if ((y < y_grid.front()) || (y > y_grid.back())) {
       return 0;
     }
     // Identify the nearest mesh neighbors of the evaluation point (x, y)
     std::vector<double>::const_iterator iter_x2;
     std::vector<double>::const_iterator iter_y2;
-    iter_x2 = std::lower_bound(f_mesh.x_grid.begin(), f_mesh.x_grid.end(), x);
-    iter_y2 = std::lower_bound(f_mesh.y_grid.begin(), f_mesh.y_grid.end(), y);
-    // Special case: if the evaluation point contains f_mesh.x_grid[-1]
-    //  or f_mesh.y_grid[-1], shift the bounding square left by 1 manually
+    iter_x2 = std::lower_bound(x_grid.begin(), x_grid.end(), x);
+    iter_y2 = std::lower_bound(y_grid.begin(), y_grid.end(), y);
+    // Special case: if the evaluation point contains x_grid[-1]
+    //  or y_grid[-1], shift the bounding square left by 1 manually
     // (std::next not applicable if lower bound gives last point in grid)
-    if (iter_x2 == f_mesh.x_grid.begin()) {
+    if (iter_x2 == x_grid.begin()) {
       iter_x2 = std::next(iter_x2);
     }
-    if (iter_y2 == f_mesh.y_grid.begin()) {
+    if (iter_y2 == y_grid.begin()) {
       iter_y2 = std::next(iter_y2);
     }
     // Now, we can reliably get the last two corners
     // of the bounding box, including edge cases
     // std::vector<double>::const_iterator iter_x2 = std::next(iter_x1) -
-    // f_mesh.x_grid.begin(); std::vector<doublidx_x2e>::const_iterator iter_y2
-    // = std::next(iter_y1) - f_mesh.y_grid.begin();
+    // x_grid.begin(); std::vector<doublidx_x2e>::const_iterator iter_y2
+    // = std::next(iter_y1) - y_grid.begin();
     auto iter_x1 = std::prev(iter_x2);
     auto iter_y1 = std::prev(iter_y2);
     // Get the actual indices associated with each iterator
-    int idx_x1 = iter_x1 - f_mesh.x_grid.begin();
-    int idx_x2 = iter_x2 - f_mesh.x_grid.begin();
-    int idx_y1 = iter_y1 - f_mesh.y_grid.begin();
-    int idx_y2 = iter_y2 - f_mesh.y_grid.begin();
+    int idx_x1 = iter_x1 - x_grid.begin();
+    int idx_x2 = iter_x2 - x_grid.begin();
+    int idx_y1 = iter_y1 - y_grid.begin();
+    int idx_y2 = iter_y2 - y_grid.begin();
     // Precompute the grid points x_1, x_2, y_1, y_2
-    double x_1 = f_mesh.x_grid[idx_x1];
-    double x_2 = f_mesh.x_grid[idx_x2];
-    double y_1 = f_mesh.y_grid[idx_y1];
-    double y_2 = f_mesh.y_grid[idx_y2];
+    double x_1 = x_grid[idx_x1];
+    double x_2 = x_grid[idx_x2];
+    double y_1 = y_grid[idx_y1];
+    double y_2 = y_grid[idx_y2];
     // Precompute the function values at the grid points f_11, f_12, f_21, f_22
-    double f_11 = f_mesh.data[idx_x1][idx_y1];
-    double f_12 = f_mesh.data[idx_x1][idx_y2];
-    double f_21 = f_mesh.data[idx_x2][idx_y1];
-    double f_22 = f_mesh.data[idx_x2][idx_y2];
+    double f_11 = f_data[idx_x1][idx_y1];
+    double f_12 = f_data[idx_x1][idx_y2];
+    double f_21 = f_data[idx_x2][idx_y1];
+    double f_22 = f_data[idx_x2][idx_y2];
     // Use bilinear interpolation to extrapolate
     // the function value at the evaluation point
     return (f_11 * (x_2 - x) * (y_2 - y) + f_12 * (x_2 - x) * (y - y_1) +
@@ -475,70 +565,13 @@ class interp_2d {
   }
 };
 
-// 1D mesh class (contains the 1D grid and function data)
-struct fmesh_1d {
-  // Fields
-  std::vector<double> data;
-  std::vector<double> x_grid;
-  // Constructor
-  fmesh_1d(const std::vector<double> &data_, const std::vector<double> &x_grid_)
-      : data(data_), x_grid(x_grid_) {}
-};
-
-// 1D interpolant class (used, e.g. to define
-// continuous-time objects from tau grid data)
-class interp_1d {
- public:
-  // Fields
-  fmesh_1d f_mesh;
-  // Constructor
-  interp_1d(const fmesh_1d &f_mesh_) : f_mesh(f_mesh_) {}
-  // An explicit default constructor
-  interp_1d() : f_mesh({}, {}) {}
-  // Use bilinear interpolation to evaluate the interpoland at any point
-  double eval(double point) const { return linear_interp(f_mesh, point); }
-  // Linear interpolation function; approximates f(x) from mesh data.
-  // NOTE: This algorithm applies regardless of mesh uniformity!
-  double linear_interp(const fmesh_1d &f_mesh, double x) const {
-    // If the values are outside the range of the x and y grids,
-    // return 0 (i.e., use extrapolation with a fill value of zero)
-    if ((x < f_mesh.x_grid.front()) || (x > f_mesh.x_grid.back())) {
-      return 0;
-    }
-    // Identify the nearest mesh neighbors of the evaluation point (x, y)
-    std::vector<double>::const_iterator iter_x2;
-    iter_x2 = std::lower_bound(f_mesh.x_grid.begin(), f_mesh.x_grid.end(), x);
-    // Special case: if the evaluation point contains f_mesh.x_grid[-1],
-    // shift the bounding points left by 1 manually (std::next not
-    // applicable if lower bound gives last point in grid)
-    if (iter_x2 == f_mesh.x_grid.begin()) {
-      iter_x2 = std::next(iter_x2);
-    }
-    // Now, we can reliably get the last two corners
-    // of the bounding box, including edge cases
-    auto iter_x1 = std::prev(iter_x2);
-    // Get the actual indices associated with each iterator
-    int idx_x1 = iter_x1 - f_mesh.x_grid.begin();
-    int idx_x2 = iter_x2 - f_mesh.x_grid.begin();
-    // Precompute the grid points x_1 and x_2
-    double x_1 = f_mesh.x_grid[idx_x1];
-    double x_2 = f_mesh.x_grid[idx_x2];
-    // Precompute the function values at the grid points f_1 and f_2
-    double f_1 = f_mesh.data[idx_x1];
-    double f_2 = f_mesh.data[idx_x2];
-    // Use bilinear interpolation to extrapolate
-    // the function value at the evaluation point
-    return (f_1 * (x_2 - x) + f_2 * (x - x_1)) / (x_2 - x_1);
-  }
-};
-
 // For a bosonic Green's function interpolant (periodic), the period is beta
 class b_interp_1d : public interp_1d {
  public:
-  // Fields
   double beta;
-  // Constructor
-  b_interp_1d(const fmesh_1d &f_mesh_, double beta_) : interp_1d(f_mesh_), beta(beta_) {}
+  b_interp_1d() = default;
+  b_interp_1d(const std::vector<double> &f_data_, const std::vector<double> &x_grid_, double beta_)
+      : interp_1d(f_data_, x_grid_), beta(beta_) {}
   // Evaluates the periodic extension of the bosonic Green's function
   // object using information on the principle interval [0, beta).
   double p_eval(double point) const { return eval(pymod<double>(point, beta)); }
@@ -547,10 +580,10 @@ class b_interp_1d : public interp_1d {
 // For a fermionic Green's function interpolant (antiperiodic), the period is beta
 class f_interp_1d : public interp_1d {
  public:
-  // Fields
   double beta;
-  // Constructor
-  f_interp_1d(const fmesh_1d &f_mesh_, double beta_) : interp_1d(f_mesh_), beta(beta_) {}
+  f_interp_1d() = default;
+  f_interp_1d(const std::vector<double> &f_data_, const std::vector<double> &x_grid_, double beta_)
+      : interp_1d(f_data_, x_grid_), beta(beta_) {}
   // Evaluates the antiperiodic extension of the fermionic Green's function
   // object using information on the principle interval [0, beta).
   double ap_eval(double point) const {
@@ -568,13 +601,29 @@ class f_interp_1d : public interp_1d {
   }
 };
 
-// Continuous-time bosonic lattice Green's function types
-typedef lattice_2d<b_interp_1d> lattice_2d_b_interp;
-typedef lattice_3d<b_interp_1d> lattice_3d_b_interp;
+// Continuous-time bosonic/fermionic lattice Green's function types
+typedef vector_2d<b_interp_1d> lattice_2d_b_interp;
+typedef vector_2d<f_interp_1d> lattice_2d_f_interp;
+typedef vector_3d<b_interp_1d> lattice_3d_b_interp;
+typedef vector_3d<f_interp_1d> lattice_3d_f_interp;
 
-// Continuous-time fermionic lattice Green's function types
-typedef lattice_2d<f_interp_1d> lattice_2d_f_interp;
-typedef lattice_3d<f_interp_1d> lattice_3d_f_interp;
+// Multiband, continuous-time bosonic/fermionic lattice Green's
+// function types (spatial dimensions plus two band indices)
+typedef vector_nd<b_interp_1d, 4> mb_lattice_2d_b_interp;
+// typedef vector_nd<f_interp_1d, 4> mb_lattice_2d_f_interp;
+using mb_lattice_2d_f_interp = vector_nd<f_interp_1d, 4>;
+typedef vector_nd<b_interp_1d, 5> mb_lattice_3d_b_interp;
+typedef vector_nd<f_interp_1d, 5> mb_lattice_3d_f_interp;
+
+// Product basis, continuous-time bosonic lattice Green's function
+// types (spatial dimensions plus two product indices)
+typedef vector_nd<b_interp_1d, 4> pb_lattice_2d_b_interp;
+typedef vector_nd<b_interp_1d, 5> pb_lattice_3d_b_interp;
+
+// template <int dim>
+// using lattice_b_interp = std::conditional<dim == 2, lattice_2d_b_interp, lattice_3d_b_interp>;
+// template <int dim>
+// using lattice_f_interp = std::conditional<dim == 2, lattice_2d_f_interp, lattice_3d_f_interp>;
 
 // Defines the (split bosonic/fermionic) edge list representation of a set of graphs; since
 // (wlog) the bosonic edges are assumed equal for all graphs, we only define the list once
@@ -585,10 +634,8 @@ typedef std::vector<edge_list> edge_lists;
 // A pool of graphs in the edge list representation
 // (assumed to share a common bosonic edge basis)
 struct graphs_el {
-  // Fields
   edge_list b_edge_list;
   edge_lists f_edge_lists;
-  // Constructors
   graphs_el() = default;
   graphs_el(const edge_list &b_edge_list_, const edge_lists &f_edge_lists_)
       : b_edge_list(b_edge_list_), f_edge_lists(f_edge_lists_) {}
@@ -597,12 +644,11 @@ struct graphs_el {
 // A pool of 3-point vertices each consisting of one boson
 // and two fermion edges (directed in/out of the base vertex)
 struct vertices_3pt_el {
-  // Fields
   edge_list b_edge_list;
   edge_lists f_edge_in_lists;
   edge_lists f_edge_out_lists;
-  // Constructors
-  vertices_3pt_el() : b_edge_list({}), f_edge_in_lists({}), f_edge_out_lists({}) {}
+  vertices_3pt_el() = default;
+  // vertices_3pt_el() : b_edge_list({}), f_edge_in_lists({}), f_edge_out_lists({}) {}
   // In the (spinless) Hubbard case, we can ignore the bosonic edges,
   // which just give an overall multiplicative factor for each diagram
   vertices_3pt_el(edge_lists f_edge_lists_)
@@ -635,26 +681,37 @@ struct vertices_3pt_el {
 // diagram info and current/proposal spacetime coordinates)
 // using (split)  el graph representation
 struct diagram_pool_el {
-  // Fields
   double s_ferm;
   int order;
-  int n_verts;
-  int n_diags;
   int n_legs;
   int n_intn;
   int n_times;
   int n_posns;
-  int n_spins_max;
+  int n_verts;
+  int n_diags;
+  int n_spins_max = 0;
+  std::vector<int> symm_factors;
+  std::vector<int> n_loops = {0};
+  std::vector<std::vector<std::vector<int>>> loops;
   graphs_el graphs;
   vertices_3pt_el nn_vertices;
-  std::vector<int> symm_factors;
-  std::vector<int> n_loops;
-  std::vector<std::vector<std::vector<int>>> loops;
-  // Constructors
-  diagram_pool_el();
-  // Constructor for the case of spinless (Hubbard, G0W0) integrators
+  // An explicit default constructor (a 0-dimensional diagram pool)
+  diagram_pool_el()
+      : s_ferm(0.5),
+        order(0),
+        n_legs(0),
+        n_intn(0),
+        n_times(0),
+        n_posns(0),
+        n_verts(0),
+        n_diags(1),
+        symm_factors({1}),
+        loops({}),
+        graphs(),
+        nn_vertices() {}
+  // Diagram pool constructor for spinless (Hubbard, G0W0) integrators
   diagram_pool_el(const hub_2dsqlat_mcmc_config &config_, const graphs_el &graphs_,
-                  const std::vector<int> &symm_factors_, const std::vector<int> &n_loops_,
+                  const std::vector<int> &symm_factors_,
                   const vertices_3pt_el &nn_vertices_ = vertices_3pt_el())
       : s_ferm(config_.phys.s_ferm),
         order(config_.diag.order),
@@ -662,45 +719,44 @@ struct diagram_pool_el {
         n_intn(config_.diag.n_intn),
         n_times(config_.diag.n_times),
         n_posns(config_.diag.n_posns),
+        n_verts(2 * config_.diag.order),
+        n_diags(graphs_.f_edge_lists.size()),
+        symm_factors(symm_factors_),
         graphs(graphs_),
+        nn_vertices(nn_vertices_) {}
+  // Diagram pool constructor for spinful or multiband integrators (require loops)
+  diagram_pool_el(const hub_2dsqlat_mcmc_config &config_, const graphs_el &graphs_,
+                  const std::vector<int> &symm_factors_, const std::vector<int> &n_loops_,
+                  const std::vector<std::vector<std::vector<int>>> loops_,
+                  const vertices_3pt_el &nn_vertices_ = vertices_3pt_el())
+      : s_ferm(config_.phys.s_ferm),
+        order(config_.diag.order),
+        n_legs(config_.diag.n_legs),
+        n_intn(config_.diag.n_intn),
+        n_times(config_.diag.n_times),
+        n_posns(config_.diag.n_posns),
+        n_verts(2 * config_.diag.order),
+        n_diags(graphs_.f_edge_lists.size()),
+        n_spins_max(*max_element(std::begin(n_loops_), std::end(n_loops_))),
         symm_factors(symm_factors_),
         n_loops(n_loops_),
-        nn_vertices(nn_vertices_),
-        n_verts(2 * config_.diag.order),
-        n_diags(graphs_.f_edge_lists.size()) {}
+        loops(loops_),
+        graphs(graphs_),
+        nn_vertices(nn_vertices_) {}
 };
 typedef std::vector<diagram_pool_el> diagram_pools_el;
 
-// An explicit default constructor (a 0-dimensional diagram pool)
-diagram_pool_el::diagram_pool_el()
-    : s_ferm(0.5),
-      order(0),
-      n_legs(0),
-      n_intn(0),
-      n_times(0),
-      n_posns(0),
-      graphs(),
-      nn_vertices(),
-      n_verts(0),
-      n_diags(1),
-      n_spins_max(0),
-      symm_factors({1}),
-      n_loops({0}),
-      loops({}) {}
-
-// Class representing a space - (imaginary) time coordinate
-class st_coord {
+// Class representing a continuous (Euclidean) spacetime coordinate
+class cont_st_coord {
  public:
-  // Fields
   int id;
   double itime;
   std::vector<double> posn;
-  // Constructor
-  st_coord(int id_, double itime_, std::vector<double> posn_)
+  cont_st_coord(int id_, double itime_, std::vector<double> posn_)
       : id(id_), itime(itime_), posn(posn_) {}
   // Overload - operator for calculation of spacetime 'distance' (positional
   // distance, temporal difference)
-  std::vector<double> operator-(const st_coord &start) const {
+  std::vector<double> operator-(const cont_st_coord &start) const {
     std::vector<double> st_dist;
     // Spatial distance
     std::vector<double> del_posn;
@@ -713,7 +769,7 @@ class st_coord {
     return st_dist;
   }
 };
-typedef std::vector<st_coord> st_coords;
+typedef std::vector<cont_st_coord> cont_st_coords;
 
 // Returns the position index vector n'_r equivalent to n_r in the first orthant
 // of the lattice (relative to the center), so that sqrt(n'_r * n'_r) defines
@@ -748,40 +804,45 @@ const std::vector<int> first_brillouin_zone(const std::vector<int> &nk, int n_si
 // Class representing a hypercubic lattice space - (imaginary) time coordinate;
 // position vectors are given in units of the lattice constant, i.e., they index
 // the lattice, and the d-toroidal lattice metric is used for spatial distances
-class hc_lat_st_coord {
+class lat_st_coord {
  public:
-  // Fields
   bool debug;
   int id;
-  double itime;
-  std::vector<int> posn;
-  // Lattice variables
   int dim;
   int n_site_pd;
-  int constr_posn_shift = -2;
   double beta;
-  double delta_tau;
   double lat_const;
-  // Use a custom default constructor
-  hc_lat_st_coord();
-  // COM constructor declaration (coordinates at the origin and user-supplied
-  // lattice parameters)
-  hc_lat_st_coord(int dim_, int n_site_pd_, double beta_, double delta_tau_,
-                  double lat_const_ = 1.0, bool debug_ = false);
-  // Constructor
-  hc_lat_st_coord(int id_, double itime_, std::vector<int> posn_, int n_site_pd_, double beta_,
-                  double delta_tau_, double lat_const_ = 1.0, bool debug_ = false)
-      : id(id_),
-        itime(itime_),
-        posn(posn_),
+  double delta_tau;
+  double itime;
+  std::vector<int> posn;
+  // Custom default constructor definition (so that we can resize a vector of coordinates)
+  lat_st_coord() : id(0), lat_const(0.0), itime(0) {}
+  // COM constructor definition (coordinates at the origin / user-supplied lattice parameters)
+  lat_st_coord(int dim_, int n_site_pd_, double beta_, double delta_tau_, double lat_const_ = 1.0,
+               bool debug_ = false)
+      : debug(debug_),
+        id(0),
+        dim(dim_),
         n_site_pd(n_site_pd_),
         beta(beta_),
-        delta_tau(delta_tau_),
         lat_const(lat_const_),
-        debug(debug_),
-        dim(posn_.size()) {}
+        delta_tau(delta_tau_),
+        itime(0),
+        posn(std::vector<int>(dim_, 0)) {}
+  // Standard constructor
+  lat_st_coord(int id_, double itime_, std::vector<int> posn_, int n_site_pd_, double beta_,
+               double delta_tau_, double lat_const_ = 1.0, bool debug_ = false)
+      : debug(debug_),
+        id(id_),
+        dim(posn_.size()),
+        n_site_pd(n_site_pd_),
+        beta(beta_),
+        lat_const(lat_const_),
+        delta_tau(delta_tau_),
+        itime(itime_),
+        posn(posn_) {}
   // Overload - operator for calculation of lattice spacetime differences (v_end - v_start)
-  std::tuple<std::vector<int>, double> operator-(const hc_lat_st_coord &v_start) const {
+  std::tuple<std::vector<int>, double> operator-(const lat_st_coord &v_start) const {
     // Spatial distance in units of the lattice constant (nvec = rvec / a)
     std::vector<int> del_nr;
     // First fill del_nr with (v_end - v_start), then apply the lattice metric
@@ -805,58 +866,68 @@ class hc_lat_st_coord {
              bool botrule = true) const {
     std::ostream out(buffer);
     if (toprule) {
-      out << "\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
-             "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
-             "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
-             "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
-          << std::endl;
+      out << "\n" << DIVIDER_MEDIUM << std::endl;
     }
-    out << " Lattice spacetime coordinate (ID #" << id << ")" << std::endl;
-    if (constr_posn_shift != -2) {
-      out << " \u2022 Constrained position shift (Delta): " << constr_posn_shift << std::endl;
-    }
-    out << " \u2022 Position indices: (";
-    for (int i = 0; i < posn.size(); ++i) {
+    out << " Lattice spacetime coordinate (ID #" << id << ")"
+        << "\n " << BULLET_PT << " Position indices: (";
+    for (std::size_t i = 0; i < posn.size(); ++i) {
       if (i == posn.size() - 1) {
         out << posn[i] << ")" << std::endl;
       } else {
         out << posn[i] << ", ";
       }
     }
-    out << " \u2022 Rescaled imaginary time (tau / beta): " << (itime / beta) << std::endl;
+    out << " " << BULLET_PT << " Rescaled imaginary time (tau / beta): " << (itime / beta)
+        << std::endl;
     if (botrule) {
-      out << "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
-             "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
-             "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
-             "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
-          << std::endl;
+      out << DIVIDER_MEDIUM << std::endl;
     }
   }
 };
-typedef std::vector<hc_lat_st_coord> hc_lat_st_coords;
+typedef std::vector<lat_st_coord> lat_st_coords;
 
-// Custom default constructor definition (so that we can resize a vector of coordinates)
-hc_lat_st_coord::hc_lat_st_coord() : id(0), itime(0), lat_const(0.0) {}
+// Multiband, product basis interaction refinement of a spacetime coordinate
+// (carries two band indices and one product basis index)
+class mb_pb_lat_st_vertex : public lat_st_coord {
+ public:
+  int pb_idx;   // Product basis index
+  int band_in;  // Incoming/outgoing fermionic band indices
+  int band_out;
+  mb_pb_lat_st_vertex() = default;
+  // mb_pb_lat_st_vertex(int band_in_, int band_out_, int pb_idx_, int dim_, int n_site_pd_,
+  //                     double beta_, double delta_tau_, double lat_const_ = 1.0, bool debug_ =
+  //                     false)
+  //     : pb_idx(pb_idx_), band_in(band_in_), band_out(band_out_) {}
+  mb_pb_lat_st_vertex(int pb_idx_, int band_in_, int band_out_, int id_, double itime_,
+                      std::vector<int> posn_, int n_site_pd_, double beta_, double delta_tau_,
+                      double lat_const_ = 1.0, bool debug_ = false)
+      : lat_st_coord(id_, itime_, posn_, n_site_pd_, beta_, delta_tau_, lat_const_, debug_),
+        pb_idx(pb_idx_),
+        band_in(band_in_),
+        band_out(band_out_) {}
+};
+typedef std::vector<mb_pb_lat_st_vertex> mb_pb_lat_st_vertices;
 
-// COM constructor definition (coordinates at the origin and user-supplied
-// lattice parameters)
-hc_lat_st_coord::hc_lat_st_coord(int dim_, int n_site_pd_, double beta_, double delta_tau_,
-                                 double lat_const_ /* = 1.0 */, bool debug_ /* = false */)
-    : id(0),
-      itime(0),
-      posn(std::vector<int>(dim_, 0)),
-      n_site_pd(n_site_pd_),
-      beta(beta_),
-      delta_tau(delta_tau_),
-      lat_const(lat_const_),
-      debug(debug_) {}
-
-std::tuple<std::vector<int>, double> test_lat_st_diff(hc_lat_st_coord v1, hc_lat_st_coord v2) {
-  return v1 - v2;
-}
+// Multiband refinement of a spacetime coordinate (carries two band indices)
+class mb_lat_st_vertex : public lat_st_coord {
+ public:
+  int band_in;  // Incoming/outgoing fermionic band indices
+  int band_out;
+  mb_lat_st_vertex() = default;
+  // mb_lat_st_vertex(int band_in_, int band_out_, int dim_, int n_site_pd_, double beta_,
+  //                 double delta_tau_, double lat_const_ = 1.0, bool debug_ = false)
+  //     : band_in(band_in_), band_out(band_out_) {}
+  mb_lat_st_vertex(int band_in_, int band_out_, int id_, double itime_, std::vector<int> posn_,
+                   int n_site_pd_, double beta_, double delta_tau_, double lat_const_ = 1.0,
+                   bool debug_ = false)
+      : lat_st_coord(id_, itime_, posn_, n_site_pd_, beta_, delta_tau_, lat_const_, debug_),
+        band_in(band_in_),
+        band_out(band_out_) {}
+};
+typedef std::vector<mb_lat_st_vertex> mb_lat_st_vertices;
 
 // Calculate the lattice spacetime difference v1.posn - v2.posn (modulo lattice BC)
-std::vector<int> lat_diff(hc_lat_st_coord v1, hc_lat_st_coord v2) {
+std::vector<int> lat_diff(lat_st_coord v1, lat_st_coord v2) {
   // Spatial distance in units of the lattice constant (nvec = rvec / a)
   std::vector<int> del_nr;
   // First, fill del_nr with (posn_2 - posn_1)
@@ -869,7 +940,7 @@ std::vector<int> lat_diff(hc_lat_st_coord v1, hc_lat_st_coord v2) {
 
 // Calculate the spatial distance |r1 - r2| using the appropriate lattice metric,
 // in units of the lattice constant (rescale by v1.lat_const for absolute distance)
-double lat_dist(hc_lat_st_coord v1, hc_lat_st_coord v2) {
+double lat_dist(lat_st_coord v1, lat_st_coord v2) {
   // First, get the spacetime difference vector (v1 - v2) in the first orthant
   const std::vector<int> &del_nr = lat_diff(v1, v2);
   // Now, calculate the distance, sqrt(r12 * r12)
@@ -881,7 +952,7 @@ double lat_dist(hc_lat_st_coord v1, hc_lat_st_coord v2) {
 }
 
 // Checks whether two sites are nearest neighbors
-bool nearest_neighbors(hc_lat_st_coord v1, hc_lat_st_coord v2) {
+bool nearest_neighbors(lat_st_coord v1, lat_st_coord v2) {
   // First, get the spacetime difference vector (v1 - v2) in the first orthant
   const std::vector<int> &del_nr = lat_diff(v1, v2);
   // If (del_nr * del_nr) is one, the two sites are nearest neighbors
@@ -889,8 +960,8 @@ bool nearest_neighbors(hc_lat_st_coord v1, hc_lat_st_coord v2) {
 }
 
 // Overload for a call directly on a lattice space-time coordinate (returns a copy)
-hc_lat_st_coord first_orthant(const hc_lat_st_coord &coord) {
-  hc_lat_st_coord coord_shifted = coord;
+lat_st_coord first_orthant(const lat_st_coord &coord) {
+  lat_st_coord coord_shifted = coord;
   for (std::size_t i = 0; i < coord.posn.size(); ++i) {
     coord_shifted.posn[i] =
         std::min(std::abs(coord.posn[i]), coord.n_site_pd - std::abs(coord.posn[i]));
@@ -901,24 +972,22 @@ hc_lat_st_coord first_orthant(const hc_lat_st_coord &coord) {
 // Class representing a hypercubic lattice Matsubara 4-vector;
 // momentum 3-vectors are given in units of the reciprocal
 // lattice spacing, i.e., they index the 1BZ.
-class hc_lat_mf_coord {
+class lat_mf_coord {
  public:
-  // Fields
   int id;
   double imfreq;  // The imaginary part of the Matsubara frequency (i imfreq)
   std::vector<int> mom;
   // Lattice variables
   int n_site_pd;
   double lat_const;
-  // Constructor
-  hc_lat_mf_coord(int id_, double imfreq_, std::vector<int> mom_, int n_site_pd_,
-                  double lat_const_ = 1.0)
+  lat_mf_coord(int id_, double imfreq_, std::vector<int> mom_, int n_site_pd_,
+               double lat_const_ = 1.0)
       : id(id_), imfreq(imfreq_), mom(mom_), n_site_pd(n_site_pd_), lat_const(lat_const_) {}
   // Default constructor
-  hc_lat_mf_coord() : id(0), imfreq(0), lat_const(1.0) {}
+  lat_mf_coord() : id(0), imfreq(0), lat_const(1.0) {}
   // Overload - operator for calculation of lattice Matsubara 4-vector
   // differences (v_end - v_start)
-  std::tuple<std::vector<int>, double> operator-(const hc_lat_mf_coord &v_start) const {
+  std::tuple<std::vector<int>, double> operator-(const lat_mf_coord &v_start) const {
     // Spatial distance in units of the lattice constant (nvec = rvec / a)
     std::vector<int> del_nk;
     // First fill del_nk with (v_end - v_start), then apply the reciprocal
@@ -932,39 +1001,31 @@ class hc_lat_mf_coord {
              bool botrule = true) const {
     std::ostream out(buffer);
     if (toprule) {
-      out << "\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
-             "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
-             "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
-             "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
-          << std::endl;
+      out << "\n" << DIVIDER_MEDIUM << std::endl;
     }
     out << " Lattice momentum-time coordinate (ID #" << id << ")" << std::endl;
-    out << " \u2022 Momentum indices: (";
-    for (int i = 0; i < mom.size(); ++i) {
+    out << " " << BULLET_PT << " Momentum indices: (";
+    for (std::size_t i = 0; i < mom.size(); ++i) {
       if (i == mom.size() - 1) {
         out << mom[i] << ")" << std::endl;
       } else {
         out << mom[i] << ", ";
       }
     }
-    out << " \u2022 Matsubara frequency Im(inu): " << imfreq << std::endl;
+    out << " " << BULLET_PT << " Matsubara frequency Im(inu): " << imfreq << std::endl;
     if (botrule) {
-      out << "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
-             "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
-             "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
-             "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
-          << std::endl;
+      out << DIVIDER_MEDIUM << std::endl;
     }
   }
 };
-typedef std::vector<hc_lat_mf_coord> hc_lat_mf_coords;
+typedef std::vector<lat_mf_coord> lat_mf_coords;
 
-std::tuple<std::vector<int>, double> test_lat_mf_diff(hc_lat_mf_coord v1, hc_lat_mf_coord v2) {
+std::tuple<std::vector<int>, double> test_lat_mf_diff(lat_mf_coord v1, lat_mf_coord v2) {
   return v1 - v2;
 }
 
 // Calculate the lattice momentum-frequency 'distance' dist(v1, v2) \equiv (k_12, ik_12)
-std::tuple<double, double> lat_mf_dist(hc_lat_mf_coord v1, hc_lat_mf_coord v2) {
+std::tuple<double, double> lat_mf_dist(lat_mf_coord v1, lat_mf_coord v2) {
   // First, get the momentum-time difference (v1 - v2)
   std::vector<int> del_nk;
   double del_freq;
@@ -981,8 +1042,8 @@ std::tuple<double, double> lat_mf_dist(hc_lat_mf_coord v1, hc_lat_mf_coord v2) {
 
 // Overload for a call directly on a lattice momentum-time coordinate
 // (returns a copy)
-hc_lat_mf_coord first_brillouin_zone(const hc_lat_mf_coord &coord) {
-  hc_lat_mf_coord coord_shifted = coord;
+lat_mf_coord first_brillouin_zone(const lat_mf_coord &coord) {
+  lat_mf_coord coord_shifted = coord;
   // Move each component back into the 1BZ;
   // k_i \in [-\pi / a, \pi / a) => nk_i \in [floor(-N / 2), floor(N / 2) - 1)
   for (std::size_t i = 0; i < coord.mom.size(); ++i) {
@@ -1014,7 +1075,6 @@ double arcsin_gen(Rand_engine rand_gen) {
 // the lattice, and the d-toroidal lattice metric is used for spatial distances
 class fcc_lat_st_coord {
  public:
-  // Fields
   int id;
   double itime;
   std::vector<int> posn;
@@ -1031,9 +1091,9 @@ class fcc_lat_st_coord {
   // (in units of (2 pi / a))
   std::vector<std::vector<double>> k_basis = {
       {+0.5, +0.5, -0.5}, {+0.5, -0.5, +0.5}, {-0.5, +0.5, +0.5}};
-  // Use a custom default constructor
-  fcc_lat_st_coord();
-  // Constructor
+  // Custom default constructor (so that we can resize a vector of coordinates)
+  fcc_lat_st_coord() : id(0), itime(0), n_site_pd(0), lat_const(0) {}
+  // Standard constructor
   fcc_lat_st_coord(int id_, double itime_, std::vector<int> posn_, int n_site_pd_,
                    double lat_const_ = 1.0)
       : id(id_), itime(itime_), posn(posn_), n_site_pd(n_site_pd_), lat_const(lat_const_) {}
@@ -1061,13 +1121,6 @@ class fcc_lat_st_coord {
 };
 typedef std::vector<fcc_lat_st_coord> fcc_lat_st_coords;
 
-// Custom default constructor (so that we can resize a vector of coordinates)
-fcc_lat_st_coord::fcc_lat_st_coord() : id(0), itime(0), n_site_pd(0), lat_const(0) {}
-
-std::tuple<std::vector<int>, double> test_lat_st_diff(fcc_lat_st_coord v1, fcc_lat_st_coord v2) {
-  return v1 - v2;
-}
-
 // TODO: refactor this to avoid unnecessary calculation
 //       of time difference and std tie/ignore!
 //
@@ -1081,9 +1134,9 @@ double lat_dist(fcc_lat_st_coord v1, fcc_lat_st_coord v2) {
   // r_i = \sum^{d}_{i=1} n_i \vec{a_i}
   double del_r_mag = 0;
   // for (const auto &del_nr_i : del_nr) {
-  for (std::size_t i = 0; i < v1.dim; ++i) {
+  for (int i = 0; i < v1.dim; ++i) {
     double del_ri = 0;
-    for (std::size_t j = 0; j < v1.dim; ++j) {
+    for (int j = 0; j < v1.dim; ++j) {
       del_ri += del_nr[i] * v1.r_basis[i][j];
     }
     del_r_mag += std::pow(del_ri, 2.0);
@@ -1092,7 +1145,7 @@ double lat_dist(fcc_lat_st_coord v1, fcc_lat_st_coord v2) {
   return del_r_mag;
 }
 
-}  // namespace develop
+}  // end namespace develop
 
 namespace deprecated {
 
@@ -1105,7 +1158,6 @@ typedef std::vector<graph_pg> graphs_pg;
 // diagram info and current/proposal spacetime coordinates)
 // using pg graph representation
 struct diagram_pool_pg {
-  // Fields
   double s_ferm;
   int order;
   int n_verts;
@@ -1120,8 +1172,20 @@ struct diagram_pool_pg {
   std::vector<int> n_loops;
   std::vector<std::vector<std::vector<int>>> loops;
   std::vector<std::vector<std::vector<int>>> neighbors;
-  diagram_pool_pg();
-  // Constructor for the case of (spinless) G0W0 integrators
+  // We must supply an explicit default constructor
+  diagram_pool_pg()
+      : s_ferm(),
+        order(),
+        n_legs(),
+        n_intn(),
+        n_times(),
+        n_posns(),
+        graphs(),
+        symm_factors(),
+        n_loops(),
+        loops(),
+        neighbors() {}
+  // Diagram pool constructor for (spinless) G0W0 integrators
   diagram_pool_pg(double s_ferm_, int order_, int n_legs_, int n_intn_, int n_times_, int n_posns_,
                   const graphs_pg &graphs_, const std::vector<int> &symm_factors_,
                   const std::vector<int> &n_loops_,
@@ -1139,7 +1203,7 @@ struct diagram_pool_pg {
     n_verts = 2 * order_;
     n_diags = graphs_.size();
   }
-  // Constructor for the case of (Extended) Hubbard integrators
+  // Diagram pool constructor for (Extended) Hubbard integrators
   diagram_pool_pg(double s_ferm_, int order_, int n_legs_, int n_intn_, int n_times_, int n_posns_,
                   const graphs_pg &graphs_, const std::vector<int> &symm_factors_,
                   const std::vector<int> &n_loops_,
@@ -1162,18 +1226,5 @@ struct diagram_pool_pg {
   }
 };
 typedef std::vector<diagram_pool_pg> diagram_pools_pg;
-// We must supply an explicit default constructor
-diagram_pool_pg::diagram_pool_pg()
-    : s_ferm(),
-      order(),
-      n_legs(),
-      n_intn(),
-      n_times(),
-      n_posns(),
-      graphs(),
-      symm_factors(),
-      n_loops(),
-      loops(),
-      neighbors() {}
 
-}  // namespace deprecated
+}  // end namespace deprecated

@@ -233,8 +233,7 @@ def plot_chi_n_ch(cfg):
 
     print('\nPlotting charge susceptibility corrections...', end='', flush=True)
 
-    colorlist = ['orchid', 'cornflowerblue',
-                 'turquoise', 'chartreuse', 'greenyellow']
+    colorlist = ['orchid', 'cornflowerblue', 'turquoise', 'chartreuse', 'greenyellow']
 
     # Plot the static susceptibility if n_nu_meas = 1
     if n_nu_meas == 1:

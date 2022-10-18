@@ -7,13 +7,13 @@ import numpy as np
 from collections import defaultdict
 
 # User-defined module(s)
-from diaggen_tools import *  # pylint: disable=unused-wildcard-import
+from diaggen_tools import *  # pylint: disable=wildcard-import
 
 
 # Draw a batch of Feynman diagrams to a bulk .tex file; this will generate a .pdf
 # with all of them in a grid (optionally: labeled vertices), as well as standalone
 # postscript .1 files.
-def draw_bulk_feynmp(graphs, n_legs=0, fside='left', savename='diagrams.tex'):
+def draw_bulk_feynmp(graphs, fside='left', savename='diagrams.tex'):
     if fside not in ['left', 'right']:
         raise ValueError(
             "Fermion line side preference for drawing must be either 'left' or 'right'!")
@@ -252,7 +252,7 @@ def generate_bare_vacuum_diags_from_hhz(order=1, draw=True):
     print('Done!')
 
     if draw:
-        draw_bulk_feynmp(feyn_graphs, n_legs=0, fside='left',
+        draw_bulk_feynmp(feyn_graphs, fside='left',
                          savename='feyn_vacuum_diagrams_bare_n='+str(order)+'.tex')
 
     print('{}! = {}'.format(2*order, math.factorial(2*order)))
@@ -288,7 +288,7 @@ def generate_bHI_vacuum_diags_from_hhz(order=1, draw=True):
     print('Done!')
 
     if draw:
-        draw_bulk_feynmp(feyn_graphs, n_legs=0, fside='left',
+        draw_bulk_feynmp(feyn_graphs, fside='left',
                          savename='feyn_vacuum_diagrams_bHI_n='+str(order)+'.tex')
 
     print('{}! = {}'.format(2*order, math.factorial(2*order)))
@@ -462,11 +462,11 @@ def generate_diff_GW_BSE2_charge_poln_graphs(order, use_hhz=True, draw=False, sa
                 diagram_file.write(info_block)
         # Draws the diagrams in a latex file using feynmp
         if draw:
-            draw_bulk_feynmp(diff_gw_bse2_poln_graphs, n_legs=2,
+            draw_bulk_feynmp(diff_gw_bse2_poln_graphs,
                              savename=f'charge_poln_n={order}_diff_gw_bse2.tex')
-            draw_bulk_feynmp(gw_poln_graphs, n_legs=2,
+            draw_bulk_feynmp(gw_poln_graphs,
                              savename=f'charge_poln_n={order}_gw.tex')
-            draw_bulk_feynmp(bse2_poln_graphs, n_legs=2,
+            draw_bulk_feynmp(bse2_poln_graphs,
                              savename=f'charge_poln_n={order}_bse2.tex')
         return graph_info
 
@@ -638,9 +638,9 @@ def generate_diff_GW_BSE2_self_energy_graphs(order, use_hhz=True, draw=False, sa
                 diagram_file.write(info_block)
         # Draws the diagrams in a latex file using feynmp
         if draw:
-            draw_bulk_feynmp(diff_gw_bse2_self_en_graphs, n_legs=2,
+            draw_bulk_feynmp(diff_gw_bse2_self_en_graphs,
                              savename='self_en_n='+str(order)+'_diff_gw_bse2.tex')
-            draw_bulk_feynmp(bse2_self_en_graphs, n_legs=2,
+            draw_bulk_feynmp(bse2_self_en_graphs,
                              savename='self_en_n='+str(order)+'_bse2.tex')
         return graph_info
 
@@ -691,7 +691,7 @@ def generate_disconnected_bare_vacuum_diagrams(order=1, save_name='vacuum_diagra
         diagram_file.write(info_block)
     # Optionally draw the diagrams
     if draw:
-        draw_bulk_feynmp(distinct_vacuum_graphs, n_legs=0, fside='right',
+        draw_bulk_feynmp(distinct_vacuum_graphs, fside='right',
                          savename='vacuum_n='+str(order)+'_disconnected_bare.tex')
     # Return the number of diagrams generated, and the number of vertices at this order
     return (len(distinct_vacuum_graphs), n_verts)
@@ -745,7 +745,7 @@ def generate_bare_vacuum_diagrams(order=1, save_name='vacuum_diagrams.npz', draw
         diagram_file.write(info_block)
     # Optionally draw the diagrams
     if draw:
-        draw_bulk_feynmp(distinct_vacuum_graphs_connected, n_legs=0,
+        draw_bulk_feynmp(distinct_vacuum_graphs_connected,
                          fside='right', savename='vacuum_n='+str(order)+'_bare.tex')
     # Return the number of diagrams generated, and the number of vertices at this order
     return (len(distinct_vacuum_graphs_connected), n_verts)
@@ -799,7 +799,7 @@ def generate_bHI_vacuum_diagrams(order=1, save_name='vacuum_diagrams.npz', draw=
         diagram_file.write(info_block)
     # Optionally draw the diagrams
     if draw:
-        draw_bulk_feynmp(distinct_vacuum_graphs_1BI, n_legs=0,
+        draw_bulk_feynmp(distinct_vacuum_graphs_1BI,
                          fside='right', savename='vacuum_n='+str(order)+'_bHI.tex')
     # Return the number of diagrams generated, and the number of vertices at this order
     return (len(distinct_vacuum_graphs_1BI), n_verts)
@@ -858,7 +858,7 @@ def generate_HFI_vacuum_diagrams(order=1, save_name='vacuum_diagrams.npz', draw=
         diagram_file.write(info_block)
     # Optionally draw the diagrams
     if draw:
-        draw_bulk_feynmp(distinct_vacuum_graphs_HFI, n_legs=0,
+        draw_bulk_feynmp(distinct_vacuum_graphs_HFI,
                          fside='right', savename='vacuum_n='+str(order)+'_HFI.tex')
     # Return the number of diagrams generated, and the number of vertices at this order
     return (len(distinct_vacuum_graphs_HFI), n_verts)
@@ -915,7 +915,7 @@ def generate_bHFI_vacuum_diagrams(order=1, save_name='vacuum_diagrams.npz', draw
         diagram_file.write(info_block)
     # Optionally draw the diagrams
     if draw:
-        draw_bulk_feynmp(distinct_vacuum_graphs_bHFI, n_legs=0,
+        draw_bulk_feynmp(distinct_vacuum_graphs_bHFI,
                          fside='right', savename='vacuum_n='+str(order)+'_bHFI.tex')
     # Return the number of diagrams generated, and the number of vertices at this order
     return (len(distinct_vacuum_graphs_bHFI), n_verts)
@@ -988,7 +988,7 @@ def generate_HPBI_vacuum_diagrams(order=1, use_hhz=True, draw=True, save_name='v
         diagram_file.write(info_block)
     # Optionally draw the diagrams
     if draw:
-        draw_bulk_feynmp(distinct_vacuum_graphs_HPBI, n_legs=0,
+        draw_bulk_feynmp(distinct_vacuum_graphs_HPBI,
                          fside='right', savename='vacuum_n='+str(order)+'_HPBI.tex')
     # Return the number of diagrams generated, and the number of vertices at this order
     return (len(distinct_vacuum_graphs_HPBI), n_verts_feyn)
@@ -1064,7 +1064,7 @@ def generate_bold_vacuum_diagrams(order=1, use_hhz=True, draw=True, save_name='b
         diagram_file.write(info_block)
     # Optionally draw the diagrams
     if draw:
-        draw_bulk_feynmp(bold_vacuum_graphs, n_legs=0, fside='right',
+        draw_bulk_feynmp(bold_vacuum_graphs, fside='right',
                          savename='vacuum_n='+str(order)+'_bold.tex')
     # Return the number of diagrams generated, and the number of vertices at this order
     return (len(bold_vacuum_graphs), n_verts_feyn)
@@ -1150,11 +1150,11 @@ def compare_HEG_and_C1_vacuum_diagrams(order=1, save_name='C1_vacuum_diagrams.np
         diagram_file.write(info_block)
     # Optionally draw the diagrams
     if draw:
-        draw_bulk_feynmp(vacuum_graphs_HEG, n_legs=0, fside='right',
+        draw_bulk_feynmp(vacuum_graphs_HEG, fside='right',
                          savename='vacuum_n='+str(order)+'_HEG.tex')
-        draw_bulk_feynmp(vacuum_graphs_C1, n_legs=0, fside='right',
+        draw_bulk_feynmp(vacuum_graphs_C1, fside='right',
                          savename='vacuum_n='+str(order)+'_C1.tex')
-        draw_bulk_feynmp(vacuum_graphs_diff_HEG_C1, n_legs=0, fside='right',
+        draw_bulk_feynmp(vacuum_graphs_diff_HEG_C1, fside='right',
                          savename='vacuum_n='+str(order)+'_diff_HEG_C1.tex')
     # Return the number of diagrams generated, and the number of vertices at this order
     return (len(vacuum_graphs_C1), n_verts_feyn)
@@ -1239,11 +1239,11 @@ def compare_HEG_and_C2_vacuum_diagrams(order=1, save_name='C2_vacuum_diagrams.np
         diagram_file.write(info_block)
     # Optionally draw the diagrams
     if draw:
-        draw_bulk_feynmp(vacuum_graphs_HEG, n_legs=0, fside='right',
+        draw_bulk_feynmp(vacuum_graphs_HEG, fside='right',
                          savename='vacuum_n='+str(order)+'_HEG.tex')
-        draw_bulk_feynmp(vacuum_graphs_C2, n_legs=0, fside='right',
+        draw_bulk_feynmp(vacuum_graphs_C2, fside='right',
                          savename='vacuum_n='+str(order)+'_C2.tex')
-        draw_bulk_feynmp(vacuum_graphs_diff_HEG_C2, n_legs=0, fside='right',
+        draw_bulk_feynmp(vacuum_graphs_diff_HEG_C2, fside='right',
                          savename='vacuum_n='+str(order)+'_diff_HEG_C2.tex')
     # Return the number of diagrams generated, and the number of vertices at this order
     return (len(vacuum_graphs_C2), n_verts_feyn)
@@ -1289,7 +1289,7 @@ def generate_C1_vacuum_diagrams(order=1, save_name='C1_vacuum_diagrams.npz', dra
         diagram_file.write(info_block)
     # Optionally draw the diagrams
     if draw:
-        draw_bulk_feynmp(vacuum_graphs_C1, n_legs=0, fside='right',
+        draw_bulk_feynmp(vacuum_graphs_C1, fside='right',
                          savename='vacuum_n='+str(order)+'_C1.tex')
     # Return the number of diagrams generated, and the number of vertices at this order
     return (len(vacuum_graphs_C1), n_verts)
@@ -1337,7 +1337,7 @@ def generate_C2_vacuum_diagrams(order=1, save_name='C2_vacuum_diagrams.npz', dra
         diagram_file.write(info_block)
     # Optionally draw the diagrams
     if draw:
-        draw_bulk_feynmp(distinct_vacuum_graphs_C2, n_legs=0,
+        draw_bulk_feynmp(distinct_vacuum_graphs_C2,
                          fside='right', savename='vacuum_n='+str(order)+'_C2.tex')
     # Return the number of diagrams generated, and the number of vertices at this order
     return (len(distinct_vacuum_graphs_C2), n_verts)
@@ -1414,7 +1414,7 @@ def generate_HFPBI_vacuum_diagrams(order=1, save_name='vacuum_diagrams.npz', dra
         diagram_file.write(info_block)
     # Optionally draw the diagrams
     if draw:
-        draw_bulk_feynmp(distinct_vacuum_graphs_HFPBI, n_legs=0,
+        draw_bulk_feynmp(distinct_vacuum_graphs_HFPBI,
                          fside='right', savename='vacuum_n='+str(order)+'_HFPBI.tex')
     # Return the number of diagrams generated, and the number of vertices at this order
     return (len(distinct_vacuum_graphs_HFPBI), n_verts)
@@ -1514,7 +1514,7 @@ def generate_bHI_charge_poln_diagrams(order=1, save_name='charge_poln_diagrams.n
             diagram_file.write(info_block)
     # Optionally draw the diagrams
     if draw:
-        draw_bulk_feynmp(distinct_poln_graphs_1BI, n_legs=2,
+        draw_bulk_feynmp(distinct_poln_graphs_1BI,
                          savename='charge_poln_n='+str(order)+'_bHI.tex')
     # Return the number of diagrams generated, and the
     # number of vertices in each (including external ones)
@@ -1619,7 +1619,7 @@ def generate_HFI_charge_poln_diagrams(order=1, save_name='charge_poln_diagrams.n
             diagram_file.write(info_block)
     # Optionally draw the diagrams
     if draw:
-        draw_bulk_feynmp(distinct_poln_graphs_HFI, n_legs=2,
+        draw_bulk_feynmp(distinct_poln_graphs_HFI,
                          savename='charge_poln_n='+str(order)+'_HFI.tex')
     # Return the number of diagrams generated, and the
     # number of vertices in each (including external ones)
@@ -1629,8 +1629,15 @@ def generate_HFI_charge_poln_diagrams(order=1, save_name='charge_poln_diagrams.n
 # Generate all nth-order charge polarization diagrams with
 # bold HF irreducibility rules. Attaches legs to the (n-1)th-order
 # vacuum diagrams in all possible ways, then removes duplicates.
-def generate_bHFI_charge_poln_diagrams(order=1, save_name='charge_poln_diagrams.npz', 
-                                       spinless=False, draw=True):
+def generate_bHFI_charge_poln_diagrams(order=1, save_name='charge_poln_diagrams.npz',
+                                       spinless=False, coord_rep='realspace',
+                                       draw=True, verbose=False):
+    # The coordinate representation may be in either real or momentum space
+    coord_rep_options = ['realspace', 'momspace']
+    if coord_rep not in coord_rep_options:
+        print(f"{coord_rep} is not a valid coordinate representation "
+              f"(choose from: {coord_rep_options}).")
+    is_mom_rep = (coord_rep == 'momspace')
     # Number of vertices in the vacuum diagrams at the next-lowest
     # order, from which we derive the polarization diagrams
     n_verts_vacuum = 2 * (order - 1)
@@ -1646,11 +1653,20 @@ def generate_bHFI_charge_poln_diagrams(order=1, save_name='charge_poln_diagrams.
         psi = np.array([[1, 0]], dtype=int)
         # No internal boson lines (the external vertex flag is -1)
         phi = np.array([[-1, -1]], dtype=int)
+        # Split edge list repn of the bubble graph
+        graph_sel = {'b': [], 'f': [[0, 1], [1, 0]]}
         # Make the graph in the adjacency list representations
         distinct_poln_graphs_bHFI = defaultdict(lambda: defaultdict(list))
         distinct_poln_graphs_bHFI[0][1].append('f')
         distinct_poln_graphs_bHFI[1][0].append('f')
         distinct_poln_graphs_bHFI = [distinct_poln_graphs_bHFI]
+        # Get the momentum loop basis info for the bubble graph
+        if is_mom_rep:
+            mom_loops, graph_sel, loop_basis_edges = get_momentum_loops(
+                graph=distinct_poln_graphs_bHFI,
+                diag_type='charge_poln',
+                verbose=verbose,
+            )
         # Save the graph and relevant loop/combinatorial information
         save_contents = {'n_loops': n_loops, 'loops': loops}
         # Add this set of diagram connections to the .npz file
@@ -1689,13 +1705,13 @@ def generate_bHFI_charge_poln_diagrams(order=1, save_name='charge_poln_diagrams.
         distinct_vacuum_graphs_1BI = get_1BI_subset(distinct_vacuum_graphs)
 
         distinct_poln_graphs_1BI = rem_top_equiv_al(
-            get_poln_graphs(
-                distinct_vacuum_graphs_1BI,
-                ext_convn='new'),
-            fixed_pts=[0, 1])
+            get_poln_graphs(distinct_vacuum_graphs_1BI, ext_convn='new'),
+            fixed_pts=[0, 1],
+        )
 
         distinct_poln_graphs_bHFI = get_bFI_subset(
-            distinct_poln_graphs_1BI, diag_type='charge_poln', legs=[0, 1])
+            distinct_poln_graphs_1BI, diag_type='charge_poln', legs=[0, 1],
+        )
 
         if spinless:
             distinct_poln_graphs_bHFI = get_loop_bipartite_subset(distinct_poln_graphs_bHFI)
@@ -1738,7 +1754,7 @@ def generate_bHFI_charge_poln_diagrams(order=1, save_name='charge_poln_diagrams.
             diagram_file.write(info_block)
     # Optionally draw the diagrams
     if draw:
-        draw_bulk_feynmp(distinct_poln_graphs_bHFI, n_legs=2,
+        draw_bulk_feynmp(distinct_poln_graphs_bHFI,
                          savename='charge_poln_n='+str(order)+'_bHFI.tex')
     # Return the number of diagrams generated, and the
     # number of vertices in each (including external ones)
@@ -1847,7 +1863,7 @@ def generate_HPBI_charge_poln_diagrams(order=1, save_name='charge_poln_diagrams.
             diagram_file.write(info_block)
     # Optionally draw the diagrams
     if draw:
-        draw_bulk_feynmp(distinct_poln_graphs_HPBI, n_legs=2,
+        draw_bulk_feynmp(distinct_poln_graphs_HPBI,
                          savename='charge_poln_n='+str(order)+'_HPBI.tex')
     # Return the number of diagrams generated, and the
     # number of vertices in each (including external ones)
@@ -1969,7 +1985,7 @@ def generate_bold_charge_poln_diagrams(order=1, use_hhz=True, draw=True, save_na
             diagram_file.write(info_block)
     # Optionally draw the diagrams
     if draw:
-        draw_bulk_feynmp(distinct_poln_graphs_bold, n_legs=2,
+        draw_bulk_feynmp(distinct_poln_graphs_bold,
                          savename='charge_poln_n='+str(order)+'_bold.tex')
     # Return the number of diagrams generated, and the
     # number of vertices in each (including external ones)
@@ -2051,7 +2067,7 @@ def generate_HPBI_spin_poln_diagrams(order=1, save_name='spin_poln_diagrams.npz'
             diagram_file.write(info_block)
     # Optionally draw the diagrams
     if draw:
-        draw_bulk_feynmp(distinct_spin_poln_graphs_HPBI, n_legs=2,
+        draw_bulk_feynmp(distinct_spin_poln_graphs_HPBI,
                          savename='spin_poln_n='+str(order)+'_HPBI.tex')
     # Return the number of diagrams generated, and the
     # number of vertices in each (including external ones)
@@ -2120,7 +2136,7 @@ def generate_bHI_self_energy_diagrams(order=1, save_name='self_energy_diagrams.n
         diagram_file.write(info_block)
     # Optionally draw the diagrams
     if draw:
-        draw_bulk_feynmp(distinct_self_energy_graphs_1BI, n_legs=2,
+        draw_bulk_feynmp(distinct_self_energy_graphs_1BI,
                          savename='self_energy_n='+str(order)+'_bHI.tex')
     # Return the number of diagrams generated, and the
     # number of vertices in each (including external ones)
@@ -2196,7 +2212,7 @@ def generate_HFI_self_energy_diagrams(order=1, save_name='self_energy_diagrams.n
         diagram_file.write(info_block)
     # Optionally draw the diagrams
     if draw:
-        draw_bulk_feynmp(distinct_self_energy_graphs_HFI, n_legs=2,
+        draw_bulk_feynmp(distinct_self_energy_graphs_HFI,
                          savename='self_energy_n='+str(order)+'_HFI.tex')
     # Return the number of diagrams generated, and the
     # number of vertices in each (including external ones)
@@ -2268,7 +2284,7 @@ def generate_bHFI_self_energy_diagrams(order=1, save_name='self_energy_diagrams.
         diagram_file.write(info_block)
     # Optionally draw the diagrams
     if draw:
-        draw_bulk_feynmp(distinct_self_energy_graphs_bHFI, n_legs=2,
+        draw_bulk_feynmp(distinct_self_energy_graphs_bHFI,
                          savename='self_energy_n='+str(order)+'_bHFI.tex')
     # Return the number of diagrams generated, and the
     # number of vertices in each (including external ones)
@@ -2343,7 +2359,7 @@ def generate_HPBI_self_energy_diagrams(order=1, save_name='self_energy_diagrams.
         diagram_file.write(info_block)
     # Optionally draw the diagrams
     if draw:
-        draw_bulk_feynmp(distinct_self_energy_graphs_HPBI, n_legs=2,
+        draw_bulk_feynmp(distinct_self_energy_graphs_HPBI,
                          savename='self_energy_n='+str(order)+'_HPBI.tex')
     # Return the number of diagrams generated, and the
     # number of vertices in each (including external ones)
@@ -2419,7 +2435,7 @@ def generate_bHFPBI_self_energy_diagrams(order=1, use_hhz=True, draw=True, save_
         diagram_file.write(info_block)
     # Optionally draw the diagrams
     if draw:
-        draw_bulk_feynmp(distinct_self_energy_graphs_bHFPBI, n_legs=2,
+        draw_bulk_feynmp(distinct_self_energy_graphs_bHFPBI,
                          savename='self_energy_n='+str(order)+'_bHFPBI.tex')
     # Return the number of diagrams generated, and the
     # number of vertices in each (including external ones)
@@ -2500,7 +2516,7 @@ def generate_bold_self_energy_diagrams(order=1, use_hhz=True, draw=True, save_na
     # Optionally draw the diagrams
     if draw:
         draw_bulk_feynmp(distinct_self_en_graphs_bold,
-                         n_legs=2, savename='self_en_n='+str(order)+'_bold.tex')
+                         savename='self_en_n='+str(order)+'_bold.tex')
     # Return the number of diagrams generated, and the
     # number of vertices in each (including external ones)
     return (len(distinct_self_en_graphs_bold), n_verts)

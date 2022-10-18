@@ -4,11 +4,13 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>  // std::pow
+#include <cstddef>
 #include <ctime>
 #include <fstream>
 #include <functional>
 #include <iostream>
 #include <iterator>
+#include <mutex>
 #include <numeric>
 #include <optional>
 #include <random>  // std::random_device
@@ -26,18 +28,6 @@
 #include <tuple>
 #include <vector>
 
-/* Boost includes */
-#include <boost/version.hpp>
-#if BOOST_VERSION >= 106500
-#include <boost/math/distributions/arcsine.hpp>
-#endif
-#include <boost/math/distributions/binomial.hpp>
-#include <boost/random/binomial_distribution.hpp>
-#include <boost/random/discrete_distribution.hpp>
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_int_distribution.hpp>
-#include <boost/random/uniform_real_distribution.hpp>
-
 // NOTE: We have used the stdlib random_device for simplicity.
 //       This will not generate true random seeds on all systems,
 //       so should be changed to the following in the future!
@@ -49,3 +39,29 @@
 /* JSON library include */
 #define JSON_USE_IMPLICIT_CONVERSIONS 0  // Turn off implicit conversions from JSON values
 #include "json.hpp"
+
+// Injects simple std::optional conversion functions into the nlohmann JSON library
+// (see: https://github.com/nlohmann/json/issues/1749#issuecomment-772996219).
+//
+// NOTE: This feature will be added to the library more robustly in a future release!
+//       (see: https://github.com/nlohmann/json/pull/2117,
+//             https://github.com/nlohmann/json/pull/2229)
+namespace nlohmann {
+
+template <class T>
+void to_json(nlohmann::json &j, const std::optional<T> &v) {
+  if (v.has_value())
+    j = *v;
+  else
+    j = nullptr;
+}
+
+template <class T>
+void from_json(const nlohmann::json &j, std::optional<T> &v) {
+  if (j.is_null())
+    v = std::nullopt;
+  else
+    v = j.get<T>();
+}
+
+}  // namespace nlohmann

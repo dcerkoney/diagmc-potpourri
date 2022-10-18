@@ -4,6 +4,9 @@ profiling/
 diags/
 run_*/
 
+# TODO: split into separate repository
+heg_soms/
+
 # Project notes/references
 papers
 notes
