@@ -1,18 +1,20 @@
+![banner](https://github.com/dcerkoney/diagmc-potpourri/blob/e1538d14651915a346723ca66f72bc97c08ed54c/.readme/banner.png?raw=true)
+
 # diagmc-potpourri
 A Markov chain Monte Carlo library for various low-order Feynman diagram computations.
 
-![alt text](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/5cdef140969020ceec51c41c87d8479fb56c512b/results/chi_ch_examples/n=1,%20beta=10,%20U=1/chi_2_ch_2dsqhub_run_1624927311.png?raw=true)
+![chi_2_ch](https://github.com/dcerkoney/diagmc-potpourri/blob/e1538d14651915a346723ca66f72bc97c08ed54c/.readme/chi_2_ch_2dsqhub_run_1629109813.png?raw=true)
 
 <p align="middle">
-  <img src="https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/5cdef140969020ceec51c41c87d8479fb56c512b/results/chi_ch_examples/n=1,%20beta=10,%20U=1/static_chi_ch_2dsqhub_run_1624927311.png?raw=true" width="276" />
-  <img src="https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/5cdef140969020ceec51c41c87d8479fb56c512b/results/self_en_examples/n=1,%20beta=2,%20U=2/re_sigma_2_2dsqhub_run_1625109804.png?raw=true" width="276" /> 
-  <img src="https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/5cdef140969020ceec51c41c87d8479fb56c512b/results/self_en_examples/n=1,%20beta=2,%20U=2/sigma_2_iom0_2dsqhub_run_1625109804.png?raw=true" width="276" />
+  <img src="https://github.com/dcerkoney/diagmc-potpourri/blob/e1538d14651915a346723ca66f72bc97c08ed54c/.readme/static_chi_ch_2dsqhub_run_1629109813.png?raw=true" width="270" />
+  <img src="https://github.com/dcerkoney/diagmc-potpourri/blob/e1538d14651915a346723ca66f72bc97c08ed54c/.readme/re_sigma_2_2dsqhub_run_1629106445.png?raw=true" width="270" /> 
+  <img src="https://github.com/dcerkoney/diagmc-potpourri/blob/e1538d14651915a346723ca66f72bc97c08ed54c/.readme/sigma_2_iom0_2dsqhub_run_1629106445.png?raw=true" width="270" />
 </p>
 
 <p align="middle">
-  <img src="https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/5cdef140969020ceec51c41c87d8479fb56c512b/results/self_en_examples/n=0.3,%20beta=2,%20U=2/im_sigma_2_loc_2dsqhub_run_1625172983.png?raw=true" width="276" /> 
-  <img src="https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/5cdef140969020ceec51c41c87d8479fb56c512b/results/self_en_examples/n=0.3,%20beta=2,%20U=2/re_sigma_2_loc_2dsqhub_run_1625172983.png?raw=true" width="276" />
-  <img src="https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/blob/5cdef140969020ceec51c41c87d8479fb56c512b/results/self_en_examples/n=0.3,%20beta=2,%20U=2/sigma_2_iom0_2dsqhub_run_1625172983.png?raw=true" width="276" />
+  <img src="https://github.com/dcerkoney/diagmc-potpourri/blob/e1538d14651915a346723ca66f72bc97c08ed54c/.readme/im_sigma_2_loc_2dsqhub_run_1629107326.png?raw=true" width="270" /> 
+  <img src="https://github.com/dcerkoney/diagmc-potpourri/blob/e1538d14651915a346723ca66f72bc97c08ed54c/.readme/re_sigma_2_loc_2dsqhub_run_1629107326.png?raw=true" width="270" />
+  <img src="https://github.com/dcerkoney/diagmc-potpourri/blob/e1538d14651915a346723ca66f72bc97c08ed54c/.readme/sigma_2_iom0_2dsqhub_run_1629107326.png?raw=true" width="270" />
 </p>
 
 <!-- DEPENDENCIES -->
@@ -45,7 +47,7 @@ For backwards compatibility with some very old compilers (e.g., GCC < 5.3), the 
    ```
   
 ### 3. [ruamel.yaml](https://pypi.org/project/ruamel.yaml/)
-Used for config files for YAML with round-trip comment support.
+Used for YAML config files with round-trip comment support.
    ```sh
     pip3 install ruamel.yaml 
    ```
@@ -103,10 +105,6 @@ edit the input parameters in [config.yml](https://github.com/dcerkoney/diagmc-hu
   ```sh
    python3 run_diagmc.py <CMDLINE_ARGS>
   ```
-the script [generate_propagators.py](generate_propagators.py) to prepare the config and (if necessary) propagator data for the C++ driver `hub_2dsqlat_cf_meas`:
-   ```
-python3 generate_propagators.py <CMDLINE_ARGS>
-   ```
 The usage details are accessible as follows:
    ```
 python3 run_diagmc.py -h
@@ -150,7 +148,7 @@ Options:
   --dry_run             perform a dry run (don't update config file or save
                          propagator data)
    ```
-If any applicable propagator data is found (stored by default in propagators/proprs_<JOB_ID>), it will be selected for the run; otherwise, the propagators will be generated. Additionally, the script (re)calculates a number of parameters and updates the YAML (user-facing) and JSON (for internal use by the C++ driver) config files. Accordingly, several config parameters need not be specified initially (namely, those with a blank value in the provided [example config templates](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/tree/main/config_templates)). A config option with an explicit `null` value is an optional parameter which may be set by the user. Additionally, several config parameters may optionally be overriden by command line arguments (see above) for convenience.
+If any applicable propagator data is found (stored by default in propagators/proprs_<JOB_ID>), it will be selected for the run; otherwise, the propagators will be generated by calling the script [generate_propagators.py](generate_propagators.py). Additionally, the script (re)calculates a number of parameters and updates the YAML (user-facing) and JSON (for internal use by the C++ driver) config files. Accordingly, several config parameters need not be specified initially (namely, those with a blank value in the provided [example config templates](https://github.com/dcerkoney/diagmc-hubbard-2dsqlat/tree/main/config_templates)). A config option with an explicit `null` value is an optional parameter which may be set by the user. Additionally, several config parameters may optionally be overriden by command line arguments (see above) for convenience.
 
 Several example sets of propagators/results are provided, but in order to run the code for a different set of test parameters, one may need to generate new propagators (i.e., if the C++ MCMC driver complains that a compatible lattice Green's function was not found). The MCMC integrator is compatible with free energy, self energy, and charge/longitudinal spin susceptibility measurements. The provided examples calculate the charge susceptibility and self energy up to 2nd order in U. The charge susceptibility may optionally be compared with the RPA result obtained via the TRIQS TPRF package.
 
